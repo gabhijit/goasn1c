@@ -22,82 +22,21 @@ Copyright (c) 2003-2017  Lev Walkin <vlm@lionet.info> and contributors.
 
 %{
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-#include <assert.h>
+package parser
 
-#include "asn1parser.h"
+import (
+	"bufio"
+	"bytes"
+	"fmt"
+	"io"
+	"log"
+	"os"
+	"unicode/utf"
 
-#define YYPARSE_PARAM	param
-#define YYPARSE_PARAM_TYPE	void **
-#define YYERROR_VERBOSE
 
-int yylex(void);
-int yyerror(const char *msg);
-#ifdef	YYBYACC
-int yyparse(void **param);	/* byacc does not produce a prototype */
-#endif
-void asn1p_lexer_hack_push_opaque_state(void);
-void asn1p_lexer_hack_enable_with_syntax(void);
-void asn1p_lexer_hack_push_encoding_control(void);
-#define	yylineno	asn1p_lineno
-extern int asn1p_lineno;
 
-/*
- * Process directives as <ASN1C:RepresentAsPointer>
- */
-extern int asn1p_as_pointer;
 
-/*
- * This temporary variable is used to solve the shortcomings of 1-lookahead
- * parser.
- */
-static struct AssignedIdentifier *saved_aid;
-
-static asn1p_value_t *_convert_bitstring2binary(char *str, int base);
-static void _fixup_anonymous_identifier(asn1p_expr_t *expr);
-
-static asn1p_module_t *currentModule;
-#define	NEW_EXPR()	(asn1p_expr_new(yylineno, currentModule))
-
-#define	checkmem(ptr)	do {						\
-		if(!(ptr))						\
-		return yyerror("Memory failure");			\
-	} while(0)
-
-#define	CONSTRAINT_INSERT(root, constr_type, arg1, arg2) do {		\
-		if(arg1->type != constr_type) {				\
-			int __ret;					\
-			root = asn1p_constraint_new(yylineno);		\
-			checkmem(root);					\
-			root->type = constr_type;			\
-			__ret = asn1p_constraint_insert(root,		\
-				arg1);					\
-			checkmem(__ret == 0);				\
-		} else {						\
-			root = arg1;					\
-		}							\
-		if(arg2) {						\
-			int __ret					\
-			= asn1p_constraint_insert(root, arg2);		\
-			checkmem(__ret == 0);				\
-		}							\
-	} while(0)
-
-#ifdef	AL_IMPORT
-#error	AL_IMPORT DEFINED ELSEWHERE!
-#endif
-#define	AL_IMPORT(to,where,from,field)	do {				\
-		if(!(from)) break;					\
-		while(TQ_FIRST(&((from)->where))) {			\
-			TQ_ADD(&((to)->where),				\
-				TQ_REMOVE(&((from)->where), field),	\
-				field);					\
-		}							\
-		assert(TQ_FIRST(&((from)->where)) == 0);		\
-	} while(0)
+)
 
 %}
 
