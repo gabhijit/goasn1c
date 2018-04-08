@@ -1,3 +1,7 @@
+// Lexer using ideas from
+// https://golang.org/src/text/template/parse/lex.go
+// Copyright Go Authors
+
 // Copyright (c) 2018 Abhijit Gadgil <gabhijit@iitbombay.org>. All rights reserved.
 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,9 +25,224 @@ package parser
 
 type itemType int
 
+type Pos int
+
 type item struct {
-	typ itemType
-	val string
+	typ  itemType
+	val  string
+	pos  Pos
+	line int
+}
+
+const (
+	DoubleDash = "--"
+	SlashStar  = "/*"
+	StarSlash  = "*/"
+)
+
+func (i item) String() string {
+	switch {
+	case i.typ == itemEOF:
+		return "EOF"
+	case i.typ == itemError:
+		return i.val
+	case i.typ == itemKeyword:
+		return fmt.Sprintf("<%s>", i.val)
+	case len(i.val) > 20:
+		return fmt.Sprintf("%.20q...", i.val)
+	}
+	return fmt.Sprintf("%q", i.val)
+}
+
+type stateFn func(*lexer) stateFn
+
+type lexer struct {
+	name   string
+	input  string
+	pos    Pos
+	start  Pos
+	width  Pos
+	line   int
+	items  chan item
+	states []stateFn
+}
+
+// next returns the next rune in the input.
+func (l *lexer) next() rune {
+	if int(l.pos) >= len(l.input) {
+		l.width = 0
+		return eof
+	}
+	r, w := utf8.DecodeRuneInString(l.input[l.pos:])
+	l.width = Pos(w)
+	l.pos += l.width
+	if r == '\n' {
+		l.line++
+	}
+	return r
+}
+
+// peek returns but does not consume the next rune in the input.
+func (l *lexer) peek() rune {
+	r := l.next()
+	l.backup()
+	return r
+}
+
+// backup steps back one rune. Can only be called once per call of next.
+func (l *lexer) backup() {
+	l.pos -= l.width
+	// Correct newline count.
+	if l.width == 1 && l.input[l.pos] == '\n' {
+		l.line--
+	}
+}
+
+// emit passes an item back to the client.
+func (l *lexer) emit(t itemType) {
+	l.items <- item{t, l.start, l.input[l.start:l.pos], l.line}
+	// Some items contain text internally. If so, count their newlines.
+	switch t {
+	case itemText, itemRawString, itemLeftDelim, itemRightDelim:
+		l.line += strings.Count(l.input[l.start:l.pos], "\n")
+	}
+	l.start = l.pos
+}
+
+// ignore skips over the pending input before this point.
+func (l *lexer) ignore() {
+	l.line += strings.Count(l.input[l.start:l.pos], "\n")
+	l.start = l.pos
+}
+
+// accept consumes the next rune if it's from the valid set.
+func (l *lexer) accept(valid string) bool {
+	if strings.ContainsRune(valid, l.next()) {
+		return true
+	}
+	l.backup()
+	return false
+}
+
+// acceptRun consumes a run of runes from the valid set.
+func (l *lexer) acceptRun(valid string) {
+	for strings.ContainsRune(valid, l.next()) {
+	}
+	l.backup()
+}
+
+// errorf returns an error token and terminates the scan by passing
+// back a nil pointer that will be the next state, terminating l.nextItem.
+func (l *lexer) errorf(format string, args ...interface{}) stateFn {
+	l.items <- item{itemError, l.start, fmt.Sprintf(format, args...), l.line}
+	return nil
+}
+
+// nextItem returns the next item from the input.
+// Called by the parser, not in the lexing goroutine.
+func (l *lexer) nextItem() item {
+	return <-l.items
+}
+
+// drain drains the output so the lexing goroutine will exit.
+// Called by the parser, not in the lexing goroutine.
+func (l *lexer) drain() {
+	for range l.items {
+	}
+}
+
+// lex creates a new scanner for the input string.
+func lex(name, input string) *lexer {
+	l := &lexer{
+		name:  name,
+		input: input,
+		items: make(chan item),
+		line:  1,
+	}
+	go l.run()
+	return l
+}
+
+// states are -
+// 1. lexBeforeModule
+// 2. lexStartModuleHeader
+// 3. lexStartModuleBody
+// 4. lexAfterModule
+
+// runs the state machine for the lexer
+func (l *lexer) run() {
+
+	for state := lexBeforeModule; state != nil; {
+		state = state(l)
+	}
+	close(l.items)
+
+}
+
+func isWhiteSpace(rune c) bool {
+	return c == " " || c == "\t" || c == "\r" || c == "\n"
+}
+
+func (l *lexer) consumeComment() bool {
+
+	x := l.accept("-") && l.accept("-")
+	if x == false {
+		return false
+	}
+	// consumed --
+	for {
+		switch l.next() {
+		case '-':
+			if l.peek() == "-" {
+				l.next()
+				return true
+			}
+		case "\n":
+			return true
+		}
+	}
+	return false
+}
+
+func (l *lexer) consumeCstyleComment() bool {
+
+	x := l.accept("/") && l.accept("*")
+	if x == false {
+		return false
+	}
+	for {
+		switch l.next() {
+		case "*":
+			if l.peek() == "/" {
+				l.next()
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func lexStart(l *lexer) stateFn {
+	for isWhiteSpace(l.peek()) {
+		l.next()
+	}
+	if l.peek() == "-" {
+		if l.consumeComment() == false {
+			// FIXME : return error here
+			return nil
+		}
+	}
+
+	if l.peek() == "/" {
+		if l.consumeCstyleComment() == false {
+			return nil
+		}
+	}
+
+	for isWhiteSpace(l.peek()) {
+		l.next()
+	}
+
 }
 
 const (
@@ -136,6 +355,8 @@ const (
 	itemReservedVisibleString
 	itemReservedWITH
 	itemReservedlBIT
+
+	itemEOF
 )
 
 var reservedWordsMap = map[string]itemType{

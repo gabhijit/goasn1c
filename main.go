@@ -15,9 +15,8 @@
 package main
 
 import (
-	"fmt"
 	"Asn1/goasn1c/parser"
-
+	"fmt"
 )
 
 func main() {
