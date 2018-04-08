@@ -138,7 +138,7 @@ const (
 	itemReservedlBIT
 )
 
-var reservedWordsMap = map[string]itemType {
+var reservedWordsMap = map[string]itemType{
 	"ABSENT":          itemReservedABSENT,
 	"ABSTRACT-SYNTAX": itemReservedABSTRACT_SYNTAX,
 	"ALL":             itemReservedALL,

@@ -12,27 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+// ASN.1 Module related types and structures
 
-import (
-	"fmt"
-	"Asn1/goasn1c/parser"
+package parser
 
-)
-
-func main() {
-
-	fmt.Println("Hello world!")
-
-	fmt.Printf("%x\n", parser.ModuleFlagUnkInstr)
-	fmt.Printf("%x\n", parser.ModuleFlagTagInstr)
-	fmt.Printf("%x\n", parser.ModuleFlagXerInstr)
-	fmt.Printf("%x\n", parser.ModuleFlagImplicitTags)
-	fmt.Printf("%x\n", parser.ModuleFlagExplicitTags)
-	fmt.Printf("%x\n", parser.ModuleFlagExplicitTags)
-	fmt.Printf("%x\n", parser.ModuleFlagAutomaticTags)
-	fmt.Printf("%x\n", parser.Asn1ExprTypeBoolean)
-	fmt.Printf("%x\n", parser.Asn1ExprTypeMax)
-	fmt.Printf("%x\n", parser.Asn1ExprTypeInvalid)
-
+// Asn1Module is a type representing ASN.1 Module
+type Asn1Module struct {
 }
+
+type ModuleFlagType uint16
+
+const (
+	ModuleFlagUnkInstr ModuleFlagType = 1 << iota
+	ModuleFlagTagInstr
+	ModuleFlagXerInstr
+	_
+	ModuleFlagImplicitTags
+	ModuleFlagExplicitTags
+	ModuleFlagAutomaticTags
+	_
+	ModuleFlagExtensibilityImplied
+
+	ModuleFlagNoFlags          ModuleFlagType = 0x00
+	ModuleFlagInstructionsMask ModuleFlagType = 0x0F
+	ModuleFlagsTagMask         ModuleFlagType = 0xF0
+)

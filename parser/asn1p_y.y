@@ -1,7 +1,7 @@
 /*
 
-Derived from ans1c/libasn1parser/asn1p_y.y @ https://github.com/vlm/asn1c
-Copyright (c) 2003-2017  Lev Walkin <vlm@lionet.info> and contributors.
+// Derived from ans1c/libasn1parser/asn1p_y.y @ https://github.com/vlm/asn1c
+// Copyright (c) 2003-2017  Lev Walkin <vlm@lionet.info> and contributors.
 
 // Copyright (c) 2018 Abhijit Gadgil <gabhijit@iitbombay.org>. All rights reserved.
 
@@ -32,10 +32,6 @@ import (
 	"log"
 	"os"
 	"unicode/utf"
-
-
-
-
 )
 
 %}

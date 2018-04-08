@@ -12,27 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+// Information Obect Classes related types constants
 
-import (
-	"fmt"
-	"Asn1/goasn1c/parser"
+package parser
 
-)
-
-func main() {
-
-	fmt.Println("Hello world!")
-
-	fmt.Printf("%x\n", parser.ModuleFlagUnkInstr)
-	fmt.Printf("%x\n", parser.ModuleFlagTagInstr)
-	fmt.Printf("%x\n", parser.ModuleFlagXerInstr)
-	fmt.Printf("%x\n", parser.ModuleFlagImplicitTags)
-	fmt.Printf("%x\n", parser.ModuleFlagExplicitTags)
-	fmt.Printf("%x\n", parser.ModuleFlagExplicitTags)
-	fmt.Printf("%x\n", parser.ModuleFlagAutomaticTags)
-	fmt.Printf("%x\n", parser.Asn1ExprTypeBoolean)
-	fmt.Printf("%x\n", parser.Asn1ExprTypeMax)
-	fmt.Printf("%x\n", parser.Asn1ExprTypeInvalid)
-
+type Asn1InfoObjectClassCell struct {
+	field *Asn1ParsedExpression
+	value *Asn1ParsedExpression
 }
+
+//
+type Asn1InfoObjectClassRow struct {
+	cols     []Asn1InfoObjectClassCell
+	ncols    int
+	maxidlen int
+}
+
+type Asn1WithSyntaxChunk struct {
+	typ     WithClauseType
+	content interface{}
+	next    *Asn1WithSyntaxChunk
+}
+
+type ASn1WithSyntax struct {
+	chunks []Asn1WithSyntaxChunk
+}
+
+type WithClauseType int
+
+const (
+	WithClauseLiteral WithClauseType = iota
+	WithClauseWhitespace
+	WithClauseField
+	WithClauseOptionalGroup
+)
