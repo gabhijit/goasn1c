@@ -61,7 +61,7 @@ func (i item) String() string {
 		return "EOF"
 	case i.typ == itemError:
 		return i.val
-	case i.typ >= itemReservedABSENT && i.typ <= itemReservedWITH :
+	case i.typ >= itemReservedABSENT && i.typ <= itemReservedWITH:
 		return fmt.Sprintf("<%s>", i.val)
 	case len(i.val) > 20:
 		return fmt.Sprintf("%.20q...", i.val)
@@ -196,7 +196,7 @@ func (l *lexer) run() {
 		state = state(l)
 	}
 	close(l.items)
-
+	fmt.Println("closed")
 }
 
 func isWhiteSpace(c rune) bool {
@@ -207,6 +207,13 @@ func isAlphaNumeric(r rune) bool {
 	return unicode.IsLetter(r) || unicode.IsDigit(r)
 }
 
+func (l *lexer) consumeWhitespace() {
+	for isWhiteSpace(l.peek()) {
+		l.next()
+	}
+	l.ignore()
+}
+
 func (l *lexer) consumeComment() bool {
 
 	x := l.accept("-") && l.accept("-")
@@ -215,14 +222,17 @@ func (l *lexer) consumeComment() bool {
 	}
 	// consumed --
 	for {
-		switch l.next() {
-		case '-':
+		fmt.Println(l.start, l.pos)
+		switch r := l.next(); {
+		case r == '-':
 			if l.peek() == '-' {
 				l.next()
 				return true
 			}
-		case '\n':
+		case r == '\n':
 			return true
+		default:
+			fmt.Println(r)
 		}
 	}
 	return false
@@ -247,18 +257,19 @@ func (l *lexer) consumeCstyleComment() bool {
 }
 
 func lexStart(l *lexer) stateFn {
-	for isWhiteSpace(l.peek()) {
-		l.next()
-	}
-	l.ignore()
+
+	l.consumeWhitespace()
 
 	if l.peek() == '-' {
-		if l.consumeComment() == false {
+		if x := l.consumeComment(); x == false {
 			// FIXME : return error here
+			fmt.Println(x)
 			return nil
 		} else {
 			l.ignore()
 		}
+		//fmt.Println(l.start, l.pos)
+		return lexStart
 	}
 
 	if l.peek() == '/' {
@@ -268,12 +279,8 @@ func lexStart(l *lexer) stateFn {
 		} else {
 			l.ignore()
 		}
+		return lexStart
 	}
-
-	for isWhiteSpace(l.peek()) {
-		l.next()
-	}
-	l.ignore()
 
 	// Now we expect typereference like module identifier
 	if l.accept(capitalLetters) {
@@ -282,12 +289,14 @@ func lexStart(l *lexer) stateFn {
 		return nil
 	}
 
+	return nil
+
 }
 
 func (l *lexer) processOid() error {
 
 	for {
-		r := l.next();
+		r := l.next()
 		if r == '}' {
 			l.backup()
 			break
@@ -383,29 +392,37 @@ func stateModuleHeader(l *lexer) stateFn {
 				l.backup()
 				err := l.processOid()
 				if err != nil {
-					l.errorf("lex error")
+					return l.errorf("lex error")
+				} else {
+					l.consumeWhitespace()
 				}
 			case r == ':':
 				l.backup()
 				err := l.processAssignment()
 				if err != nil {
-					l.errorf("lex error")
+					return l.errorf("lex error")
+				} else {
+					l.consumeWhitespace()
 				}
 			case isWhiteSpace(r):
 				l.backup()
 				word := l.input[l.start:l.pos]
 				// Word can be a keyword
+				fmt.Println("before: %d:%d", l.start, l.pos)
 				err := l.processWord(word, state)
+				fmt.Println("after: %d:%d", l.start, l.pos)
 				if err != nil {
-					l.errorf("lex error")
+					return l.errorf("lex error")
 				} else {
-					for s := l.next(); isWhiteSpace(s); {
-					}
-					l.ignore()
+					l.consumeWhitespace()
 				}
+			case r == eof:
+				break
 			}
 		}
+
 	}
+	return nil
 
 }
 

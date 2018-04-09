@@ -15,7 +15,7 @@
 package parser
 
 import (
-	"fmt"
+//"fmt"
 )
 
 type Parser struct {
@@ -23,17 +23,14 @@ type Parser struct {
 }
 
 func NewParser(name string) *Parser {
-	return &Parser{name:name}
+	return &Parser{name: name}
 }
 
 func (p *Parser) Parse(name, input string) error {
 
 	l := lex(name, input)
 
-
 	for {
-		i := l.nextItem()
-		fmt.Println(i)
+		_ = l.nextItem()
 	}
 }
-

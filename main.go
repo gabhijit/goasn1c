@@ -16,11 +16,10 @@ package main
 
 import (
 	"Asn1/goasn1c/parser"
-	"fmt"
 	"flag"
-	"os"
+	"fmt"
 	"io/ioutil"
-
+	"os"
 )
 
 func main() {
@@ -41,7 +40,7 @@ func main() {
 	flag.Parse()
 
 	// read a file
-	for _, f := range(flag.Args()) {
+	for _, f := range flag.Args() {
 		d, err := ioutil.ReadFile(f)
 		if err != nil {
 			fmt.Printf("Unable to read file \"%s\"\n", f)
