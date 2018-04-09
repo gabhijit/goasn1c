@@ -17,6 +17,10 @@ package main
 import (
 	"Asn1/goasn1c/parser"
 	"fmt"
+	"flag"
+	"os"
+	"io/ioutil"
+
 )
 
 func main() {
@@ -34,4 +38,19 @@ func main() {
 	fmt.Printf("%x\n", parser.Asn1ExprTypeMax)
 	fmt.Printf("%x\n", parser.Asn1ExprTypeInvalid)
 
+	flag.Parse()
+
+	// read a file
+	for _, f := range(flag.Args()) {
+		d, err := ioutil.ReadFile(f)
+		if err != nil {
+			fmt.Printf("Unable to read file \"%s\"\n", f)
+			os.Exit(-1)
+		}
+		s := string(d)
+		p := parser.NewParser(f)
+		p.Parse(f, s)
+	}
+
+	os.Exit(0)
 }
