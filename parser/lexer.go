@@ -23,21 +23,36 @@
 
 package parser
 
+import (
+	"errors"
+	"fmt"
+	"strings"
+	"unicode"
+	"unicode/utf8"
+)
+
 type itemType int
 
 type Pos int
 
 type item struct {
 	typ  itemType
-	val  string
 	pos  Pos
+	val  string
 	line int
 }
 
 const (
-	DoubleDash = "--"
-	SlashStar  = "/*"
-	StarSlash  = "*/"
+	dash      = "-"
+	slashStar = "/*"
+	starSlash = "*/"
+
+	capitalLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	smallLetters   = "abcdefghijklmnopqrstuvwxyz"
+	digits         = "0123456789"
+	capitalWords   = capitalLetters + digits + dash
+
+	eof = -1
 )
 
 func (i item) String() string {
@@ -46,7 +61,7 @@ func (i item) String() string {
 		return "EOF"
 	case i.typ == itemError:
 		return i.val
-	case i.typ == itemKeyword:
+	case i.typ >= itemReservedABSENT && i.typ <= itemReservedWITH :
 		return fmt.Sprintf("<%s>", i.val)
 	case len(i.val) > 20:
 		return fmt.Sprintf("%.20q...", i.val)
@@ -103,9 +118,14 @@ func (l *lexer) emit(t itemType) {
 	l.items <- item{t, l.start, l.input[l.start:l.pos], l.line}
 	// Some items contain text internally. If so, count their newlines.
 	switch t {
-	case itemText, itemRawString, itemLeftDelim, itemRightDelim:
+	case itemWSpace, itemComment:
 		l.line += strings.Count(l.input[l.start:l.pos], "\n")
 	}
+	l.start = l.pos
+}
+
+// consume is just like emit, but doesn't actually emit
+func (l *lexer) consume(t itemType) {
 	l.start = l.pos
 }
 
@@ -164,7 +184,7 @@ func lex(name, input string) *lexer {
 }
 
 // states are -
-// 1. lexBeforeModule
+// 1. lexStart
 // 2. lexStartModuleHeader
 // 3. lexStartModuleBody
 // 4. lexAfterModule
@@ -172,15 +192,19 @@ func lex(name, input string) *lexer {
 // runs the state machine for the lexer
 func (l *lexer) run() {
 
-	for state := lexBeforeModule; state != nil; {
+	for state := lexStart; state != nil; {
 		state = state(l)
 	}
 	close(l.items)
 
 }
 
-func isWhiteSpace(rune c) bool {
-	return c == " " || c == "\t" || c == "\r" || c == "\n"
+func isWhiteSpace(c rune) bool {
+	return c == ' ' || c == '\t' || c == '\r' || c == '\n'
+}
+
+func isAlphaNumeric(r rune) bool {
+	return unicode.IsLetter(r) || unicode.IsDigit(r)
 }
 
 func (l *lexer) consumeComment() bool {
@@ -193,11 +217,11 @@ func (l *lexer) consumeComment() bool {
 	for {
 		switch l.next() {
 		case '-':
-			if l.peek() == "-" {
+			if l.peek() == '-' {
 				l.next()
 				return true
 			}
-		case "\n":
+		case '\n':
 			return true
 		}
 	}
@@ -212,8 +236,8 @@ func (l *lexer) consumeCstyleComment() bool {
 	}
 	for {
 		switch l.next() {
-		case "*":
-			if l.peek() == "/" {
+		case '*':
+			if l.peek() == '/' {
 				l.next()
 				return true
 			}
@@ -226,24 +250,172 @@ func lexStart(l *lexer) stateFn {
 	for isWhiteSpace(l.peek()) {
 		l.next()
 	}
-	if l.peek() == "-" {
+	l.ignore()
+
+	if l.peek() == '-' {
 		if l.consumeComment() == false {
 			// FIXME : return error here
 			return nil
+		} else {
+			l.ignore()
 		}
 	}
 
-	if l.peek() == "/" {
+	if l.peek() == '/' {
 		if l.consumeCstyleComment() == false {
+			// FIXME: return error here
 			return nil
+		} else {
+			l.ignore()
 		}
 	}
 
 	for isWhiteSpace(l.peek()) {
 		l.next()
 	}
+	l.ignore()
+
+	// Now we expect typereference like module identifier
+	if l.accept(capitalLetters) {
+		return stateModuleHeader
+	} else {
+		return nil
+	}
 
 }
+
+func (l *lexer) processOid() error {
+
+	for {
+		r := l.next();
+		if r == '}' {
+			l.backup()
+			break
+		}
+	}
+
+	r := l.next()
+	if r == '}' {
+		l.emit(itemOID)
+		l.start = l.pos
+		return nil
+	} else {
+		return errors.New("expected OID not terminated.")
+	}
+
+}
+
+func (l *lexer) processWord(word string, state lexerState) error {
+
+	last := word[len(word)-1]
+
+	// Word can be
+	// 1. A word starting with capital letter
+	// 2. A keyword
+	// 3. A word starting with small letter
+
+	// depending upon state we are in, we emit different tokens
+
+	if strings.IndexAny(word, digits) == 0 {
+		return errors.New("A word cannot start with a digit")
+	}
+
+	if last == '-' {
+		return errors.New("A Word cannot end with a -.")
+	}
+
+	if strings.Index(word, "--") >= 0 {
+		return errors.New("A word cannot have a dash followed by a dash (--).")
+	}
+
+	if val, ok := reservedWordsMap[word]; ok {
+		l.emit(val)
+		l.start = l.pos
+		return nil
+	}
+
+	if strings.IndexAny(word, capitalLetters) == 0 {
+		if state == lexerStateModuleHeader {
+			l.emit(itemModuleReference)
+		} else {
+			l.emit(itemTypeReference)
+		}
+		l.start = l.pos
+		return nil
+	} else {
+		// FIXME: verify
+		l.emit(itemValueReference)
+		l.start = l.pos
+		return nil
+	}
+
+	// should never come here.
+	return errors.New("Unknown error occurred.")
+}
+
+func (l *lexer) processAssignment() error {
+
+	l.acceptRun(":=")
+
+	t := l.input[l.start:l.pos]
+
+	if t == "::=" {
+		l.emit(itemAssignment)
+		l.start = l.pos
+		return nil
+	}
+
+	return errors.New("invalid assignment found.")
+}
+
+func stateModuleHeader(l *lexer) stateFn {
+
+	state := lexerStateModuleHeader
+
+	l.backup()
+	for {
+		switch r := l.next(); {
+		case isAlphaNumeric(r):
+			// keep accumulating
+		default:
+			switch {
+			case r == '{':
+				l.backup()
+				err := l.processOid()
+				if err != nil {
+					l.errorf("lex error")
+				}
+			case r == ':':
+				l.backup()
+				err := l.processAssignment()
+				if err != nil {
+					l.errorf("lex error")
+				}
+			case isWhiteSpace(r):
+				l.backup()
+				word := l.input[l.start:l.pos]
+				// Word can be a keyword
+				err := l.processWord(word, state)
+				if err != nil {
+					l.errorf("lex error")
+				} else {
+					for s := l.next(); isWhiteSpace(s); {
+					}
+					l.ignore()
+				}
+			}
+		}
+	}
+
+}
+
+type lexerState int
+
+const (
+	lexerStateStart lexerState = iota
+	lexerStateModuleHeader
+	lexerStateModuleBody
+)
 
 const (
 	itemError itemType = iota // Error occurred
@@ -356,6 +528,8 @@ const (
 	itemReservedWITH
 	itemReservedlBIT
 
+	itemOID
+	itemWSpace
 	itemEOF
 )
 
