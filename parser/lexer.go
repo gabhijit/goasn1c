@@ -417,6 +417,7 @@ func stateModuleHeader(l *lexer) stateFn {
 					l.consumeWhitespace()
 				}
 			case r == eof:
+				l.emit(itemEOF)
 				break
 			}
 		}

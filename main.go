@@ -48,7 +48,10 @@ func main() {
 		}
 		s := string(d)
 		p := parser.NewParser(f)
-		p.Parse(f, s)
+		err = p.Parse(f, s)
+		if err != nil {
+			os.Exit(-1)
+		}
 	}
 
 	os.Exit(0)
