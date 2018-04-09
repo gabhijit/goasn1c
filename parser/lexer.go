@@ -43,11 +43,12 @@ type item struct {
 }
 
 const (
-	dash = "-"
-
+	dash           = "-"
 	capitalLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	smallLetters   = "abcdefghijklmnopqrstuvwxyz"
 	digits         = "0123456789"
+
+	idLetters = smallLetters + capitalLetters + digits + dash
 
 	eof = -1
 )
@@ -60,8 +61,8 @@ func (i item) String() string {
 		return i.val
 	case i.typ >= itemReservedABSENT && i.typ <= itemReservedWITH:
 		return fmt.Sprintf("<%s>", i.val)
-	case len(i.val) > 20:
-		return fmt.Sprintf("%.20q...", i.val)
+	case len(i.val) > 80:
+		return fmt.Sprintf("%.80q...", i.val)
 	}
 	return fmt.Sprintf("%q", i.val)
 }
@@ -193,7 +194,6 @@ func (l *lexer) run() {
 		state = state(l)
 	}
 	close(l.items)
-	fmt.Println("closed")
 }
 
 func isWhiteSpace(c rune) bool {
@@ -204,7 +204,7 @@ func isAlphaNumeric(r rune) bool {
 	return unicode.IsLetter(r) || unicode.IsDigit(r)
 }
 
-func (l *lexer) consumeWhitespace() {
+func (l *lexer) consumeWS() {
 	for isWhiteSpace(l.peek()) {
 		l.next()
 	}
@@ -219,7 +219,6 @@ func (l *lexer) consumeComment() bool {
 	}
 	// consumed --
 	for {
-		fmt.Println(l.start, l.pos)
 		switch r := l.next(); {
 		case r == '-':
 			if l.peek() == '-' {
@@ -229,7 +228,7 @@ func (l *lexer) consumeComment() bool {
 		case r == '\n':
 			return true
 		default:
-			fmt.Println(r)
+			// pass
 		}
 	}
 	return false
@@ -255,12 +254,11 @@ func (l *lexer) consumeCstyleComment() bool {
 
 func lexStart(l *lexer) stateFn {
 
-	l.consumeWhitespace()
+	l.consumeWS()
 
 	if l.peek() == '-' {
 		if x := l.consumeComment(); x == false {
 			// FIXME : return error here
-			fmt.Println(x)
 			return nil
 		} else {
 			l.ignore()
@@ -281,7 +279,7 @@ func lexStart(l *lexer) stateFn {
 
 	// Now we expect typereference like module identifier
 	if l.accept(capitalLetters) {
-		return stateModuleHeader
+		return lexModuleHeader
 	} else {
 		return nil
 	}
@@ -290,28 +288,7 @@ func lexStart(l *lexer) stateFn {
 
 }
 
-func (l *lexer) processOid() error {
-
-	for {
-		r := l.next()
-		if r == '}' {
-			l.backup()
-			break
-		}
-	}
-
-	r := l.next()
-	if r == '}' {
-		l.emit(itemOID)
-		l.start = l.pos
-		return nil
-	} else {
-		return errors.New("expected OID not terminated.")
-	}
-
-}
-
-func (l *lexer) processWord(word string, state lexerState) error {
+func (l *lexer) processWord(word string, ctx lexerContext) error {
 
 	last := word[len(word)-1]
 
@@ -341,16 +318,21 @@ func (l *lexer) processWord(word string, state lexerState) error {
 	}
 
 	if strings.IndexAny(word, capitalLetters) == 0 {
-		if state == lexerStateModuleHeader {
+		switch ctx {
+		case lexerContextModuleHeader:
 			l.emit(itemModuleReference)
-		} else {
+		default:
 			l.emit(itemTypeReference)
 		}
 		l.start = l.pos
 		return nil
 	} else {
-		// FIXME: verify
-		l.emit(itemValueReference)
+		switch ctx {
+		case lexerContextObjectId:
+			l.emit(itemIdentifier)
+		default:
+			l.emit(itemIdentifier)
+		}
 		l.start = l.pos
 		return nil
 	}
@@ -374,10 +356,78 @@ func (l *lexer) processAssignment() error {
 	return errors.New("invalid assignment found.")
 }
 
-func stateModuleHeader(l *lexer) stateFn {
+func (l *lexer) processOid(ctx lexerContext) error {
 
-	state := lexerStateModuleHeader
+	for {
+		switch r := l.next(); {
+		case r == '{':
+			l.emit(itemSymbol)
+		case unicode.IsLower(r):
+			l.acceptRun(idLetters)
+			word := l.input[l.start:l.pos]
+			err := l.processWord(word, ctx)
+			if err != nil {
+				return errors.New("lex error")
+			}
+		case unicode.IsDigit(r):
+			l.acceptRun(digits)
+			l.emit(itemNumber)
+			s := l.peek()
+			if isWhiteSpace(s) || s == ')' {
+				l.start = l.pos
+			} else {
+				errors.New("number in oid should be followed by whitespace or ')'")
+			}
+		case r == '(':
+			l.emit(itemSymbol)
+		case r == ')':
+			l.emit(itemSymbol)
+		case r == '}':
+			l.emit(itemSymbol)
+			return nil
+		default:
+			return errors.New("Unknown char found.")
+		}
+		l.consumeWS()
+	}
+	return errors.New("Unknown error occurred.")
+}
 
+func lexModuleBody(l *lexer) stateFn {
+
+	l.consumeWS()
+
+	ctx := lexerContextModuleBody
+
+	fmt.Println(l.start, l.pos)
+	for {
+		switch r := l.next(); {
+		case isAlphaNumeric(r):
+			// keep accumulating
+		default:
+			switch {
+			case isWhiteSpace(r):
+				l.backup()
+				fmt.Println(l.start, l.pos)
+				word := l.input[l.start:l.pos]
+				err := l.processWord(word, ctx)
+				if err != nil {
+					return l.errorf("lex error")
+				} else {
+					l.consumeWS()
+				}
+			case r == eof:
+				l.emit(itemEOF)
+				break
+			}
+		}
+	}
+	return nil
+}
+
+func lexModuleHeader(l *lexer) stateFn {
+
+	ctx := lexerContextModuleHeader
 	l.backup()
 	for {
 		switch r := l.next(); {
@@ -387,11 +437,11 @@ func stateModuleHeader(l *lexer) stateFn {
 			switch {
 			case r == '{':
 				l.backup()
-				err := l.processOid()
+				err := l.processOid(ctx)
 				if err != nil {
 					return l.errorf("lex error")
 				} else {
-					l.consumeWhitespace()
+					l.consumeWS()
 				}
 			case r == ':':
 				l.backup()
@@ -399,17 +449,18 @@ func stateModuleHeader(l *lexer) stateFn {
 				if err != nil {
 					return l.errorf("lex error")
 				} else {
-					l.consumeWhitespace()
+					l.consumeWS()
+					// We are gone past the ::=
+					return lexModuleBody
 				}
 			case isWhiteSpace(r):
 				l.backup()
 				word := l.input[l.start:l.pos]
-				// Word can be a keyword
-				err := l.processWord(word, state)
+				err := l.processWord(word, ctx)
 				if err != nil {
 					return l.errorf("lex error")
 				} else {
-					l.consumeWhitespace()
+					l.consumeWS()
 				}
 			case r == eof:
 				l.emit(itemEOF)
@@ -422,12 +473,13 @@ func stateModuleHeader(l *lexer) stateFn {
 
 }
 
-type lexerState int
+type lexerContext int
 
 const (
-	lexerStateStart lexerState = iota
-	lexerStateModuleHeader
-	lexerStateModuleBody
+	lexerContextStart lexerContext = iota
+	lexerContextModuleHeader
+	lexerContextObjectId
+	lexerContextModuleBody
 )
 
 const (
