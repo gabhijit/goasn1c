@@ -43,14 +43,11 @@ type item struct {
 }
 
 const (
-	dash      = "-"
-	slashStar = "/*"
-	starSlash = "*/"
+	dash = "-"
 
 	capitalLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	smallLetters   = "abcdefghijklmnopqrstuvwxyz"
 	digits         = "0123456789"
-	capitalWords   = capitalLetters + digits + dash
 
 	eof = -1
 )
@@ -408,9 +405,7 @@ func stateModuleHeader(l *lexer) stateFn {
 				l.backup()
 				word := l.input[l.start:l.pos]
 				// Word can be a keyword
-				fmt.Println("before: %d:%d", l.start, l.pos)
 				err := l.processWord(word, state)
-				fmt.Println("after: %d:%d", l.start, l.pos)
 				if err != nil {
 					return l.errorf("lex error")
 				} else {
