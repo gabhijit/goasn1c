@@ -37,6 +37,7 @@ func main() {
 		p := parser.NewParser(f)
 		err = p.Parse(f, s)
 		if err != nil {
+			fmt.Println(err)
 			os.Exit(-1)
 		}
 	}

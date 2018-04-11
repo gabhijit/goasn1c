@@ -43,10 +43,11 @@ type item struct {
 }
 
 const (
-	dash           = "-"
-	capitalLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	smallLetters   = "abcdefghijklmnopqrstuvwxyz"
-	digits         = "0123456789"
+	dash            = "-"
+	capitalLetters  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	smallLetters    = "abcdefghijklmnopqrstuvwxyz"
+	digits          = "0123456789"
+	terminalLetters = "{}();, \r\n\t"
 
 	idLetters = smallLetters + capitalLetters + digits + dash
 
@@ -184,7 +185,11 @@ func lex(name, input string) *lexer {
 // states are -
 // 1. lexStart
 // 2. lexStartModuleHeader
+// lexObjectId
 // 3. lexStartModuleBody
+// lexExports
+// lexImports
+// lexModuleAssignment
 // 4. lexAfterModule
 
 // runs the state machine for the lexer
@@ -263,7 +268,6 @@ func lexStart(l *lexer) stateFn {
 		} else {
 			l.ignore()
 		}
-		//fmt.Println(l.start, l.pos)
 		return lexStart
 	}
 
@@ -288,7 +292,7 @@ func lexStart(l *lexer) stateFn {
 
 }
 
-func (l *lexer) processWord(word string, ctx lexerContext) error {
+func (l *lexer) validateWord(word string) error {
 
 	last := word[len(word)-1]
 
@@ -299,9 +303,10 @@ func (l *lexer) processWord(word string, ctx lexerContext) error {
 
 	// depending upon state we are in, we emit different tokens
 
-	if strings.IndexAny(word, digits) == 0 {
+	// FIXME: We need to implement scan number (or reuse) but this should not fail word validation
+	/* if strings.IndexAny(word, digits) == 0 {
 		return errors.New("A word cannot start with a digit")
-	}
+	} */
 
 	if last == '-' {
 		return errors.New("A Word cannot end with a -.")
@@ -311,6 +316,15 @@ func (l *lexer) processWord(word string, ctx lexerContext) error {
 		return errors.New("A word cannot have a dash followed by a dash (--).")
 	}
 
+	return nil
+}
+
+func (l *lexer) processWordModuleHeader(word string) error {
+
+	if err := l.validateWord(word); err != nil {
+		return err
+	}
+
 	if val, ok := reservedWordsMap[word]; ok {
 		l.emit(val)
 		l.start = l.pos
@@ -318,21 +332,7 @@ func (l *lexer) processWord(word string, ctx lexerContext) error {
 	}
 
 	if strings.IndexAny(word, capitalLetters) == 0 {
-		switch ctx {
-		case lexerContextModuleHeader:
-			l.emit(itemModuleReference)
-		default:
-			l.emit(itemTypeReference)
-		}
-		l.start = l.pos
-		return nil
-	} else {
-		switch ctx {
-		case lexerContextObjectId:
-			l.emit(itemIdentifier)
-		default:
-			l.emit(itemIdentifier)
-		}
+		l.emit(itemModuleReference)
 		l.start = l.pos
 		return nil
 	}
@@ -341,19 +341,57 @@ func (l *lexer) processWord(word string, ctx lexerContext) error {
 	return errors.New("Unknown error occurred.")
 }
 
-func (l *lexer) processAssignment() error {
+func (l *lexer) processWordOid(word string) error {
 
-	l.acceptRun(":=")
+	if err := l.validateWord(word); err != nil {
+		return err
+	}
 
-	t := l.input[l.start:l.pos]
-
-	if t == "::=" {
-		l.emit(itemAssignment)
+	if strings.IndexAny(word, smallLetters) == 0 {
+		l.emit(itemIdentifier)
 		l.start = l.pos
 		return nil
 	}
 
-	return errors.New("invalid assignment found.")
+	// should never come here.
+	return errors.New("Unknown error occurred.")
+}
+
+func (l *lexer) handleColon() error {
+
+	if l.start < l.pos-1 {
+		w := l.input[l.start:l.pos]
+		err := l.processWordModuleBody(w)
+		if err != nil {
+			return err
+		}
+		l.start = l.pos
+		l.consumeWS()
+	}
+
+	l.acceptRun(":=")
+	w := l.input[l.start:l.pos]
+
+	switch len(w) {
+	case 1:
+		l.emit(itemSymbol)
+		l.start = l.pos
+		return nil
+	case 2:
+		return errors.New("unaccepted lexical item " + w)
+	case 3:
+		if w == "::=" {
+			l.emit(itemAssignment)
+			l.start = l.pos
+			return nil
+		} else {
+			return errors.New("unaccepted lexical item " + w)
+		}
+	default:
+		return errors.New("unaccepted lexical item " + w)
+	}
+
+	return errors.New("unaccepted lexical item.")
 }
 
 func (l *lexer) processOid(ctx lexerContext) error {
@@ -365,7 +403,7 @@ func (l *lexer) processOid(ctx lexerContext) error {
 		case unicode.IsLower(r):
 			l.acceptRun(idLetters)
 			word := l.input[l.start:l.pos]
-			err := l.processWord(word, ctx)
+			err := l.processWordOid(word)
 			if err != nil {
 				return errors.New("lex error")
 			}
@@ -393,33 +431,128 @@ func (l *lexer) processOid(ctx lexerContext) error {
 	return errors.New("Unknown error occurred.")
 }
 
-func lexModuleBody(l *lexer) stateFn {
+func (l *lexer) processWordModuleBody(word string) error {
 
+	if err := l.validateWord(word); err != nil {
+		return err
+	}
+
+	if val, ok := reservedWordsMap[word]; ok {
+		l.emit(val)
+		l.start = l.pos
+		return nil
+	}
+
+	if strings.IndexAny(word, capitalLetters) == 0 {
+		// FIXME: This could be Type or Type Reference
+		l.emit(itemTypeReference)
+		l.start = l.pos
+		return nil
+	}
+
+	if strings.IndexAny(word, smallLetters) == 0 {
+		// FIXME: This could be Type or Type Reference
+		l.emit(itemValueReference)
+		l.start = l.pos
+		return nil
+	}
+
+	return nil
+}
+
+func isTerminator(r rune) bool {
+	return strings.ContainsRune(terminalLetters, r)
+}
+
+func (l *lexer) handleDot() error {
+
+	l.acceptRun(".")
+	w := l.input[l.start:l.pos]
+
+	switch len(w) {
+	case 1:
+		l.emit(itemSymbol)
+	case 2:
+		l.emit(itemRangeSeparator)
+	case 3:
+		l.emit(itemEllipsis)
+	default:
+		return errors.New("too many dots.")
+	}
+	l.start = l.pos
 	l.consumeWS()
 
-	ctx := lexerContextModuleBody
+	return nil
+}
 
-	fmt.Println(l.start, l.pos)
+func (l *lexer) handleLeftRightBracket(b rune) error {
+
+	s := string(b)
+	l.acceptRun(s)
+	w := l.input[l.start:l.pos]
+
+	switch len(w) {
+	case 1:
+		l.emit(itemSymbol)
+	case 2:
+		if b == '[' {
+			l.emit(itemTwoLeftBracket)
+		} else {
+			l.emit(itemTwoRightBracket)
+		}
+	default:
+		return errors.New("wrong number of brakcets " + w)
+	}
+	l.start = l.pos
+	l.consumeWS()
+
+	return nil
+}
+
+func lexModuleBody(l *lexer) stateFn {
+
+	accum := false
+	l.consumeWS()
+
 	for {
 		switch r := l.next(); {
 		case isAlphaNumeric(r):
-			// keep accumulating
+			accum = true
 		default:
-			switch {
-			case isWhiteSpace(r):
-				l.backup()
-				fmt.Println(l.start, l.pos)
+			l.backup()
+			if accum {
 				word := l.input[l.start:l.pos]
-				err := l.processWord(word, ctx)
+				err := l.processWordModuleBody(word)
+				if err != nil {
+					return l.errorf("lexer error")
+				}
+			}
+			switch {
+			case r == '.':
+				err := l.handleDot()
+				if err != nil {
+					return l.errorf("lexer error")
+				}
+			case r == ':':
+				err := l.handleColon()
 				if err != nil {
 					return l.errorf("lex error")
-				} else {
-					l.consumeWS()
+				}
+			case r == '[' || r == ']':
+				err := l.handleLeftRightBracket(r)
+				if err != nil {
+					return l.errorf("lex error")
+				}
+			case isTerminator(r):
+				if !isWhiteSpace(r) {
+					l.emit(itemSymbol)
 				}
 			case r == eof:
 				l.emit(itemEOF)
 				break
 			}
+			l.consumeWS()
+			accum = false
 		}
 	}
 	return nil
@@ -445,7 +578,7 @@ func lexModuleHeader(l *lexer) stateFn {
 				}
 			case r == ':':
 				l.backup()
-				err := l.processAssignment()
+				err := l.handleColon()
 				if err != nil {
 					return l.errorf("lex error")
 				} else {
@@ -456,7 +589,7 @@ func lexModuleHeader(l *lexer) stateFn {
 			case isWhiteSpace(r):
 				l.backup()
 				word := l.input[l.start:l.pos]
-				err := l.processWord(word, ctx)
+				err := l.processWordModuleHeader(word)
 				if err != nil {
 					return l.errorf("lex error")
 				} else {

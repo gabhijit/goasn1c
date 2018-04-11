@@ -33,6 +33,7 @@ func (p *Parser) Parse(name, input string) error {
 
 	for i := l.nextItem(); i.typ != itemEOF; i = l.nextItem() {
 		if i.typ == itemError {
+			fmt.Println(l.line)
 			return errors.New("Error parsing..")
 		}
 		fmt.Println(i)
