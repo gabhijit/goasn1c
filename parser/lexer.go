@@ -257,6 +257,7 @@ func (l *lexer) consumeCstyleComment() bool {
 	return false
 }
 
+// FIXME: This should be folded into handleModuleHeader and handleModuleBody
 func lexStart(l *lexer) stateFn {
 
 	l.consumeWS()
@@ -359,16 +360,6 @@ func (l *lexer) processWordOid(word string) error {
 
 func (l *lexer) handleColon() error {
 
-	if l.start < l.pos-1 {
-		w := l.input[l.start:l.pos]
-		err := l.processWordModuleBody(w)
-		if err != nil {
-			return err
-		}
-		l.start = l.pos
-		l.consumeWS()
-	}
-
 	l.acceptRun(":=")
 	w := l.input[l.start:l.pos]
 
@@ -439,25 +430,25 @@ func (l *lexer) processWordModuleBody(word string) error {
 
 	if val, ok := reservedWordsMap[word]; ok {
 		l.emit(val)
-		l.start = l.pos
 		return nil
 	}
 
 	if strings.IndexAny(word, capitalLetters) == 0 {
-		// FIXME: This could be Type or Type Reference
 		l.emit(itemTypeReference)
-		l.start = l.pos
 		return nil
 	}
 
 	if strings.IndexAny(word, smallLetters) == 0 {
-		// FIXME: This could be Type or Type Reference
 		l.emit(itemValueReference)
-		l.start = l.pos
 		return nil
 	}
 
-	return nil
+	if strings.IndexAny(word, digits) == 0 {
+		l.emit(itemNumber)
+		return nil
+	}
+
+	return errors.New("Unknown word")
 }
 
 func isTerminator(r rune) bool {
@@ -509,6 +500,38 @@ func (l *lexer) handleLeftRightBracket(b rune) error {
 	return nil
 }
 
+func (l *lexer) handleDash() error {
+
+	l.acceptRun("-")
+	w := l.input[l.start:l.pos]
+	l.start = l.pos
+
+	if len(w) == 2 {
+		for {
+			r := l.next()
+			if r == '\n' {
+				l.start = l.pos
+				return nil
+			} else if r == '-' {
+				if l.peek() == '-' {
+					l.next()
+					l.start = l.pos
+					return nil
+				}
+			}
+
+		}
+		return errors.New("unterminated comment")
+	} else if len(w) == 1 {
+		l.emit(itemSymbol)
+		l.start = l.pos
+		l.consumeWS()
+		return nil
+	}
+
+	return errors.New("error processing dash")
+}
+
 func lexModuleBody(l *lexer) stateFn {
 
 	accum := false
@@ -518,6 +541,16 @@ func lexModuleBody(l *lexer) stateFn {
 		switch r := l.next(); {
 		case isAlphaNumeric(r):
 			accum = true
+		case r == '-':
+			if l.peek() == '-' {
+				l.backup()
+				err := l.handleDash()
+				if err != nil {
+					return l.errorf("lexer error")
+				}
+			} else {
+				accum = true
+			}
 		default:
 			l.backup()
 			if accum {
@@ -526,6 +559,7 @@ func lexModuleBody(l *lexer) stateFn {
 				if err != nil {
 					return l.errorf("lexer error")
 				}
+				l.start = l.pos
 			}
 			switch {
 			case r == '.':
@@ -543,9 +577,16 @@ func lexModuleBody(l *lexer) stateFn {
 				if err != nil {
 					return l.errorf("lex error")
 				}
+			/* case r == '-':
+			err := l.handleDash()
+			if err != nil {
+				return l.errorf("lex error")
+			} */
 			case isTerminator(r):
+				l.next()
 				if !isWhiteSpace(r) {
 					l.emit(itemSymbol)
+					l.start = l.pos
 				}
 			case r == eof:
 				l.emit(itemEOF)
@@ -558,6 +599,7 @@ func lexModuleBody(l *lexer) stateFn {
 	return nil
 }
 
+// FIXME : this needs to be in similar structure as module body
 func lexModuleHeader(l *lexer) stateFn {
 
 	ctx := lexerContextModuleHeader
