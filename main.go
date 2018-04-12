@@ -15,9 +15,9 @@
 package main
 
 import (
-	"Asn1/goasn1c/parser"
 	"flag"
 	"fmt"
+	"github.com/gabhijit/goasn1c/parser"
 	"io/ioutil"
 	"os"
 )

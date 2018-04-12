@@ -20,6 +20,7 @@
 
 // Lexical Specification from ITU-T X.680 (072002)
 // http://www.itu.int/rec/T-REC-X.680-200207-S/en
+// http://www.itu.int/rec/T-REC-X.681-200207-S/en
 
 package parser
 
@@ -297,12 +298,8 @@ func (l *lexer) validateWord(word string) error {
 
 	last := word[len(word)-1]
 
-	// Word can be
-	// 1. A word starting with capital letter
-	// 2. A keyword
-	// 3. A word starting with small letter
-
-	// depending upon state we are in, we emit different tokens
+	// Interpretation of the word is responsibility of the parser. We make sure that the word is what constitutes a
+	// 1. valid identifier, typereference, valuereference, objectreference, number and so on
 
 	// FIXME: We need to implement scan number (or reuse) but this should not fail word validation
 	/* if strings.IndexAny(word, digits) == 0 {
@@ -315,6 +312,10 @@ func (l *lexer) validateWord(word string) error {
 
 	if strings.Index(word, "--") >= 0 {
 		return errors.New("A word cannot have a dash followed by a dash (--).")
+	}
+
+	if strings.Index(word, "&") > 0 {
+		return errors.New("& not allowed anywhere other than beginning of word.")
 	}
 
 	return nil
@@ -434,7 +435,12 @@ func (l *lexer) processWordModuleBody(word string) error {
 	}
 
 	if strings.IndexAny(word, capitalLetters) == 0 {
-		l.emit(itemTypeReference)
+		if strings.ToUpper(word) == word {
+			// All caps not a keyword objectclass reference (X.681 - 7.1)
+			l.emit(itemObjectClassReference)
+		} else {
+			l.emit(itemTypeReference)
+		}
 		return nil
 	}
 
@@ -445,6 +451,15 @@ func (l *lexer) processWordModuleBody(word string) error {
 
 	if strings.IndexAny(word, digits) == 0 {
 		l.emit(itemNumber)
+		return nil
+	}
+
+	if strings.IndexAny(word, "&") == 0 {
+		if strings.IndexAny(word, capitalLetters) == 1 {
+			l.emit(itemTypeFieldReference)
+		} else if strings.IndexAny(word, smallLetters) == 1 {
+			l.emit(itemValueFieldReference)
+		}
 		return nil
 	}
 
@@ -540,6 +555,8 @@ func lexModuleBody(l *lexer) stateFn {
 	for {
 		switch r := l.next(); {
 		case isAlphaNumeric(r):
+			accum = true
+		case r == '&':
 			accum = true
 		case r == '-':
 			if l.peek() == '-' {
@@ -767,6 +784,16 @@ const (
 	itemReservedVisibleString
 	itemReservedWITH
 	itemReservedlBIT
+
+	// X.681 Section 7
+	itemObjectClassReference
+	itemObjectReference
+	itemObjectSetReference
+	itemTypeFieldReference
+	itemValueFieldReference
+	itemValueSetFieldReference
+	itemObjectFieldReference
+	itemObjectSetFieldReference
 
 	itemOID
 	itemWSpace
