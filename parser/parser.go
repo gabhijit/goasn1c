@@ -32,10 +32,10 @@ func (p *Parser) Parse(name, input string) error {
 	l := lex(name, input)
 
 	for i := l.nextItem(); i.typ != itemEOF; i = l.nextItem() {
+		fmt.Println(i)
 		if i.typ == itemError {
 			return errors.New("Error parsing..")
 		}
-		fmt.Println(i)
 	}
 	return nil
 }

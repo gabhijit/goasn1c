@@ -36,24 +36,13 @@ type itemType int
 
 type Pos int
 
+// an item is a token that is 'emit'ted by the lexer
 type item struct {
 	typ  itemType
 	pos  Pos
 	val  string
 	line int
 }
-
-const (
-	dash            = "-"
-	capitalLetters  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	smallLetters    = "abcdefghijklmnopqrstuvwxyz"
-	digits          = "0123456789"
-	terminalLetters = "{}();, \r\n\t"
-
-	idLetters = smallLetters + capitalLetters + digits + dash
-
-	eof = -1
-)
 
 func (i item) String() string {
 	switch {
@@ -69,19 +58,37 @@ func (i item) String() string {
 	return fmt.Sprintf("%q", i.val)
 }
 
-type stateFn func(*lexer) stateFn
+const (
+	dash            = "-"
+	capitalLetters  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	smallLetters    = "abcdefghijklmnopqrstuvwxyz"
+	digits          = "0123456789"
+	terminalLetters = "{}();, \r\n\t"
+	binaryAlphabet  = "01"
+	hexAlphabet     = "0123456789abcdefABCDEF"
+	whiteSpaces     = " \t\r\n"
+	hexString       = hexAlphabet + whiteSpaces
+	binaryString    = binaryAlphabet + whiteSpaces
 
+	idLetters = smallLetters + capitalLetters + digits + dash
+
+	eof = -1
+)
+
+// lexer : internal state of tokenizer
 type lexer struct {
-	name   string
-	input  string
-	pos    Pos
-	start  Pos
-	width  Pos
-	line   int
-	items  chan item
-	states []stateFn
+	name  string
+	input string
+	pos   Pos
+	start Pos
+	width Pos
+	line  int
+	items chan item
 }
 
+type stateFn func(*lexer) stateFn
+
+// All the following functions are taken from go/src/text/template/parse/lex.go
 // next returns the next rune in the input.
 func (l *lexer) next() rune {
 	if int(l.pos) >= len(l.input) {
@@ -183,16 +190,6 @@ func lex(name, input string) *lexer {
 	return l
 }
 
-// states are -
-// 1. lexStart
-// 2. lexStartModuleHeader
-// lexObjectId
-// 3. lexStartModuleBody
-// lexExports
-// lexImports
-// lexModuleAssignment
-// 4. lexAfterModule
-
 // runs the state machine for the lexer
 func (l *lexer) run() {
 
@@ -202,14 +199,7 @@ func (l *lexer) run() {
 	close(l.items)
 }
 
-func isWhiteSpace(c rune) bool {
-	return c == ' ' || c == '\t' || c == '\r' || c == '\n'
-}
-
-func isAlphaNumeric(r rune) bool {
-	return unicode.IsLetter(r) || unicode.IsDigit(r)
-}
-
+// eat up all white spaces
 func (l *lexer) consumeWS() {
 	for isWhiteSpace(l.peek()) {
 		l.next()
@@ -217,6 +207,7 @@ func (l *lexer) consumeWS() {
 	l.ignore()
 }
 
+// consume comment -- followed by '\n' or another '--' on same line
 func (l *lexer) consumeComment() bool {
 
 	x := l.accept("-") && l.accept("-")
@@ -240,6 +231,7 @@ func (l *lexer) consumeComment() bool {
 	return false
 }
 
+// consume c-style comments
 func (l *lexer) consumeCstyleComment() bool {
 
 	x := l.accept("/") && l.accept("*")
@@ -258,72 +250,11 @@ func (l *lexer) consumeCstyleComment() bool {
 	return false
 }
 
-// FIXME: This should be folded into handleModuleHeader and handleModuleBody
-func lexStart(l *lexer) stateFn {
-
-	l.consumeWS()
-
-	if l.peek() == '-' {
-		if x := l.consumeComment(); x == false {
-			// FIXME : return error here
-			return nil
-		} else {
-			l.ignore()
-		}
-		return lexStart
-	}
-
-	if l.peek() == '/' {
-		if l.consumeCstyleComment() == false {
-			// FIXME: return error here
-			return nil
-		} else {
-			l.ignore()
-		}
-		return lexStart
-	}
-
-	// Now we expect typereference like module identifier
-	if l.accept(capitalLetters) {
-		return lexModuleHeader
-	} else {
-		return nil
-	}
-
-	return nil
-
-}
-
-func (l *lexer) validateWord(word string) error {
-
-	last := word[len(word)-1]
-
-	// Interpretation of the word is responsibility of the parser. We make sure that the word is what constitutes a
-	// 1. valid identifier, typereference, valuereference, objectreference, number and so on
-
-	// FIXME: We need to implement scan number (or reuse) but this should not fail word validation
-	/* if strings.IndexAny(word, digits) == 0 {
-		return errors.New("A word cannot start with a digit")
-	} */
-
-	if last == '-' {
-		return errors.New("A Word cannot end with a -.")
-	}
-
-	if strings.Index(word, "--") >= 0 {
-		return errors.New("A word cannot have a dash followed by a dash (--).")
-	}
-
-	if strings.Index(word, "&") > 0 {
-		return errors.New("& not allowed anywhere other than beginning of word.")
-	}
-
-	return nil
-}
-
+// processing of a 'word' in the context of Module Header
+// usually, a keyword modulename or oid references
 func (l *lexer) processWordModuleHeader(word string) error {
 
-	if err := l.validateWord(word); err != nil {
+	if err := validateWord(word); err != nil {
 		return err
 	}
 
@@ -343,89 +274,11 @@ func (l *lexer) processWordModuleHeader(word string) error {
 	return errors.New("Unknown error occurred.")
 }
 
-func (l *lexer) processWordOid(word string) error {
-
-	if err := l.validateWord(word); err != nil {
-		return err
-	}
-
-	if strings.IndexAny(word, smallLetters) == 0 {
-		l.emit(itemIdentifier)
-		l.start = l.pos
-		return nil
-	}
-
-	// should never come here.
-	return errors.New("Unknown error occurred.")
-}
-
-func (l *lexer) handleColon() error {
-
-	l.acceptRun(":=")
-	w := l.input[l.start:l.pos]
-
-	switch len(w) {
-	case 1:
-		l.emit(itemSymbol)
-		l.start = l.pos
-		return nil
-	case 2:
-		return errors.New("unaccepted lexical item " + w)
-	case 3:
-		if w == "::=" {
-			l.emit(itemAssignment)
-			l.start = l.pos
-			return nil
-		} else {
-			return errors.New("unaccepted lexical item " + w)
-		}
-	default:
-		return errors.New("unaccepted lexical item " + w)
-	}
-
-	return errors.New("unaccepted lexical item.")
-}
-
-func (l *lexer) processOid(ctx lexerContext) error {
-
-	for {
-		switch r := l.next(); {
-		case r == '{':
-			l.emit(itemSymbol)
-		case unicode.IsLower(r):
-			l.acceptRun(idLetters)
-			word := l.input[l.start:l.pos]
-			err := l.processWordOid(word)
-			if err != nil {
-				return errors.New("lex error")
-			}
-		case unicode.IsDigit(r):
-			l.acceptRun(digits)
-			l.emit(itemNumber)
-			s := l.peek()
-			if isWhiteSpace(s) || s == ')' {
-				l.start = l.pos
-			} else {
-				errors.New("number in oid should be followed by whitespace or ')'")
-			}
-		case r == '(':
-			l.emit(itemSymbol)
-		case r == ')':
-			l.emit(itemSymbol)
-		case r == '}':
-			l.emit(itemSymbol)
-			return nil
-		default:
-			return errors.New("Unknown char found.")
-		}
-		l.consumeWS()
-	}
-	return errors.New("Unknown error occurred.")
-}
-
+// processing of a 'word' in the context of module body
+// pretty much everything
 func (l *lexer) processWordModuleBody(word string) error {
 
-	if err := l.validateWord(word); err != nil {
+	if err := validateWord(word); err != nil {
 		return err
 	}
 
@@ -466,10 +319,92 @@ func (l *lexer) processWordModuleBody(word string) error {
 	return errors.New("Unknown word")
 }
 
-func isTerminator(r rune) bool {
-	return strings.ContainsRune(terminalLetters, r)
+// process word in the oid context
+// FIXME: may be this is not required (it's up to the parser to decide whether this is right oid
+func (l *lexer) processWordOid(word string) error {
+
+	if err := validateWord(word); err != nil {
+		return err
+	}
+
+	if strings.IndexAny(word, smallLetters) == 0 {
+		l.emit(itemIdentifier)
+		l.start = l.pos
+		return nil
+	}
+
+	// should never come here.
+	return errors.New("Unknown error occurred.")
 }
 
+// process word in the oid context
+// FIXME: may be this is not required (it's up to the parser to decide whether this is right oid
+func (l *lexer) processOid() error {
+
+	for {
+		switch r := l.next(); {
+		case r == '{':
+			l.emit(itemSymbol)
+		case unicode.IsLower(r):
+			l.acceptRun(idLetters)
+			word := l.input[l.start:l.pos]
+			err := l.processWordOid(word)
+			if err != nil {
+				return errors.New("lex error")
+			}
+		case unicode.IsDigit(r):
+			l.acceptRun(digits)
+			l.emit(itemNumber)
+			s := l.peek()
+			if isWhiteSpace(s) || s == ')' {
+				l.start = l.pos
+			} else {
+				errors.New("number in oid should be followed by whitespace or ')'")
+			}
+		case r == '(':
+			l.emit(itemSymbol)
+		case r == ')':
+			l.emit(itemSymbol)
+		case r == '}':
+			l.emit(itemSymbol)
+			return nil
+		default:
+			return errors.New("Unknown char found.")
+		}
+		l.consumeWS()
+	}
+	return errors.New("Unknown error occurred.")
+}
+
+// special handling of ":" character ('cos it could mean assignment or a standalone token or a separator (parametarized type)
+func (l *lexer) handleColon() error {
+
+	l.acceptRun(":=")
+	w := l.input[l.start:l.pos]
+
+	switch len(w) {
+	case 1:
+		l.emit(itemSymbol)
+		l.start = l.pos
+		return nil
+	case 2:
+		return errors.New("unaccepted lexical item " + w)
+	case 3:
+		if w == "::=" {
+			l.emit(itemAssignment)
+			l.start = l.pos
+			return nil
+		} else {
+			return errors.New("unaccepted lexical item " + w)
+		}
+	default:
+		return errors.New("unaccepted lexical item " + w)
+	}
+
+	return errors.New("unaccepted lexical item.")
+}
+
+// special handling of "." could be a separator(single .) a range separator (..) or ellipsis (...)
 func (l *lexer) handleDot() error {
 
 	l.acceptRun(".")
@@ -491,6 +426,7 @@ func (l *lexer) handleDot() error {
 	return nil
 }
 
+// left/right brackets two consecutive brackets have special meaning '[[' and ']]'
 func (l *lexer) handleLeftRightBracket(b rune) error {
 
 	s := string(b)
@@ -515,6 +451,7 @@ func (l *lexer) handleLeftRightBracket(b rune) error {
 	return nil
 }
 
+// handing of "-". Don't think this is 100% right yet, but most of the test cases pass so far pass
 func (l *lexer) handleDash() error {
 
 	l.acceptRun("-")
@@ -547,6 +484,144 @@ func (l *lexer) handleDash() error {
 	return errors.New("error processing dash")
 }
 
+// handle '\'' single quote (usually means handling binarystring and hexstring
+func (l *lexer) handleSingleQuote() error {
+	return nil
+}
+
+// make sure it's a valid word (starts with a letter or number, does not end in a dash and no two consequtive dashes
+func validateWord(word string) error {
+
+	last := word[len(word)-1]
+
+	// Interpretation of the word is responsibility of the parser. We make sure that the word is what constitutes a
+	// 1. valid identifier, typereference, valuereference, objectreference, number and so on
+
+	// FIXME: We need to implement scan number (or reuse) but this should not fail word validation
+	/* if strings.IndexAny(word, digits) == 0 {
+		return errors.New("A word cannot start with a digit")
+	} */
+
+	if last == '-' {
+		return errors.New("A Word cannot end with a -.")
+	}
+
+	if strings.Index(word, "--") >= 0 {
+		return errors.New("A word cannot have a dash followed by a dash (--).")
+	}
+
+	if strings.Index(word, "&") > 0 {
+		return errors.New("& not allowed anywhere other than beginning of word.")
+	}
+
+	return nil
+}
+
+func isWhiteSpace(c rune) bool {
+	return c == ' ' || c == '\t' || c == '\r' || c == '\n'
+}
+
+func isAlphaNumeric(r rune) bool {
+	return unicode.IsLetter(r) || unicode.IsDigit(r)
+}
+
+func isTerminator(r rune) bool {
+	return strings.ContainsRune(terminalLetters, r)
+}
+
+// start of a module(ish) thing
+// FIXME: This should be folded into handleModuleHeader and handleModuleBody
+func lexStart(l *lexer) stateFn {
+
+	l.consumeWS()
+
+	if l.next() == eof {
+		l.emit(itemEOF)
+		return nil
+	}
+	l.backup()
+
+	if l.peek() == '-' {
+		if x := l.consumeComment(); x == false {
+			// FIXME : return error here
+			return nil
+		} else {
+			l.ignore()
+		}
+		return lexStart
+	}
+
+	if l.peek() == '/' {
+		if l.consumeCstyleComment() == false {
+			// FIXME: return error here
+			return nil
+		} else {
+			l.ignore()
+		}
+		return lexStart
+	}
+
+	// Now we expect typereference like module identifier
+	if l.accept(capitalLetters) {
+		return lexModuleHeader
+	} else {
+		return nil
+	}
+
+	return nil
+
+}
+
+// module header state
+// FIXME : this needs to be in similar structure as module body
+func lexModuleHeader(l *lexer) stateFn {
+
+	l.backup()
+	for {
+		switch r := l.next(); {
+		case isAlphaNumeric(r):
+			// keep accumulating
+		default:
+			switch {
+			case r == '{':
+				l.backup()
+				err := l.processOid()
+				if err != nil {
+					return l.errorf("lex error")
+				} else {
+					l.consumeWS()
+				}
+			case r == ':':
+				l.backup()
+				err := l.handleColon()
+				if err != nil {
+					return l.errorf("lex error")
+				} else {
+					l.consumeWS()
+					// We are gone past the ::=
+					return lexModuleBody
+				}
+			case isWhiteSpace(r):
+				l.backup()
+				word := l.input[l.start:l.pos]
+				err := l.processWordModuleHeader(word)
+				if err != nil {
+					return l.errorf("lex error")
+				} else {
+					l.consumeWS()
+				}
+			case r == eof:
+				l.emit(itemEOF)
+				break
+			}
+		}
+
+	}
+	return nil
+
+}
+
+// module body state - pretty much everything happens here.
 func lexModuleBody(l *lexer) stateFn {
 
 	accum := false
@@ -568,6 +643,11 @@ func lexModuleBody(l *lexer) stateFn {
 			} else {
 				accum = true
 			}
+		case r == '\'':
+			err := l.handleSingleQuote()
+			if err != nil {
+				return l.errorf("lexer error")
+			}
 		default:
 			l.backup()
 			if accum {
@@ -576,6 +656,10 @@ func lexModuleBody(l *lexer) stateFn {
 				if err != nil {
 					return l.errorf("lexer error")
 				}
+				if word == "END" {
+					return lexStart
+				}
+
 				l.start = l.pos
 			}
 			switch {
@@ -616,64 +700,7 @@ func lexModuleBody(l *lexer) stateFn {
 	return nil
 }
 
-// FIXME : this needs to be in similar structure as module body
-func lexModuleHeader(l *lexer) stateFn {
-
-	ctx := lexerContextModuleHeader
-	l.backup()
-	for {
-		switch r := l.next(); {
-		case isAlphaNumeric(r):
-			// keep accumulating
-		default:
-			switch {
-			case r == '{':
-				l.backup()
-				err := l.processOid(ctx)
-				if err != nil {
-					return l.errorf("lex error")
-				} else {
-					l.consumeWS()
-				}
-			case r == ':':
-				l.backup()
-				err := l.handleColon()
-				if err != nil {
-					return l.errorf("lex error")
-				} else {
-					l.consumeWS()
-					// We are gone past the ::=
-					return lexModuleBody
-				}
-			case isWhiteSpace(r):
-				l.backup()
-				word := l.input[l.start:l.pos]
-				err := l.processWordModuleHeader(word)
-				if err != nil {
-					return l.errorf("lex error")
-				} else {
-					l.consumeWS()
-				}
-			case r == eof:
-				l.emit(itemEOF)
-				break
-			}
-		}
-
-	}
-	return nil
-
-}
-
-type lexerContext int
-
-const (
-	lexerContextStart lexerContext = iota
-	lexerContextModuleHeader
-	lexerContextObjectId
-	lexerContextModuleBody
-)
-
+// items from X.680 specification - TODO: review this
 const (
 	itemError itemType = iota // Error occurred
 
