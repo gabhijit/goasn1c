@@ -63,12 +63,13 @@ const (
 	capitalLetters  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	smallLetters    = "abcdefghijklmnopqrstuvwxyz"
 	digits          = "0123456789"
-	terminalLetters = "{}();, \r\n\t"
+	terminalLetters = "{}();,|^ \r\n\t"
 	binaryAlphabet  = "01"
 	hexAlphabet     = "0123456789abcdefABCDEF"
+	quote           = "'"
 	whiteSpaces     = " \t\r\n"
-	hexString       = hexAlphabet + whiteSpaces
-	binaryString    = binaryAlphabet + whiteSpaces
+	hexString       = hexAlphabet + whiteSpaces + quote
+	binaryString    = binaryAlphabet + whiteSpaces + quote
 
 	idLetters = smallLetters + capitalLetters + digits + dash
 
@@ -484,9 +485,32 @@ func (l *lexer) handleDash() error {
 	return errors.New("error processing dash")
 }
 
-// handle '\'' single quote (usually means handling binarystring and hexstring
+// handle '\'' single quote (usually means handling binarystring and hexString
 func (l *lexer) handleSingleQuote() error {
-	return nil
+
+	save := l.pos
+	l.accept("'")
+
+	l.acceptRun(binaryString)
+
+	if l.peek() == 'B' {
+		l.next()
+		l.emit(itemBstring)
+		return nil
+	} else {
+		l.pos = save
+		l.start = save
+		l.acceptRun(hexString)
+
+		if l.peek() == 'H' {
+			l.next()
+			l.emit(itemHstring)
+			return nil
+
+		}
+		return errors.New("invalid bstring or hstring")
+	}
+	return errors.New("invalid bstring or hstring")
 }
 
 // make sure it's a valid word (starts with a letter or number, does not end in a dash and no two consequtive dashes
@@ -644,6 +668,7 @@ func lexModuleBody(l *lexer) stateFn {
 				accum = true
 			}
 		case r == '\'':
+			l.backup()
 			err := l.handleSingleQuote()
 			if err != nil {
 				return l.errorf("lexer error")
