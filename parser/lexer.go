@@ -27,6 +27,7 @@ package parser
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -63,7 +64,7 @@ const (
 	capitalLetters  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	smallLetters    = "abcdefghijklmnopqrstuvwxyz"
 	digits          = "0123456789"
-	terminalLetters = "{}();,|^ \r\n\t"
+	terminalLetters = "{}();,|^! \r\n\t"
 	binaryAlphabet  = "01"
 	hexAlphabet     = "0123456789abcdefABCDEF"
 	quote           = "'"
@@ -303,17 +304,22 @@ func (l *lexer) processWordModuleBody(word string) error {
 		return nil
 	}
 
-	if strings.IndexAny(word, digits) == 0 {
-		l.emit(itemNumber)
-		return nil
-	}
-
 	if strings.IndexAny(word, "&@") == 0 {
 		if strings.IndexAny(word, capitalLetters) == 1 {
 			l.emit(itemTypeFieldReference)
 		} else if strings.IndexAny(word, smallLetters) == 1 {
 			l.emit(itemValueFieldReference)
 		}
+		return nil
+	}
+
+	// try a number
+	_, err := strconv.ParseInt(word, 10, 64)
+
+	if err != nil {
+		return err
+	} else {
+		l.emit(itemNumber)
 		return nil
 	}
 
@@ -457,9 +463,9 @@ func (l *lexer) handleDash() error {
 
 	l.acceptRun("-")
 	w := l.input[l.start:l.pos]
-	l.start = l.pos
 
 	if len(w) == 2 {
+		l.start = l.pos
 		for {
 			r := l.next()
 			if r == '\n' {
@@ -664,7 +670,7 @@ func lexModuleBody(l *lexer) stateFn {
 				l.backup()
 				err := l.handleDash()
 				if err != nil {
-					return l.errorf("lexer error")
+					return l.errorf("lexer error 1")
 				}
 			} else {
 				accum = true
