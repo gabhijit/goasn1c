@@ -308,7 +308,7 @@ func (l *lexer) processWordModuleBody(word string) error {
 		return nil
 	}
 
-	if strings.IndexAny(word, "&") == 0 {
+	if strings.IndexAny(word, "&@") == 0 {
 		if strings.IndexAny(word, capitalLetters) == 1 {
 			l.emit(itemTypeFieldReference)
 		} else if strings.IndexAny(word, smallLetters) == 1 {
@@ -656,6 +656,8 @@ func lexModuleBody(l *lexer) stateFn {
 		case isAlphaNumeric(r):
 			accum = true
 		case r == '&':
+			accum = true
+		case r == '@':
 			accum = true
 		case r == '-':
 			if l.peek() == '-' {
