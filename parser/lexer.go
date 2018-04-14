@@ -52,11 +52,11 @@ func (i item) String() string {
 	case i.typ == itemError:
 		return i.val
 	case i.typ >= itemReservedABSENT && i.typ <= itemReservedWITH:
-		return fmt.Sprintf("<%s>", i.val)
+		return fmt.Sprintf("<%d:%s>", i.line, i.val)
 	case len(i.val) > 80:
-		return fmt.Sprintf("%.80q...", i.val)
+		return fmt.Sprintf("%d:%.80q...", i.line, i.val)
 	}
-	return fmt.Sprintf("%q", i.val)
+	return fmt.Sprintf("%d:%q", i.line, i.val)
 }
 
 const (
@@ -206,6 +206,7 @@ func (l *lexer) consumeWS() {
 	for isWhiteSpace(l.peek()) {
 		l.next()
 	}
+	l.start = l.pos
 	l.ignore()
 }
 
@@ -216,6 +217,7 @@ func (l *lexer) consumeComment() bool {
 	if x == false {
 		return false
 	}
+Loop:
 	// consumed --
 	for {
 		switch r := l.next(); {
@@ -226,6 +228,8 @@ func (l *lexer) consumeComment() bool {
 			}
 		case r == '\n':
 			return true
+		case r == eof:
+			break Loop
 		default:
 			// pass
 		}
@@ -240,6 +244,7 @@ func (l *lexer) consumeCstyleComment() bool {
 	if x == false {
 		return false
 	}
+Loop:
 	for {
 		switch l.next() {
 		case '*':
@@ -247,6 +252,8 @@ func (l *lexer) consumeCstyleComment() bool {
 				l.next()
 				return true
 			}
+		case eof:
+			break Loop
 		}
 	}
 	return false
@@ -323,7 +330,6 @@ func (l *lexer) processWordModuleBody(word string) error {
 		return nil
 	}
 
-	return errors.New("Unknown word")
 }
 
 // process word in the oid context
@@ -345,7 +351,7 @@ func (l *lexer) processWordOid(word string) error {
 }
 
 // process word in the oid context
-// FIXME: may be this is not required (it's up to the parser to decide whether this is right oid
+// FIXME: may be this is not required (it's up to the parser to decide whether this is right oid)
 func (l *lexer) processOid() error {
 
 	for {
@@ -366,7 +372,7 @@ func (l *lexer) processOid() error {
 			if isWhiteSpace(s) || s == ')' {
 				l.start = l.pos
 			} else {
-				errors.New("number in oid should be followed by whitespace or ')'")
+				return errors.New("number in oid should be followed by whitespace or ')'")
 			}
 		case r == '(':
 			l.emit(itemSymbol)
@@ -380,7 +386,8 @@ func (l *lexer) processOid() error {
 		}
 		l.consumeWS()
 	}
-	return errors.New("Unknown error occurred.")
+	// commenting below thanks to `go vet`, but not sure
+	//return errors.New("Unknown error occurred.")
 }
 
 // special handling of ":" character ('cos it could mean assignment or a standalone token or a separator (parametarized type)
@@ -408,7 +415,6 @@ func (l *lexer) handleColon() error {
 		return errors.New("unaccepted lexical item " + w)
 	}
 
-	return errors.New("unaccepted lexical item.")
 }
 
 // special handling of "." could be a separator(single .) a range separator (..) or ellipsis (...)
@@ -466,19 +472,21 @@ func (l *lexer) handleDash() error {
 
 	if len(w) == 2 {
 		l.start = l.pos
+	Loop:
 		for {
-			r := l.next()
-			if r == '\n' {
+			switch r := l.next(); {
+			case r == '\n':
 				l.start = l.pos
 				return nil
-			} else if r == '-' {
+			case r == '-':
 				if l.peek() == '-' {
 					l.next()
 					l.start = l.pos
 					return nil
 				}
+			case r == eof:
+				break Loop
 			}
-
 		}
 		return errors.New("unterminated comment")
 	} else if len(w) == 1 {
@@ -516,7 +524,6 @@ func (l *lexer) handleSingleQuote() error {
 		}
 		return errors.New("invalid bstring or hstring")
 	}
-	return errors.New("invalid bstring or hstring")
 }
 
 // make sure it's a valid word (starts with a letter or number, does not end in a dash and no two consequtive dashes
@@ -576,6 +583,7 @@ func lexStart(l *lexer) stateFn {
 			// FIXME : return error here
 			return nil
 		} else {
+			l.start = l.pos
 			l.ignore()
 		}
 		return lexStart
@@ -586,6 +594,7 @@ func lexStart(l *lexer) stateFn {
 			// FIXME: return error here
 			return nil
 		} else {
+			l.start = l.pos
 			l.ignore()
 		}
 		return lexStart
@@ -598,8 +607,6 @@ func lexStart(l *lexer) stateFn {
 		return nil
 	}
 
-	return nil
-
 }
 
 // module header state
@@ -607,6 +614,7 @@ func lexStart(l *lexer) stateFn {
 func lexModuleHeader(l *lexer) stateFn {
 
 	l.backup()
+Loop:
 	for {
 		switch r := l.next(); {
 		case isAlphaNumeric(r):
@@ -642,7 +650,7 @@ func lexModuleHeader(l *lexer) stateFn {
 				}
 			case r == eof:
 				l.emit(itemEOF)
-				break
+				break Loop
 			}
 		}
 
@@ -657,6 +665,7 @@ func lexModuleBody(l *lexer) stateFn {
 	accum := false
 	l.consumeWS()
 
+Loop:
 	for {
 		switch r := l.next(); {
 		case isAlphaNumeric(r):
@@ -681,6 +690,8 @@ func lexModuleBody(l *lexer) stateFn {
 			if err != nil {
 				return l.errorf("lexer error")
 			}
+		case r == eof:
+			break Loop
 		default:
 			l.backup()
 			if accum {
