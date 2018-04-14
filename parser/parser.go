@@ -27,12 +27,14 @@ func NewParser(name string) *Parser {
 	return &Parser{name: name}
 }
 
-func (p *Parser) Parse(name, input string) error {
+func (p *Parser) Parse(name, input string, output bool) error {
 
 	l := lex(name, input)
 
 	for i := l.nextItem(); i.typ != itemEOF; i = l.nextItem() {
-		fmt.Println(i)
+		if output {
+			fmt.Println(i)
+		}
 		if i.typ == itemError {
 			return errors.New("Error parsing..")
 		}

@@ -35,7 +35,7 @@ func main() {
 		}
 		s := string(d)
 		p := parser.NewParser(f)
-		err = p.Parse(f, s)
+		err = p.Parse(f, s, true)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(-1)
