@@ -499,6 +499,51 @@ func (l *lexer) handleDash() error {
 	return errors.New("error processing dash")
 }
 
+// handling of "/".
+func (l *lexer) handleSlash() error {
+
+	var w string
+
+	count := 1
+	if l.accept("/") {
+		if l.accept("*") {
+			w = l.input[l.start:l.pos]
+		} else {
+			l.emit(itemSymbol)
+			return nil
+		}
+	}
+
+	if len(w) == 2 {
+		l.start = l.pos
+	Loop:
+		for count > 0 {
+			switch r := l.next(); {
+			case r == '*':
+				if l.peek() == '/' {
+					count--
+					l.next()
+					l.start = l.pos
+				}
+
+			case r == '/':
+				if l.peek() == '*' {
+					l.next()
+					count++
+				}
+			case r == eof:
+				break Loop
+			}
+		}
+	}
+
+	if count == 0 {
+		return nil
+	}
+
+	return errors.New("Unterminated C++ style comment")
+}
+
 // handle '\'' single quote (usually means handling binarystring and hexString
 func (l *lexer) handleSingleQuote() error {
 
@@ -524,6 +569,23 @@ func (l *lexer) handleSingleQuote() error {
 		}
 		return errors.New("invalid bstring or hstring")
 	}
+}
+
+// handle the double quote "\"". Note doesn't handle "" yet
+func (l *lexer) handleDoubleQuote() error {
+	l.accept("\"")
+Loop:
+	for {
+		switch r := l.next(); {
+		case r == '"':
+			l.emit(itemCstring)
+			l.start = l.pos
+			return nil
+		case r == eof:
+			break Loop
+		}
+	}
+	return errors.New("unterminated double quote.")
 }
 
 // make sure it's a valid word (starts with a letter or number, does not end in a dash and no two consequtive dashes
@@ -687,6 +749,18 @@ Loop:
 		case r == '\'':
 			l.backup()
 			err := l.handleSingleQuote()
+			if err != nil {
+				return l.errorf("lexer error")
+			}
+		case r == '/':
+			l.backup()
+			err := l.handleSlash()
+			if err != nil {
+				return l.errorf("lexer error")
+			}
+		case r == '"':
+			l.backup()
+			err := l.handleDoubleQuote()
 			if err != nil {
 				return l.errorf("lexer error")
 			}
