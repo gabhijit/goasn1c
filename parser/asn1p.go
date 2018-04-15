@@ -17,10 +17,13 @@ var currentModule *Asn1Module
 
 //line asn1p.y:21
 type asn1SymType struct {
-	yys int
-
-	str      string
-	a_module *Asn1Module
+	yys       int
+	ch        rune
+	str       string
+	a_module  *Asn1Module
+	a_oid     *Asn1Oid
+	a_oid_arc Asn1OidArc
+	num       int64
 }
 
 const Tok_BEGIN = 57346
@@ -28,6 +31,8 @@ const Tok_END = 57347
 const Tok_DEFINITIONS = 57348
 const Tok_ASSIGNMENT = 57349
 const Tok_TypeReference = 57350
+const Tok_Number = 57351
+const Tok_Identifier = 57352
 
 var asn1Toknames = [...]string{
 	"$end",
@@ -38,6 +43,12 @@ var asn1Toknames = [...]string{
 	"Tok_DEFINITIONS",
 	"Tok_ASSIGNMENT",
 	"Tok_TypeReference",
+	"Tok_Number",
+	"Tok_Identifier",
+	"'{'",
+	"'}'",
+	"'('",
+	"')'",
 }
 var asn1Statenames = [...]string{}
 
@@ -45,7 +56,7 @@ const asn1EofCode = 1
 const asn1ErrCode = 2
 const asn1InitialStackSize = 16
 
-//line asn1p.y:56
+//line asn1p.y:102
 
 //line yacctab:1
 var asn1Exca = [...]int{
@@ -56,43 +67,65 @@ var asn1Exca = [...]int{
 
 const asn1Private = 57344
 
-const asn1Last = 8
+const asn1Last = 24
 
 var asn1Act = [...]int{
 
-	3, 6, 5, 8, 7, 4, 1, 2,
+	22, 13, 14, 18, 16, 13, 14, 11, 10, 7,
+	20, 3, 15, 8, 21, 19, 4, 17, 9, 6,
+	5, 1, 12, 2,
 }
 var asn1Pact = [...]int{
 
-	-8, -1000, -1000, -1000, -4, -6, 0, -2, -1000,
+	3, -1000, -1000, -1000, -2, 7, -1000, -4, 5, -8,
+	-1000, -1000, -10, -1000, -1000, 11, -1000, -1000, 1, 9,
+	-14, -1000, -1000,
 }
 var asn1Pgo = [...]int{
 
-	0, 7, 6, 5,
+	0, 23, 22, 21, 20, 19, 18, 7, 16,
 }
 var asn1R1 = [...]int{
 
-	0, 3, 2, 1,
+	0, 8, 3, 4, 4, 5, 5, 6, 6, 7,
+	7, 7, 2, 1,
 }
 var asn1R2 = [...]int{
 
-	0, 0, 6, 1,
+	0, 0, 7, 0, 1, 3, 2, 1, 2, 1,
+	4, 1, 1, 1,
 }
 var asn1Chk = [...]int{
 
-	-1000, -2, -1, 8, -3, 6, 7, 4, 5,
+	-1000, -3, -1, 8, -8, -4, -5, 11, 6, -6,
+	12, -7, -2, 9, 10, 7, 12, -7, 13, 4,
+	9, 5, 14,
 }
 var asn1Def = [...]int{
 
-	0, -2, 1, 3, 0, 0, 0, 0, 2,
+	0, -2, 1, 13, 3, 0, 4, 0, 0, 0,
+	6, 7, 9, 11, 12, 0, 5, 8, 0, 0,
+	0, 2, 10,
 }
 var asn1Tok1 = [...]int{
 
-	1,
+	1, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	13, 14, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 11, 3, 12,
 }
 var asn1Tok2 = [...]int{
 
-	2, 3, 4, 5, 6, 7, 8,
+	2, 3, 4, 5, 6, 7, 8, 9, 10,
 }
 var asn1Tok3 = [...]int{
 	0,
@@ -110,7 +143,7 @@ var asn1ErrorMessages = [...]struct {
 
 var (
 	asn1Debug        = 0
-	asn1ErrorVerbose = false
+	asn1ErrorVerbose = true
 )
 
 type asn1Lexer interface {
@@ -437,24 +470,87 @@ asn1default:
 
 	case 1:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line asn1p.y:40
+		//line asn1p.y:50
 		{
 			currentModule = NewAsn1Module()
-			fmt.Println(currentModule)
 		}
 	case 2:
-		asn1Dollar = asn1S[asn1pt-6 : asn1pt+1]
-		//line asn1p.y:42
+		asn1Dollar = asn1S[asn1pt-7 : asn1pt+1]
+		//line asn1p.y:52
 		{
 
 			asn1VAL.a_module = currentModule
 			asn1VAL.a_module.name = asn1Dollar[1].str
 			fmt.Println(asn1VAL.a_module)
-
 		}
 	case 3:
+		asn1Dollar = asn1S[asn1pt-0 : asn1pt+1]
+		//line asn1p.y:60
+		{
+			asn1VAL.a_oid = nil
+		}
+	case 4:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line asn1p.y:52
+		//line asn1p.y:61
+		{
+			asn1VAL.a_oid = asn1Dollar[1].a_oid
+		}
+	case 5:
+		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
+		//line asn1p.y:64
+		{
+			asn1VAL.a_oid = asn1Dollar[2].a_oid
+		}
+	case 6:
+		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
+		//line asn1p.y:67
+		{
+			asn1VAL.a_oid = nil
+		}
+	case 7:
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line asn1p.y:73
+		{
+			asn1VAL.a_oid = NewAsn1Oid()
+			asn1VAL.a_oid.arcs = append(asn1VAL.a_oid.arcs, asn1Dollar[1].a_oid_arc)
+		}
+	case 8:
+		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
+		//line asn1p.y:77
+		{
+			asn1VAL.a_oid = asn1Dollar[1].a_oid
+			asn1VAL.a_oid.arcs = append(asn1VAL.a_oid.arcs, asn1Dollar[2].a_oid_arc)
+		}
+	case 9:
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line asn1p.y:83
+		{ /* iso */
+			asn1VAL.a_oid_arc.name = asn1Dollar[1].str
+			asn1VAL.a_oid_arc.num = -1
+		}
+	case 10:
+		asn1Dollar = asn1S[asn1pt-4 : asn1pt+1]
+		//line asn1p.y:86
+		{ /* iso(1) */
+			asn1VAL.a_oid_arc.name = asn1Dollar[1].str
+			asn1VAL.a_oid_arc.num = asn1Dollar[3].num
+		}
+	case 11:
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line asn1p.y:89
+		{ /* 1 */
+			asn1VAL.a_oid_arc.name = ""
+			asn1VAL.a_oid_arc.num = asn1Dollar[1].num
+		}
+	case 12:
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line asn1p.y:93
+		{
+			asn1VAL.str = asn1Dollar[1].str
+		}
+	case 13:
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line asn1p.y:98
 		{
 			asn1VAL.str = asn1Dollar[1].str
 		}

@@ -111,13 +111,31 @@ func (l *lexer) Lex(lval *asn1SymType) int {
 	case itemModuleReference:
 		lval.str = i.val
 		return Tok_TypeReference
+
 	case itemAssignment:
 		return Tok_ASSIGNMENT
+
+	case itemNumber:
+		lval.num, _ = strconv.ParseInt(i.val, 10, 64)
+		return Tok_Number
+
+	case itemIdentifier:
+		lval.str = i.val
+		return Tok_Identifier
+
+	case itemSymbol:
+		runes := []rune(i.val)
+		return int(runes[0])
+
 	case itemEOF:
 		return 0
 	}
 
 	return 0
+}
+
+func (l *lexer) Error(s string) {
+	fmt.Println("Error:", s)
 }
 
 type stateFn func(*lexer) stateFn
