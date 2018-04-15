@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:generate goyacc -o parser/asn1p.go -p asn1 parser/asn1p.y
+
 package main
 
 import (
