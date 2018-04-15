@@ -12,21 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// ASN.1 Oid related types and structures
+// Information Obect Classes related types constants
 
-package parser
+package asn1types
 
-type Asn1OidArc struct {
-	num  int64
-	name string
+type Asn1InfoObjectClassCell struct {
+	field *Asn1ParsedExpression
+	value *Asn1ParsedExpression
 }
 
-type Asn1Oid struct {
-	count int
-	arcs  []Asn1OidArc
+//
+type Asn1InfoObjectClassRow struct {
+	cols     []Asn1InfoObjectClassCell
+	ncols    int
+	maxidlen int
 }
 
-func NewAsn1Oid() *Asn1Oid {
-	o := &Asn1Oid{}
-	return o
+type Asn1WithSyntaxChunk struct {
+	typ     WithClauseType
+	content interface{}
+	next    *Asn1WithSyntaxChunk
 }
+
+type ASn1WithSyntax struct {
+	chunks []Asn1WithSyntaxChunk
+}
+
+type WithClauseType int
+
+const (
+	WithClauseLiteral WithClauseType = iota
+	WithClauseWhitespace
+	WithClauseField
+	WithClauseOptionalGroup
+)

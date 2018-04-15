@@ -12,6 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// types used in parser
+// ASN.1 Oid related types and structures
 
-package parser
+package asn1types
+
+type Asn1OidArc struct {
+	Num  int64
+	Name string
+}
+
+type Asn1Oid struct {
+	Count int
+	Arcs  []Asn1OidArc
+}
+
+func NewAsn1Oid() *Asn1Oid {
+	o := &Asn1Oid{}
+	return o
+}

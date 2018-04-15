@@ -71,8 +71,7 @@ const (
 	whiteSpaces     = " \t\r\n"
 	hexString       = hexAlphabet + whiteSpaces + quote
 	binaryString    = binaryAlphabet + whiteSpaces + quote
-
-	idLetters = smallLetters + capitalLetters + digits + dash
+	idLetters       = smallLetters + capitalLetters + digits + dash
 
 	eof = -1
 )

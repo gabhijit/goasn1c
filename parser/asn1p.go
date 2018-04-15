@@ -1,28 +1,32 @@
-//line asn1p.y:3
+//line asn1p.y:24
 package parser
 
 import __yyfmt__ "fmt"
 
-//line asn1p.y:4
+//line asn1p.y:25
 import (
-	"fmt" /*	"bufio"
-		"bytes"
-		"io"
-		"log"
-		"os"
-		"unicode/utf8"
-	*/)
+	"fmt"
+	"github.com/gabhijit/goasn1c/types"
 
-var currentModule *Asn1Module
+/*	"bufio"
+	"bytes"
+	"io"
+	"log"
+	"os"
+	"unicode/utf8"
+*/
+)
 
-//line asn1p.y:21
+var currentModule *asn1types.Asn1Module
+
+//line asn1p.y:43
 type asn1SymType struct {
 	yys       int
 	ch        rune
 	str       string
-	a_module  *Asn1Module
-	a_oid     *Asn1Oid
-	a_oid_arc Asn1OidArc
+	a_module  *asn1types.Asn1Module
+	a_oid     *asn1types.Asn1Oid
+	a_oid_arc asn1types.Asn1OidArc
 	num       int64
 }
 
@@ -56,7 +60,7 @@ const asn1EofCode = 1
 const asn1ErrCode = 2
 const asn1InitialStackSize = 16
 
-//line asn1p.y:102
+//line asn1p.y:124
 
 //line yacctab:1
 var asn1Exca = [...]int{
@@ -143,7 +147,7 @@ var asn1ErrorMessages = [...]struct {
 
 var (
 	asn1Debug        = 0
-	asn1ErrorVerbose = true
+	asn1ErrorVerbose = false
 )
 
 type asn1Lexer interface {
@@ -470,87 +474,87 @@ asn1default:
 
 	case 1:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line asn1p.y:50
+		//line asn1p.y:72
 		{
-			currentModule = NewAsn1Module()
+			currentModule = asn1types.NewAsn1Module()
 		}
 	case 2:
 		asn1Dollar = asn1S[asn1pt-7 : asn1pt+1]
-		//line asn1p.y:52
+		//line asn1p.y:74
 		{
 
 			asn1VAL.a_module = currentModule
-			asn1VAL.a_module.name = asn1Dollar[1].str
+			asn1VAL.a_module.Name = asn1Dollar[1].str
 			fmt.Println(asn1VAL.a_module)
 		}
 	case 3:
 		asn1Dollar = asn1S[asn1pt-0 : asn1pt+1]
-		//line asn1p.y:60
+		//line asn1p.y:82
 		{
 			asn1VAL.a_oid = nil
 		}
 	case 4:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line asn1p.y:61
+		//line asn1p.y:83
 		{
 			asn1VAL.a_oid = asn1Dollar[1].a_oid
 		}
 	case 5:
 		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
-		//line asn1p.y:64
+		//line asn1p.y:86
 		{
 			asn1VAL.a_oid = asn1Dollar[2].a_oid
 		}
 	case 6:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line asn1p.y:67
+		//line asn1p.y:89
 		{
 			asn1VAL.a_oid = nil
 		}
 	case 7:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line asn1p.y:73
+		//line asn1p.y:95
 		{
-			asn1VAL.a_oid = NewAsn1Oid()
-			asn1VAL.a_oid.arcs = append(asn1VAL.a_oid.arcs, asn1Dollar[1].a_oid_arc)
+			asn1VAL.a_oid = asn1types.NewAsn1Oid()
+			asn1VAL.a_oid.Arcs = append(asn1VAL.a_oid.Arcs, asn1Dollar[1].a_oid_arc)
 		}
 	case 8:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line asn1p.y:77
+		//line asn1p.y:99
 		{
 			asn1VAL.a_oid = asn1Dollar[1].a_oid
-			asn1VAL.a_oid.arcs = append(asn1VAL.a_oid.arcs, asn1Dollar[2].a_oid_arc)
+			asn1VAL.a_oid.Arcs = append(asn1VAL.a_oid.Arcs, asn1Dollar[2].a_oid_arc)
 		}
 	case 9:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line asn1p.y:83
+		//line asn1p.y:105
 		{ /* iso */
-			asn1VAL.a_oid_arc.name = asn1Dollar[1].str
-			asn1VAL.a_oid_arc.num = -1
+			asn1VAL.a_oid_arc.Name = asn1Dollar[1].str
+			asn1VAL.a_oid_arc.Num = -1
 		}
 	case 10:
 		asn1Dollar = asn1S[asn1pt-4 : asn1pt+1]
-		//line asn1p.y:86
+		//line asn1p.y:108
 		{ /* iso(1) */
-			asn1VAL.a_oid_arc.name = asn1Dollar[1].str
-			asn1VAL.a_oid_arc.num = asn1Dollar[3].num
+			asn1VAL.a_oid_arc.Name = asn1Dollar[1].str
+			asn1VAL.a_oid_arc.Num = asn1Dollar[3].num
 		}
 	case 11:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line asn1p.y:89
+		//line asn1p.y:111
 		{ /* 1 */
-			asn1VAL.a_oid_arc.name = ""
-			asn1VAL.a_oid_arc.num = asn1Dollar[1].num
+			asn1VAL.a_oid_arc.Name = ""
+			asn1VAL.a_oid_arc.Num = asn1Dollar[1].num
 		}
 	case 12:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line asn1p.y:93
+		//line asn1p.y:115
 		{
 			asn1VAL.str = asn1Dollar[1].str
 		}
 	case 13:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line asn1p.y:98
+		//line asn1p.y:120
 		{
 			asn1VAL.str = asn1Dollar[1].str
 		}

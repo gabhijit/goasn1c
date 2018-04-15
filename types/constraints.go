@@ -14,7 +14,7 @@
 
 // Types and Consts related to constraints
 
-package parser
+package asn1types
 
 type Asn1ConstraintKind uint8
 

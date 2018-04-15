@@ -12,37 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Information Obect Classes related types constants
+// ASN.1 Module related types and structures
 
-package parser
+package asn1types
 
-type Asn1InfoObjectClassCell struct {
-	field *Asn1ParsedExpression
-	value *Asn1ParsedExpression
+// Asn1Module is a type representing ASN.1 Module
+type Asn1Module struct {
+	Name string
 }
 
-//
-type Asn1InfoObjectClassRow struct {
-	cols     []Asn1InfoObjectClassCell
-	ncols    int
-	maxidlen int
-}
-
-type Asn1WithSyntaxChunk struct {
-	typ     WithClauseType
-	content interface{}
-	next    *Asn1WithSyntaxChunk
-}
-
-type ASn1WithSyntax struct {
-	chunks []Asn1WithSyntaxChunk
-}
-
-type WithClauseType int
+type ModuleFlagType uint16
 
 const (
-	WithClauseLiteral WithClauseType = iota
-	WithClauseWhitespace
-	WithClauseField
-	WithClauseOptionalGroup
+	ModuleFlagUnkInstr ModuleFlagType = 1 << iota
+	ModuleFlagTagInstr
+	ModuleFlagXerInstr
+	_
+	ModuleFlagImplicitTags
+	ModuleFlagExplicitTags
+	ModuleFlagAutomaticTags
+	_
+	ModuleFlagExtensibilityImplied
+
+	ModuleFlagNoFlags          ModuleFlagType = 0x00
+	ModuleFlagInstructionsMask ModuleFlagType = 0x0F
+	ModuleFlagsTagMask         ModuleFlagType = 0xF0
 )
+
+func NewAsn1Module() *Asn1Module {
+
+	n := &Asn1Module{}
+
+	return n
+}
