@@ -21,23 +21,38 @@ import (
 
 type Parser struct {
 	name string
+	ap   asn1Parser
 }
 
 func NewParser(name string) *Parser {
-	return &Parser{name: name}
+	ap := asn1NewParser()
+	return &Parser{name: name, ap: ap}
 }
 
-func (p *Parser) Parse(name, input string, output bool) error {
+func (p *Parser) Parse(name, input string, lexdebug bool) error {
 
-	l := NewLexer(name, input)
+	l := lex(name, input, lexdebug)
+
+	err := p.ap.Parse(l)
+	if err == 0 {
+		return nil
+	} else {
+		return errors.New("parser error.")
+	}
+}
+
+func (p *Parser) RunLexer(name, input string, lexdebug bool) error {
+
+	l := lex(name, input, lexdebug)
 
 	for i := l.nextItem(); i.typ != itemEOF; i = l.nextItem() {
-		if output {
+		if lexdebug {
 			fmt.Println(i)
 		}
 		if i.typ == itemError {
 			return errors.New("Error parsing..")
 		}
 	}
+
 	return nil
 }

@@ -16,7 +16,7 @@ import (
 var currentModule *Asn1Module
 
 //line asn1p.y:21
-type Asn1SymType struct {
+type asn1SymType struct {
 	yys int
 
 	str      string
@@ -29,7 +29,7 @@ const Tok_DEFINITIONS = 57348
 const Tok_ASSIGNMENT = 57349
 const Tok_TypeReference = 57350
 
-var Asn1Toknames = [...]string{
+var asn1Toknames = [...]string{
 	"$end",
 	"error",
 	"$unk",
@@ -39,66 +39,66 @@ var Asn1Toknames = [...]string{
 	"Tok_ASSIGNMENT",
 	"Tok_TypeReference",
 }
-var Asn1Statenames = [...]string{}
+var asn1Statenames = [...]string{}
 
-const Asn1EofCode = 1
-const Asn1ErrCode = 2
-const Asn1InitialStackSize = 16
+const asn1EofCode = 1
+const asn1ErrCode = 2
+const asn1InitialStackSize = 16
 
 //line asn1p.y:56
 
 //line yacctab:1
-var Asn1Exca = [...]int{
+var asn1Exca = [...]int{
 	-1, 1,
 	1, -1,
 	-2, 0,
 }
 
-const Asn1Private = 57344
+const asn1Private = 57344
 
-const Asn1Last = 8
+const asn1Last = 8
 
-var Asn1Act = [...]int{
+var asn1Act = [...]int{
 
 	3, 6, 5, 8, 7, 4, 1, 2,
 }
-var Asn1Pact = [...]int{
+var asn1Pact = [...]int{
 
 	-8, -1000, -1000, -1000, -4, -6, 0, -2, -1000,
 }
-var Asn1Pgo = [...]int{
+var asn1Pgo = [...]int{
 
 	0, 7, 6, 5,
 }
-var Asn1R1 = [...]int{
+var asn1R1 = [...]int{
 
 	0, 3, 2, 1,
 }
-var Asn1R2 = [...]int{
+var asn1R2 = [...]int{
 
 	0, 0, 6, 1,
 }
-var Asn1Chk = [...]int{
+var asn1Chk = [...]int{
 
 	-1000, -2, -1, 8, -3, 6, 7, 4, 5,
 }
-var Asn1Def = [...]int{
+var asn1Def = [...]int{
 
 	0, -2, 1, 3, 0, 0, 0, 0, 2,
 }
-var Asn1Tok1 = [...]int{
+var asn1Tok1 = [...]int{
 
 	1,
 }
-var Asn1Tok2 = [...]int{
+var asn1Tok2 = [...]int{
 
 	2, 3, 4, 5, 6, 7, 8,
 }
-var Asn1Tok3 = [...]int{
+var asn1Tok3 = [...]int{
 	0,
 }
 
-var Asn1ErrorMessages = [...]struct {
+var asn1ErrorMessages = [...]struct {
 	state int
 	token int
 	msg   string
@@ -109,76 +109,76 @@ var Asn1ErrorMessages = [...]struct {
 /*	parser for yacc output	*/
 
 var (
-	Asn1Debug        = 0
-	Asn1ErrorVerbose = false
+	asn1Debug        = 0
+	asn1ErrorVerbose = false
 )
 
-type Asn1Lexer interface {
-	Lex(lval *Asn1SymType) int
+type asn1Lexer interface {
+	Lex(lval *asn1SymType) int
 	Error(s string)
 }
 
-type Asn1Parser interface {
-	Parse(Asn1Lexer) int
+type asn1Parser interface {
+	Parse(asn1Lexer) int
 	Lookahead() int
 }
 
-type Asn1ParserImpl struct {
-	lval  Asn1SymType
-	stack [Asn1InitialStackSize]Asn1SymType
+type asn1ParserImpl struct {
+	lval  asn1SymType
+	stack [asn1InitialStackSize]asn1SymType
 	char  int
 }
 
-func (p *Asn1ParserImpl) Lookahead() int {
+func (p *asn1ParserImpl) Lookahead() int {
 	return p.char
 }
 
-func Asn1NewParser() Asn1Parser {
-	return &Asn1ParserImpl{}
+func asn1NewParser() asn1Parser {
+	return &asn1ParserImpl{}
 }
 
-const Asn1Flag = -1000
+const asn1Flag = -1000
 
-func Asn1Tokname(c int) string {
-	if c >= 1 && c-1 < len(Asn1Toknames) {
-		if Asn1Toknames[c-1] != "" {
-			return Asn1Toknames[c-1]
+func asn1Tokname(c int) string {
+	if c >= 1 && c-1 < len(asn1Toknames) {
+		if asn1Toknames[c-1] != "" {
+			return asn1Toknames[c-1]
 		}
 	}
 	return __yyfmt__.Sprintf("tok-%v", c)
 }
 
-func Asn1Statname(s int) string {
-	if s >= 0 && s < len(Asn1Statenames) {
-		if Asn1Statenames[s] != "" {
-			return Asn1Statenames[s]
+func asn1Statname(s int) string {
+	if s >= 0 && s < len(asn1Statenames) {
+		if asn1Statenames[s] != "" {
+			return asn1Statenames[s]
 		}
 	}
 	return __yyfmt__.Sprintf("state-%v", s)
 }
 
-func Asn1ErrorMessage(state, lookAhead int) string {
+func asn1ErrorMessage(state, lookAhead int) string {
 	const TOKSTART = 4
 
-	if !Asn1ErrorVerbose {
+	if !asn1ErrorVerbose {
 		return "syntax error"
 	}
 
-	for _, e := range Asn1ErrorMessages {
+	for _, e := range asn1ErrorMessages {
 		if e.state == state && e.token == lookAhead {
 			return "syntax error: " + e.msg
 		}
 	}
 
-	res := "syntax error: unexpected " + Asn1Tokname(lookAhead)
+	res := "syntax error: unexpected " + asn1Tokname(lookAhead)
 
 	// To match Bison, suggest at most four expected tokens.
 	expected := make([]int, 0, 4)
 
 	// Look for shiftable tokens.
-	base := Asn1Pact[state]
-	for tok := TOKSTART; tok-1 < len(Asn1Toknames); tok++ {
-		if n := base + tok; n >= 0 && n < Asn1Last && Asn1Chk[Asn1Act[n]] == tok {
+	base := asn1Pact[state]
+	for tok := TOKSTART; tok-1 < len(asn1Toknames); tok++ {
+		if n := base + tok; n >= 0 && n < asn1Last && asn1Chk[asn1Act[n]] == tok {
 			if len(expected) == cap(expected) {
 				return res
 			}
@@ -186,16 +186,16 @@ func Asn1ErrorMessage(state, lookAhead int) string {
 		}
 	}
 
-	if Asn1Def[state] == -2 {
+	if asn1Def[state] == -2 {
 		i := 0
-		for Asn1Exca[i] != -1 || Asn1Exca[i+1] != state {
+		for asn1Exca[i] != -1 || asn1Exca[i+1] != state {
 			i += 2
 		}
 
 		// Look for tokens that we accept or reduce.
-		for i += 2; Asn1Exca[i] >= 0; i += 2 {
-			tok := Asn1Exca[i]
-			if tok < TOKSTART || Asn1Exca[i+1] == 0 {
+		for i += 2; asn1Exca[i] >= 0; i += 2 {
+			tok := asn1Exca[i]
+			if tok < TOKSTART || asn1Exca[i+1] == 0 {
 				continue
 			}
 			if len(expected) == cap(expected) {
@@ -205,7 +205,7 @@ func Asn1ErrorMessage(state, lookAhead int) string {
 		}
 
 		// If the default action is to accept or reduce, give up.
-		if Asn1Exca[i+1] != 0 {
+		if asn1Exca[i+1] != 0 {
 			return res
 		}
 	}
@@ -216,70 +216,70 @@ func Asn1ErrorMessage(state, lookAhead int) string {
 		} else {
 			res += " or "
 		}
-		res += Asn1Tokname(tok)
+		res += asn1Tokname(tok)
 	}
 	return res
 }
 
-func Asn1lex1(lex Asn1Lexer, lval *Asn1SymType) (char, token int) {
+func asn1lex1(lex asn1Lexer, lval *asn1SymType) (char, token int) {
 	token = 0
 	char = lex.Lex(lval)
 	if char <= 0 {
-		token = Asn1Tok1[0]
+		token = asn1Tok1[0]
 		goto out
 	}
-	if char < len(Asn1Tok1) {
-		token = Asn1Tok1[char]
+	if char < len(asn1Tok1) {
+		token = asn1Tok1[char]
 		goto out
 	}
-	if char >= Asn1Private {
-		if char < Asn1Private+len(Asn1Tok2) {
-			token = Asn1Tok2[char-Asn1Private]
+	if char >= asn1Private {
+		if char < asn1Private+len(asn1Tok2) {
+			token = asn1Tok2[char-asn1Private]
 			goto out
 		}
 	}
-	for i := 0; i < len(Asn1Tok3); i += 2 {
-		token = Asn1Tok3[i+0]
+	for i := 0; i < len(asn1Tok3); i += 2 {
+		token = asn1Tok3[i+0]
 		if token == char {
-			token = Asn1Tok3[i+1]
+			token = asn1Tok3[i+1]
 			goto out
 		}
 	}
 
 out:
 	if token == 0 {
-		token = Asn1Tok2[1] /* unknown char */
+		token = asn1Tok2[1] /* unknown char */
 	}
-	if Asn1Debug >= 3 {
-		__yyfmt__.Printf("lex %s(%d)\n", Asn1Tokname(token), uint(char))
+	if asn1Debug >= 3 {
+		__yyfmt__.Printf("lex %s(%d)\n", asn1Tokname(token), uint(char))
 	}
 	return char, token
 }
 
-func Asn1Parse(Asn1lex Asn1Lexer) int {
-	return Asn1NewParser().Parse(Asn1lex)
+func asn1Parse(asn1lex asn1Lexer) int {
+	return asn1NewParser().Parse(asn1lex)
 }
 
-func (Asn1rcvr *Asn1ParserImpl) Parse(Asn1lex Asn1Lexer) int {
-	var Asn1n int
-	var Asn1VAL Asn1SymType
-	var Asn1Dollar []Asn1SymType
-	_ = Asn1Dollar // silence set and not used
-	Asn1S := Asn1rcvr.stack[:]
+func (asn1rcvr *asn1ParserImpl) Parse(asn1lex asn1Lexer) int {
+	var asn1n int
+	var asn1VAL asn1SymType
+	var asn1Dollar []asn1SymType
+	_ = asn1Dollar // silence set and not used
+	asn1S := asn1rcvr.stack[:]
 
 	Nerrs := 0   /* number of errors */
 	Errflag := 0 /* error recovery flag */
-	Asn1state := 0
-	Asn1rcvr.char = -1
-	Asn1token := -1 // Asn1rcvr.char translated into internal numbering
+	asn1state := 0
+	asn1rcvr.char = -1
+	asn1token := -1 // asn1rcvr.char translated into internal numbering
 	defer func() {
 		// Make sure we report no lookahead when not parsing.
-		Asn1state = -1
-		Asn1rcvr.char = -1
-		Asn1token = -1
+		asn1state = -1
+		asn1rcvr.char = -1
+		asn1token = -1
 	}()
-	Asn1p := -1
-	goto Asn1stack
+	asn1p := -1
+	goto asn1stack
 
 ret0:
 	return 0
@@ -287,81 +287,81 @@ ret0:
 ret1:
 	return 1
 
-Asn1stack:
+asn1stack:
 	/* put a state and value onto the stack */
-	if Asn1Debug >= 4 {
-		__yyfmt__.Printf("char %v in %v\n", Asn1Tokname(Asn1token), Asn1Statname(Asn1state))
+	if asn1Debug >= 4 {
+		__yyfmt__.Printf("char %v in %v\n", asn1Tokname(asn1token), asn1Statname(asn1state))
 	}
 
-	Asn1p++
-	if Asn1p >= len(Asn1S) {
-		nyys := make([]Asn1SymType, len(Asn1S)*2)
-		copy(nyys, Asn1S)
-		Asn1S = nyys
+	asn1p++
+	if asn1p >= len(asn1S) {
+		nyys := make([]asn1SymType, len(asn1S)*2)
+		copy(nyys, asn1S)
+		asn1S = nyys
 	}
-	Asn1S[Asn1p] = Asn1VAL
-	Asn1S[Asn1p].yys = Asn1state
+	asn1S[asn1p] = asn1VAL
+	asn1S[asn1p].yys = asn1state
 
-Asn1newstate:
-	Asn1n = Asn1Pact[Asn1state]
-	if Asn1n <= Asn1Flag {
-		goto Asn1default /* simple state */
+asn1newstate:
+	asn1n = asn1Pact[asn1state]
+	if asn1n <= asn1Flag {
+		goto asn1default /* simple state */
 	}
-	if Asn1rcvr.char < 0 {
-		Asn1rcvr.char, Asn1token = Asn1lex1(Asn1lex, &Asn1rcvr.lval)
+	if asn1rcvr.char < 0 {
+		asn1rcvr.char, asn1token = asn1lex1(asn1lex, &asn1rcvr.lval)
 	}
-	Asn1n += Asn1token
-	if Asn1n < 0 || Asn1n >= Asn1Last {
-		goto Asn1default
+	asn1n += asn1token
+	if asn1n < 0 || asn1n >= asn1Last {
+		goto asn1default
 	}
-	Asn1n = Asn1Act[Asn1n]
-	if Asn1Chk[Asn1n] == Asn1token { /* valid shift */
-		Asn1rcvr.char = -1
-		Asn1token = -1
-		Asn1VAL = Asn1rcvr.lval
-		Asn1state = Asn1n
+	asn1n = asn1Act[asn1n]
+	if asn1Chk[asn1n] == asn1token { /* valid shift */
+		asn1rcvr.char = -1
+		asn1token = -1
+		asn1VAL = asn1rcvr.lval
+		asn1state = asn1n
 		if Errflag > 0 {
 			Errflag--
 		}
-		goto Asn1stack
+		goto asn1stack
 	}
 
-Asn1default:
+asn1default:
 	/* default state action */
-	Asn1n = Asn1Def[Asn1state]
-	if Asn1n == -2 {
-		if Asn1rcvr.char < 0 {
-			Asn1rcvr.char, Asn1token = Asn1lex1(Asn1lex, &Asn1rcvr.lval)
+	asn1n = asn1Def[asn1state]
+	if asn1n == -2 {
+		if asn1rcvr.char < 0 {
+			asn1rcvr.char, asn1token = asn1lex1(asn1lex, &asn1rcvr.lval)
 		}
 
 		/* look through exception table */
 		xi := 0
 		for {
-			if Asn1Exca[xi+0] == -1 && Asn1Exca[xi+1] == Asn1state {
+			if asn1Exca[xi+0] == -1 && asn1Exca[xi+1] == asn1state {
 				break
 			}
 			xi += 2
 		}
 		for xi += 2; ; xi += 2 {
-			Asn1n = Asn1Exca[xi+0]
-			if Asn1n < 0 || Asn1n == Asn1token {
+			asn1n = asn1Exca[xi+0]
+			if asn1n < 0 || asn1n == asn1token {
 				break
 			}
 		}
-		Asn1n = Asn1Exca[xi+1]
-		if Asn1n < 0 {
+		asn1n = asn1Exca[xi+1]
+		if asn1n < 0 {
 			goto ret0
 		}
 	}
-	if Asn1n == 0 {
+	if asn1n == 0 {
 		/* error ... attempt to resume parsing */
 		switch Errflag {
 		case 0: /* brand new error */
-			Asn1lex.Error(Asn1ErrorMessage(Asn1state, Asn1token))
+			asn1lex.Error(asn1ErrorMessage(asn1state, asn1token))
 			Nerrs++
-			if Asn1Debug >= 1 {
-				__yyfmt__.Printf("%s", Asn1Statname(Asn1state))
-				__yyfmt__.Printf(" saw %s\n", Asn1Tokname(Asn1token))
+			if asn1Debug >= 1 {
+				__yyfmt__.Printf("%s", asn1Statname(asn1state))
+				__yyfmt__.Printf(" saw %s\n", asn1Tokname(asn1token))
 			}
 			fallthrough
 
@@ -369,95 +369,95 @@ Asn1default:
 			Errflag = 3
 
 			/* find a state where "error" is a legal shift action */
-			for Asn1p >= 0 {
-				Asn1n = Asn1Pact[Asn1S[Asn1p].yys] + Asn1ErrCode
-				if Asn1n >= 0 && Asn1n < Asn1Last {
-					Asn1state = Asn1Act[Asn1n] /* simulate a shift of "error" */
-					if Asn1Chk[Asn1state] == Asn1ErrCode {
-						goto Asn1stack
+			for asn1p >= 0 {
+				asn1n = asn1Pact[asn1S[asn1p].yys] + asn1ErrCode
+				if asn1n >= 0 && asn1n < asn1Last {
+					asn1state = asn1Act[asn1n] /* simulate a shift of "error" */
+					if asn1Chk[asn1state] == asn1ErrCode {
+						goto asn1stack
 					}
 				}
 
 				/* the current p has no shift on "error", pop stack */
-				if Asn1Debug >= 2 {
-					__yyfmt__.Printf("error recovery pops state %d\n", Asn1S[Asn1p].yys)
+				if asn1Debug >= 2 {
+					__yyfmt__.Printf("error recovery pops state %d\n", asn1S[asn1p].yys)
 				}
-				Asn1p--
+				asn1p--
 			}
 			/* there is no state on the stack with an error shift ... abort */
 			goto ret1
 
 		case 3: /* no shift yet; clobber input char */
-			if Asn1Debug >= 2 {
-				__yyfmt__.Printf("error recovery discards %s\n", Asn1Tokname(Asn1token))
+			if asn1Debug >= 2 {
+				__yyfmt__.Printf("error recovery discards %s\n", asn1Tokname(asn1token))
 			}
-			if Asn1token == Asn1EofCode {
+			if asn1token == asn1EofCode {
 				goto ret1
 			}
-			Asn1rcvr.char = -1
-			Asn1token = -1
-			goto Asn1newstate /* try again in the same state */
+			asn1rcvr.char = -1
+			asn1token = -1
+			goto asn1newstate /* try again in the same state */
 		}
 	}
 
-	/* reduction by production Asn1n */
-	if Asn1Debug >= 2 {
-		__yyfmt__.Printf("reduce %v in:\n\t%v\n", Asn1n, Asn1Statname(Asn1state))
+	/* reduction by production asn1n */
+	if asn1Debug >= 2 {
+		__yyfmt__.Printf("reduce %v in:\n\t%v\n", asn1n, asn1Statname(asn1state))
 	}
 
-	Asn1nt := Asn1n
-	Asn1pt := Asn1p
-	_ = Asn1pt // guard against "declared and not used"
+	asn1nt := asn1n
+	asn1pt := asn1p
+	_ = asn1pt // guard against "declared and not used"
 
-	Asn1p -= Asn1R2[Asn1n]
-	// Asn1p is now the index of $0. Perform the default action. Iff the
+	asn1p -= asn1R2[asn1n]
+	// asn1p is now the index of $0. Perform the default action. Iff the
 	// reduced production is ε, $1 is possibly out of range.
-	if Asn1p+1 >= len(Asn1S) {
-		nyys := make([]Asn1SymType, len(Asn1S)*2)
-		copy(nyys, Asn1S)
-		Asn1S = nyys
+	if asn1p+1 >= len(asn1S) {
+		nyys := make([]asn1SymType, len(asn1S)*2)
+		copy(nyys, asn1S)
+		asn1S = nyys
 	}
-	Asn1VAL = Asn1S[Asn1p+1]
+	asn1VAL = asn1S[asn1p+1]
 
 	/* consult goto table to find next state */
-	Asn1n = Asn1R1[Asn1n]
-	Asn1g := Asn1Pgo[Asn1n]
-	Asn1j := Asn1g + Asn1S[Asn1p].yys + 1
+	asn1n = asn1R1[asn1n]
+	asn1g := asn1Pgo[asn1n]
+	asn1j := asn1g + asn1S[asn1p].yys + 1
 
-	if Asn1j >= Asn1Last {
-		Asn1state = Asn1Act[Asn1g]
+	if asn1j >= asn1Last {
+		asn1state = asn1Act[asn1g]
 	} else {
-		Asn1state = Asn1Act[Asn1j]
-		if Asn1Chk[Asn1state] != -Asn1n {
-			Asn1state = Asn1Act[Asn1g]
+		asn1state = asn1Act[asn1j]
+		if asn1Chk[asn1state] != -asn1n {
+			asn1state = asn1Act[asn1g]
 		}
 	}
 	// dummy call; replaced with literal code
-	switch Asn1nt {
+	switch asn1nt {
 
 	case 1:
-		Asn1Dollar = Asn1S[Asn1pt-1 : Asn1pt+1]
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
 		//line asn1p.y:40
 		{
 			currentModule = NewAsn1Module()
 			fmt.Println(currentModule)
 		}
 	case 2:
-		Asn1Dollar = Asn1S[Asn1pt-6 : Asn1pt+1]
+		asn1Dollar = asn1S[asn1pt-6 : asn1pt+1]
 		//line asn1p.y:42
 		{
 
-			Asn1VAL.a_module = currentModule
-			Asn1VAL.a_module.name = Asn1Dollar[1].str
-			fmt.Println(Asn1VAL.a_module)
+			asn1VAL.a_module = currentModule
+			asn1VAL.a_module.name = asn1Dollar[1].str
+			fmt.Println(asn1VAL.a_module)
 
 		}
 	case 3:
-		Asn1Dollar = Asn1S[Asn1pt-1 : Asn1pt+1]
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
 		//line asn1p.y:52
 		{
-			Asn1VAL.str = Asn1Dollar[1].str
+			asn1VAL.str = asn1Dollar[1].str
 		}
 	}
-	goto Asn1stack /* stack new state and value */
+	goto asn1stack /* stack new state and value */
 }

@@ -67,7 +67,7 @@ func TestEverything(t *testing.T) {
 		fmt.Println("Running parser for : ", name)
 		s := string(d)
 		p := NewParser(name)
-		err = p.Parse(name, s, false)
+		err = p.RunLexer(name, s, false)
 		if err != nil {
 			t.Error("Error during tokenization of file :", name)
 		}

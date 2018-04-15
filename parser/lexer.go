@@ -78,7 +78,7 @@ const (
 )
 
 // lexer : internal state of tokenizer
-type Lexer struct {
+type lexer struct {
 	name  string
 	input string
 	pos   Pos
@@ -86,12 +86,17 @@ type Lexer struct {
 	width Pos
 	line  int
 	items chan item
-	Asn1Lexer
+	debug bool
+	asn1Lexer
 }
 
-func (l *Lexer) Lex(lval *Asn1SymType) int {
+func (l *lexer) Lex(lval *asn1SymType) int {
 
 	i := l.nextItem()
+
+	if l.debug {
+		fmt.Println(i)
+	}
 
 	switch i.typ {
 	case itemReservedBEGIN:
@@ -115,11 +120,11 @@ func (l *Lexer) Lex(lval *Asn1SymType) int {
 	return 0
 }
 
-type stateFn func(*Lexer) stateFn
+type stateFn func(*lexer) stateFn
 
 // All the following functions are taken from go/src/text/template/parse/lex.go
 // next returns the next rune in the input.
-func (l *Lexer) next() rune {
+func (l *lexer) next() rune {
 	if int(l.pos) >= len(l.input) {
 		l.width = 0
 		return eof
@@ -134,14 +139,14 @@ func (l *Lexer) next() rune {
 }
 
 // peek returns but does not consume the next rune in the input.
-func (l *Lexer) peek() rune {
+func (l *lexer) peek() rune {
 	r := l.next()
 	l.backup()
 	return r
 }
 
 // backup steps back one rune. Can only be called once per call of next.
-func (l *Lexer) backup() {
+func (l *lexer) backup() {
 	l.pos -= l.width
 	// Correct newline count.
 	if l.width == 1 && l.input[l.pos] == '\n' {
@@ -150,7 +155,7 @@ func (l *Lexer) backup() {
 }
 
 // emit passes an item back to the client.
-func (l *Lexer) emit(t itemType) {
+func (l *lexer) emit(t itemType) {
 	l.items <- item{t, l.start, l.input[l.start:l.pos], l.line}
 	// Some items contain text internally. If so, count their newlines.
 	switch t {
@@ -161,18 +166,18 @@ func (l *Lexer) emit(t itemType) {
 }
 
 // consume is just like emit, but doesn't actually emit
-func (l *Lexer) consume(t itemType) {
+func (l *lexer) consume(t itemType) {
 	l.start = l.pos
 }
 
 // ignore skips over the pending input before this point.
-func (l *Lexer) ignore() {
+func (l *lexer) ignore() {
 	l.line += strings.Count(l.input[l.start:l.pos], "\n")
 	l.start = l.pos
 }
 
 // accept consumes the next rune if it's from the valid set.
-func (l *Lexer) accept(valid string) bool {
+func (l *lexer) accept(valid string) bool {
 	if strings.ContainsRune(valid, l.next()) {
 		return true
 	}
@@ -181,7 +186,7 @@ func (l *Lexer) accept(valid string) bool {
 }
 
 // acceptRun consumes a run of runes from the valid set.
-func (l *Lexer) acceptRun(valid string) {
+func (l *lexer) acceptRun(valid string) {
 	for strings.ContainsRune(valid, l.next()) {
 	}
 	l.backup()
@@ -189,38 +194,39 @@ func (l *Lexer) acceptRun(valid string) {
 
 // errorf returns an error token and terminates the scan by passing
 // back a nil pointer that will be the next state, terminating l.nextItem.
-func (l *Lexer) errorf(format string, args ...interface{}) stateFn {
+func (l *lexer) errorf(format string, args ...interface{}) stateFn {
 	l.items <- item{itemError, l.start, fmt.Sprintf(format, args...), l.line}
 	return nil
 }
 
 // nextItem returns the next item from the input.
 // Called by the parser, not in the lexing goroutine.
-func (l *Lexer) nextItem() item {
+func (l *lexer) nextItem() item {
 	return <-l.items
 }
 
 // drain drains the output so the lexing goroutine will exit.
 // Called by the parser, not in the lexing goroutine.
-func (l *Lexer) drain() {
+func (l *lexer) drain() {
 	for range l.items {
 	}
 }
 
 // lex creates a new scanner for the input string.
-func NewLexer(name, input string) *Lexer {
-	l := &Lexer{
+func lex(name, input string, debug bool) *lexer {
+	l := &lexer{
 		name:  name,
 		input: input,
 		items: make(chan item),
 		line:  1,
+		debug: debug,
 	}
 	go l.run()
 	return l
 }
 
-// runs the state machine for the Lexer
-func (l *Lexer) run() {
+// runs the state machine for the lexer
+func (l *lexer) run() {
 
 	for state := lexStart; state != nil; {
 		state = state(l)
@@ -229,7 +235,7 @@ func (l *Lexer) run() {
 }
 
 // eat up all white spaces
-func (l *Lexer) consumeWS() {
+func (l *lexer) consumeWS() {
 	for isWhiteSpace(l.peek()) {
 		l.next()
 	}
@@ -238,7 +244,7 @@ func (l *Lexer) consumeWS() {
 }
 
 // consume comment -- followed by '\n' or another '--' on same line
-func (l *Lexer) consumeComment() bool {
+func (l *lexer) consumeComment() bool {
 
 	x := l.accept("-") && l.accept("-")
 	if x == false {
@@ -265,7 +271,7 @@ Loop:
 }
 
 // consume c-style comments
-func (l *Lexer) consumeCstyleComment() bool {
+func (l *lexer) consumeCstyleComment() bool {
 
 	x := l.accept("/") && l.accept("*")
 	if x == false {
@@ -288,7 +294,7 @@ Loop:
 
 // processing of a 'word' in the context of Module Header
 // usually, a keyword modulename or oid references
-func (l *Lexer) processWordModuleHeader(word string) error {
+func (l *lexer) processWordModuleHeader(word string) error {
 
 	if err := validateWord(word); err != nil {
 		return err
@@ -312,7 +318,7 @@ func (l *Lexer) processWordModuleHeader(word string) error {
 
 // processing of a 'word' in the context of module body
 // pretty much everything
-func (l *Lexer) processWordModuleBody(word string) error {
+func (l *lexer) processWordModuleBody(word string) error {
 
 	if err := validateWord(word); err != nil {
 		return err
@@ -361,7 +367,7 @@ func (l *Lexer) processWordModuleBody(word string) error {
 
 // process word in the oid context
 // FIXME: may be this is not required (it's up to the parser to decide whether this is right oid
-func (l *Lexer) processWordOid(word string) error {
+func (l *lexer) processWordOid(word string) error {
 
 	if err := validateWord(word); err != nil {
 		return err
@@ -379,7 +385,7 @@ func (l *Lexer) processWordOid(word string) error {
 
 // process word in the oid context
 // FIXME: may be this is not required (it's up to the parser to decide whether this is right oid)
-func (l *Lexer) processOid() error {
+func (l *lexer) processOid() error {
 
 	for {
 		switch r := l.next(); {
@@ -418,7 +424,7 @@ func (l *Lexer) processOid() error {
 }
 
 // special handling of ":" character ('cos it could mean assignment or a standalone token or a separator (parametarized type)
-func (l *Lexer) handleColon() error {
+func (l *lexer) handleColon() error {
 
 	l.acceptRun(":=")
 	w := l.input[l.start:l.pos]
@@ -445,7 +451,7 @@ func (l *Lexer) handleColon() error {
 }
 
 // special handling of "." could be a separator(single .) a range separator (..) or ellipsis (...)
-func (l *Lexer) handleDot() error {
+func (l *lexer) handleDot() error {
 
 	l.acceptRun(".")
 	w := l.input[l.start:l.pos]
@@ -467,7 +473,7 @@ func (l *Lexer) handleDot() error {
 }
 
 // left/right brackets two consecutive brackets have special meaning '[[' and ']]'
-func (l *Lexer) handleLeftRightBracket(b rune) error {
+func (l *lexer) handleLeftRightBracket(b rune) error {
 
 	s := string(b)
 	l.acceptRun(s)
@@ -492,7 +498,7 @@ func (l *Lexer) handleLeftRightBracket(b rune) error {
 }
 
 // handing of "-". Don't think this is 100% right yet, but most of the test cases pass so far pass
-func (l *Lexer) handleDash() error {
+func (l *lexer) handleDash() error {
 
 	l.acceptRun("-")
 	w := l.input[l.start:l.pos]
@@ -527,7 +533,7 @@ func (l *Lexer) handleDash() error {
 }
 
 // handling of "/".
-func (l *Lexer) handleSlash() error {
+func (l *lexer) handleSlash() error {
 
 	var w string
 
@@ -572,7 +578,7 @@ func (l *Lexer) handleSlash() error {
 }
 
 // handle '\'' single quote (usually means handling binarystring and hexString
-func (l *Lexer) handleSingleQuote() error {
+func (l *lexer) handleSingleQuote() error {
 
 	save := l.pos
 	l.accept("'")
@@ -599,7 +605,7 @@ func (l *Lexer) handleSingleQuote() error {
 }
 
 // handle the double quote "\"". Note doesn't handle "" yet
-func (l *Lexer) handleDoubleQuote() error {
+func (l *lexer) handleDoubleQuote() error {
 	l.accept("\"")
 Loop:
 	for {
@@ -657,7 +663,7 @@ func isTerminator(r rune) bool {
 
 // start of a module(ish) thing
 // FIXME: This should be folded into handleModuleHeader and handleModuleBody
-func lexStart(l *Lexer) stateFn {
+func lexStart(l *lexer) stateFn {
 
 	l.consumeWS()
 
@@ -700,7 +706,7 @@ func lexStart(l *Lexer) stateFn {
 
 // module header state
 // FIXME : this needs to be in similar structure as module body
-func lexModuleHeader(l *Lexer) stateFn {
+func lexModuleHeader(l *lexer) stateFn {
 
 	l.backup()
 Loop:
@@ -749,7 +755,7 @@ Loop:
 }
 
 // module body state - pretty much everything happens here.
-func lexModuleBody(l *Lexer) stateFn {
+func lexModuleBody(l *lexer) stateFn {
 
 	accum := false
 	l.consumeWS()
