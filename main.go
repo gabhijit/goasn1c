@@ -34,12 +34,9 @@ func main() {
 			os.Exit(-1)
 		}
 		s := string(d)
-		p := parser.NewParser(f)
-		err = p.Parse(f, s, true)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(-1)
-		}
+		l := parser.NewLexer(f, s)
+		r := parser.Asn1Parse(l)
+		os.Exit(r)
 	}
 
 	os.Exit(0)

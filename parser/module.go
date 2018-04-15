@@ -18,6 +18,7 @@ package parser
 
 // Asn1Module is a type representing ASN.1 Module
 type Asn1Module struct {
+	name string
 }
 
 type ModuleFlagType uint16
@@ -37,3 +38,10 @@ const (
 	ModuleFlagInstructionsMask ModuleFlagType = 0x0F
 	ModuleFlagsTagMask         ModuleFlagType = 0xF0
 )
+
+func NewAsn1Module() *Asn1Module {
+
+	n := &Asn1Module{}
+
+	return n
+}

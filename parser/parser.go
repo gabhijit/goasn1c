@@ -29,7 +29,7 @@ func NewParser(name string) *Parser {
 
 func (p *Parser) Parse(name, input string, output bool) error {
 
-	l := lex(name, input)
+	l := NewLexer(name, input)
 
 	for i := l.nextItem(); i.typ != itemEOF; i = l.nextItem() {
 		if output {

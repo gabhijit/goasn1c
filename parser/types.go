@@ -15,6 +15,3 @@
 // types used in parser
 
 package parser
-
-type Asn1Parser struct {
-}
