@@ -45,3 +45,13 @@ func NewAsn1Module() *Asn1Module {
 
 	return n
 }
+
+type Asn1Grammar struct {
+	Modules []*Asn1Module
+}
+
+func NewAsn1Grammar() *Asn1Grammar {
+
+	g := &Asn1Grammar{}
+	return g
+}

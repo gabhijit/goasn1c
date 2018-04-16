@@ -328,6 +328,24 @@ ModuleList:
 	}
 	;
 
+ParsedGrammar:
+	ModuleList {
+		*(void **)param = $1;
+	}
+	;
+
+ModuleList:
+	ModuleDefinition {
+		$$ = asn1p_new();
+		checkmem($$);
+		TQ_ADD(&($$->modules), $1, mod_next);
+	}
+	| ModuleList ModuleDefinition {
+		$$ = $1;
+		TQ_ADD(&($$->modules), $2, mod_next);
+	}
+	;
+
 /*
  * ASN module definition.
  * === EXAMPLE ===

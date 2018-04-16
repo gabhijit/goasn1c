@@ -37,17 +37,20 @@ import (
 )
 
 var currentModule *asn1types.Asn1Module
+var AllModules    *asn1types.Asn1Grammar
 
 %}
 
 %union {
 	ch           rune
 	str          string
+	num          int64
+
+	grammar      *asn1types.Asn1Grammar
 	module       *asn1types.Asn1Module
 	oid	     *asn1types.Asn1Oid
 	oid_arc      asn1types.Asn1OidArc
 	module_flags asn1types.ModuleFlagType
-	num          int64
 }
 
 %token       Tok_BEGIN
@@ -65,6 +68,7 @@ var currentModule *asn1types.Asn1Module
 %token <str> Tok_Identifier
 
 
+%type <grammar>      ModuleList
 %type <str>          TypeRefName
 %type <str>          Identifier
 %type <module>       ModuleDefinition
@@ -78,6 +82,24 @@ var currentModule *asn1types.Asn1Module
 
 
 %%
+
+ParsedGrammar:
+	ModuleList {
+		AllModules = $1
+		fmt.Println(AllModules)
+	}
+	;
+
+ModuleList:
+	ModuleDefinition {
+		$$ = asn1types.NewAsn1Grammar();
+		$$.Modules = append($$.Modules, $1)
+	}
+	| ModuleList ModuleDefinition {
+		$$ = $1;
+		$$.Modules = append($$.Modules, $2)
+	}
+	;
 
 ModuleDefinition:
 		TypeRefName { currentModule = asn1types.NewAsn1Module();}

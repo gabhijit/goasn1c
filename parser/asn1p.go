@@ -18,17 +18,19 @@ import (
 )
 
 var currentModule *asn1types.Asn1Module
+var AllModules *asn1types.Asn1Grammar
 
-//line parser/asn1p.y:43
+//line parser/asn1p.y:44
 type asn1SymType struct {
 	yys          int
 	ch           rune
 	str          string
+	num          int64
+	grammar      *asn1types.Asn1Grammar
 	module       *asn1types.Asn1Module
 	oid          *asn1types.Asn1Oid
 	oid_arc      asn1types.Asn1OidArc
 	module_flags asn1types.ModuleFlagType
-	num          int64
 }
 
 const Tok_BEGIN = 57346
@@ -73,7 +75,7 @@ const asn1EofCode = 1
 const asn1ErrCode = 2
 const asn1InitialStackSize = 16
 
-//line parser/asn1p.y:167
+//line parser/asn1p.y:189
 
 //line yacctab:1
 var asn1Exca = [...]int{
@@ -84,52 +86,52 @@ var asn1Exca = [...]int{
 
 const asn1Private = 57344
 
-const asn1Last = 36
+const asn1Last = 39
 
 var asn1Act = [...]int{
 
-	33, 13, 14, 24, 22, 13, 14, 17, 10, 7,
-	19, 31, 18, 21, 3, 20, 29, 28, 27, 11,
-	30, 25, 8, 34, 26, 32, 4, 16, 15, 23,
-	9, 6, 5, 1, 12, 2,
+	36, 16, 17, 20, 25, 16, 17, 27, 13, 10,
+	22, 34, 21, 24, 5, 23, 14, 32, 31, 30,
+	33, 28, 11, 29, 37, 35, 7, 3, 1, 26,
+	6, 19, 18, 12, 9, 8, 15, 4, 2,
 }
 var asn1Pact = [...]int{
 
-	0, -1000, -1000, -1000, -8, 16, -1000, -10, 2, -14,
-	-1000, -1000, -16, -1000, -1000, 14, 2, -1000, 6, 5,
-	4, 11, -1000, -1000, -4, 21, -1000, -1000, -1000, -1000,
-	-1000, -20, 18, -1000, -1000,
+	0, -1000, 0, -1000, -1000, -1000, -1000, -8, 16, -1000,
+	-10, 2, -14, -1000, -1000, -12, -1000, -1000, 14, 2,
+	-1000, 7, 6, 5, 11, -1000, -1000, -4, 21, -1000,
+	-1000, -1000, -1000, -1000, -20, 19, -1000, -1000,
 }
 var asn1Pgo = [...]int{
 
-	0, 35, 34, 33, 32, 31, 30, 19, 28, 27,
-	7, 26,
+	0, 38, 37, 36, 27, 35, 34, 33, 16, 32,
+	31, 3, 28, 26,
 }
 var asn1R1 = [...]int{
 
-	0, 11, 3, 4, 4, 5, 5, 6, 6, 7,
-	7, 7, 2, 1, 8, 8, 9, 9, 10, 10,
-	10, 10,
+	0, 12, 1, 1, 13, 4, 5, 5, 6, 6,
+	7, 7, 8, 8, 8, 3, 2, 9, 9, 10,
+	10, 11, 11, 11, 11,
 }
 var asn1R2 = [...]int{
 
-	0, 0, 8, 0, 1, 3, 2, 1, 2, 1,
-	4, 1, 1, 1, 0, 1, 1, 2, 2, 2,
-	2, 2,
+	0, 1, 1, 2, 0, 8, 0, 1, 3, 2,
+	1, 2, 1, 4, 1, 1, 1, 0, 1, 1,
+	2, 2, 2, 2, 2,
 }
 var asn1Chk = [...]int{
 
-	-1000, -3, -1, 14, -11, -4, -5, 17, 6, -6,
-	18, -7, -2, 15, 16, -8, -9, -10, 10, 8,
-	13, 11, 18, -7, 19, 7, -10, 12, 12, 12,
-	9, 15, 4, 20, 5,
+	-1000, -12, -1, -4, -2, 14, -4, -13, -5, -6,
+	17, 6, -7, 18, -8, -3, 15, 16, -9, -10,
+	-11, 10, 8, 13, 11, 18, -8, 19, 7, -11,
+	12, 12, 12, 9, 15, 4, 20, 5,
 }
 var asn1Def = [...]int{
 
-	0, -2, 1, 13, 3, 0, 4, 0, 14, 0,
-	6, 7, 9, 11, 12, 0, 15, 16, 0, 0,
-	0, 0, 5, 8, 0, 0, 17, 18, 19, 20,
-	21, 0, 0, 10, 2,
+	0, -2, 1, 2, 4, 16, 3, 6, 0, 7,
+	0, 17, 0, 9, 10, 12, 14, 15, 0, 18,
+	19, 0, 0, 0, 0, 8, 11, 0, 0, 20,
+	21, 22, 23, 24, 0, 0, 13, 5,
 }
 var asn1Tok1 = [...]int{
 
@@ -495,135 +497,156 @@ asn1default:
 
 	case 1:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:83
+		//line parser/asn1p.y:87
+		{
+			AllModules = asn1Dollar[1].grammar
+			fmt.Println(AllModules)
+		}
+	case 2:
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line parser/asn1p.y:94
+		{
+			asn1VAL.grammar = asn1types.NewAsn1Grammar()
+			asn1VAL.grammar.Modules = append(asn1VAL.grammar.Modules, asn1Dollar[1].module)
+		}
+	case 3:
+		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
+		//line parser/asn1p.y:98
+		{
+			asn1VAL.grammar = asn1Dollar[1].grammar
+			asn1VAL.grammar.Modules = append(asn1VAL.grammar.Modules, asn1Dollar[2].module)
+		}
+	case 4:
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line parser/asn1p.y:105
 		{
 			currentModule = asn1types.NewAsn1Module()
 		}
-	case 2:
+	case 5:
 		asn1Dollar = asn1S[asn1pt-8 : asn1pt+1]
-		//line parser/asn1p.y:87
+		//line parser/asn1p.y:109
 		{
 
 			asn1VAL.module = currentModule
 			asn1VAL.module.Name = asn1Dollar[1].str
 			fmt.Println(asn1VAL.module)
 		}
-	case 3:
-		asn1Dollar = asn1S[asn1pt-0 : asn1pt+1]
-		//line parser/asn1p.y:95
-		{
-			asn1VAL.oid = nil
-		}
-	case 4:
-		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:96
-		{
-			asn1VAL.oid = asn1Dollar[1].oid
-		}
-	case 5:
-		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
-		//line parser/asn1p.y:99
-		{
-			asn1VAL.oid = asn1Dollar[2].oid
-		}
 	case 6:
-		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:102
+		asn1Dollar = asn1S[asn1pt-0 : asn1pt+1]
+		//line parser/asn1p.y:117
 		{
 			asn1VAL.oid = nil
 		}
 	case 7:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:108
+		//line parser/asn1p.y:118
+		{
+			asn1VAL.oid = asn1Dollar[1].oid
+		}
+	case 8:
+		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
+		//line parser/asn1p.y:121
+		{
+			asn1VAL.oid = asn1Dollar[2].oid
+		}
+	case 9:
+		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
+		//line parser/asn1p.y:124
+		{
+			asn1VAL.oid = nil
+		}
+	case 10:
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line parser/asn1p.y:130
 		{
 			asn1VAL.oid = asn1types.NewAsn1Oid()
 			asn1VAL.oid.Arcs = append(asn1VAL.oid.Arcs, asn1Dollar[1].oid_arc)
 		}
-	case 8:
+	case 11:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:112
+		//line parser/asn1p.y:134
 		{
 			asn1VAL.oid = asn1Dollar[1].oid
 			asn1VAL.oid.Arcs = append(asn1VAL.oid.Arcs, asn1Dollar[2].oid_arc)
 		}
-	case 9:
+	case 12:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:118
+		//line parser/asn1p.y:140
 		{ /* iso */
 			asn1VAL.oid_arc.Name = asn1Dollar[1].str
 			asn1VAL.oid_arc.Num = -1
 		}
-	case 10:
+	case 13:
 		asn1Dollar = asn1S[asn1pt-4 : asn1pt+1]
-		//line parser/asn1p.y:121
+		//line parser/asn1p.y:143
 		{ /* iso(1) */
 			asn1VAL.oid_arc.Name = asn1Dollar[1].str
 			asn1VAL.oid_arc.Num = asn1Dollar[3].num
 		}
-	case 11:
+	case 14:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:124
+		//line parser/asn1p.y:146
 		{ /* 1 */
 			asn1VAL.oid_arc.Name = ""
 			asn1VAL.oid_arc.Num = asn1Dollar[1].num
 		}
-	case 12:
-		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:128
-		{
-			asn1VAL.str = asn1Dollar[1].str
-		}
-	case 13:
-		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:133
-		{
-			asn1VAL.str = asn1Dollar[1].str
-		}
-	case 14:
-		asn1Dollar = asn1S[asn1pt-0 : asn1pt+1]
-		//line parser/asn1p.y:138
-		{
-			asn1VAL.module_flags = asn1types.ModuleFlagNoFlags
-		}
 	case 15:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:139
+		//line parser/asn1p.y:150
 		{
-			asn1VAL.module_flags = asn1Dollar[1].module_flags
+			asn1VAL.str = asn1Dollar[1].str
 		}
 	case 16:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:145
+		//line parser/asn1p.y:155
+		{
+			asn1VAL.str = asn1Dollar[1].str
+		}
+	case 17:
+		asn1Dollar = asn1S[asn1pt-0 : asn1pt+1]
+		//line parser/asn1p.y:160
+		{
+			asn1VAL.module_flags = asn1types.ModuleFlagNoFlags
+		}
+	case 18:
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line parser/asn1p.y:161
 		{
 			asn1VAL.module_flags = asn1Dollar[1].module_flags
 		}
-	case 17:
-		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:148
-		{
-			asn1VAL.module_flags = asn1Dollar[1].module_flags | asn1Dollar[2].module_flags
-		}
-	case 18:
-		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:154
-		{
-			asn1VAL.module_flags = asn1types.ModuleFlagExplicitTags
-		}
 	case 19:
-		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:157
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line parser/asn1p.y:167
 		{
-			asn1VAL.module_flags = asn1types.ModuleFlagImplicitTags
+			asn1VAL.module_flags = asn1Dollar[1].module_flags
 		}
 	case 20:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:160
+		//line parser/asn1p.y:170
 		{
-			asn1VAL.module_flags = asn1types.ModuleFlagAutomaticTags
+			asn1VAL.module_flags = asn1Dollar[1].module_flags | asn1Dollar[2].module_flags
 		}
 	case 21:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:163
+		//line parser/asn1p.y:176
+		{
+			asn1VAL.module_flags = asn1types.ModuleFlagExplicitTags
+		}
+	case 22:
+		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
+		//line parser/asn1p.y:179
+		{
+			asn1VAL.module_flags = asn1types.ModuleFlagImplicitTags
+		}
+	case 23:
+		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
+		//line parser/asn1p.y:182
+		{
+			asn1VAL.module_flags = asn1types.ModuleFlagAutomaticTags
+		}
+	case 24:
+		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
+		//line parser/asn1p.y:185
 		{
 			asn1VAL.module_flags = asn1types.ModuleFlagExtensibilityImplied
 		}
