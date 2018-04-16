@@ -21,22 +21,29 @@ var currentModule *asn1types.Asn1Module
 
 //line parser/asn1p.y:43
 type asn1SymType struct {
-	yys       int
-	ch        rune
-	str       string
-	a_module  *asn1types.Asn1Module
-	a_oid     *asn1types.Asn1Oid
-	a_oid_arc asn1types.Asn1OidArc
-	num       int64
+	yys          int
+	ch           rune
+	str          string
+	module       *asn1types.Asn1Module
+	oid          *asn1types.Asn1Oid
+	oid_arc      asn1types.Asn1OidArc
+	module_flags asn1types.ModuleFlagType
+	num          int64
 }
 
 const Tok_BEGIN = 57346
 const Tok_END = 57347
 const Tok_DEFINITIONS = 57348
 const Tok_ASSIGNMENT = 57349
-const Tok_TypeReference = 57350
-const Tok_Number = 57351
-const Tok_Identifier = 57352
+const Tok_IMPLICIT = 57350
+const Tok_IMPLIED = 57351
+const Tok_EXPLICIT = 57352
+const Tok_EXTENSIBILITY = 57353
+const Tok_TAGS = 57354
+const Tok_AUTOMATIC = 57355
+const Tok_TypeReference = 57356
+const Tok_Number = 57357
+const Tok_Identifier = 57358
 
 var asn1Toknames = [...]string{
 	"$end",
@@ -46,6 +53,12 @@ var asn1Toknames = [...]string{
 	"Tok_END",
 	"Tok_DEFINITIONS",
 	"Tok_ASSIGNMENT",
+	"Tok_IMPLICIT",
+	"Tok_IMPLIED",
+	"Tok_EXPLICIT",
+	"Tok_EXTENSIBILITY",
+	"Tok_TAGS",
+	"Tok_AUTOMATIC",
 	"Tok_TypeReference",
 	"Tok_Number",
 	"Tok_Identifier",
@@ -60,7 +73,7 @@ const asn1EofCode = 1
 const asn1ErrCode = 2
 const asn1InitialStackSize = 16
 
-//line parser/asn1p.y:124
+//line parser/asn1p.y:167
 
 //line yacctab:1
 var asn1Exca = [...]int{
@@ -71,45 +84,52 @@ var asn1Exca = [...]int{
 
 const asn1Private = 57344
 
-const asn1Last = 24
+const asn1Last = 36
 
 var asn1Act = [...]int{
 
-	22, 13, 14, 18, 16, 13, 14, 11, 10, 7,
-	20, 3, 15, 8, 21, 19, 4, 17, 9, 6,
-	5, 1, 12, 2,
+	33, 13, 14, 24, 22, 13, 14, 17, 10, 7,
+	19, 31, 18, 21, 3, 20, 29, 28, 27, 11,
+	30, 25, 8, 34, 26, 32, 4, 16, 15, 23,
+	9, 6, 5, 1, 12, 2,
 }
 var asn1Pact = [...]int{
 
-	3, -1000, -1000, -1000, -2, 7, -1000, -4, 5, -8,
-	-1000, -1000, -10, -1000, -1000, 11, -1000, -1000, 1, 9,
-	-14, -1000, -1000,
+	0, -1000, -1000, -1000, -8, 16, -1000, -10, 2, -14,
+	-1000, -1000, -16, -1000, -1000, 14, 2, -1000, 6, 5,
+	4, 11, -1000, -1000, -4, 21, -1000, -1000, -1000, -1000,
+	-1000, -20, 18, -1000, -1000,
 }
 var asn1Pgo = [...]int{
 
-	0, 23, 22, 21, 20, 19, 18, 7, 16,
+	0, 35, 34, 33, 32, 31, 30, 19, 28, 27,
+	7, 26,
 }
 var asn1R1 = [...]int{
 
-	0, 8, 3, 4, 4, 5, 5, 6, 6, 7,
-	7, 7, 2, 1,
+	0, 11, 3, 4, 4, 5, 5, 6, 6, 7,
+	7, 7, 2, 1, 8, 8, 9, 9, 10, 10,
+	10, 10,
 }
 var asn1R2 = [...]int{
 
-	0, 0, 7, 0, 1, 3, 2, 1, 2, 1,
-	4, 1, 1, 1,
+	0, 0, 8, 0, 1, 3, 2, 1, 2, 1,
+	4, 1, 1, 1, 0, 1, 1, 2, 2, 2,
+	2, 2,
 }
 var asn1Chk = [...]int{
 
-	-1000, -3, -1, 8, -8, -4, -5, 11, 6, -6,
-	12, -7, -2, 9, 10, 7, 12, -7, 13, 4,
-	9, 5, 14,
+	-1000, -3, -1, 14, -11, -4, -5, 17, 6, -6,
+	18, -7, -2, 15, 16, -8, -9, -10, 10, 8,
+	13, 11, 18, -7, 19, 7, -10, 12, 12, 12,
+	9, 15, 4, 20, 5,
 }
 var asn1Def = [...]int{
 
-	0, -2, 1, 13, 3, 0, 4, 0, 0, 0,
-	6, 7, 9, 11, 12, 0, 5, 8, 0, 0,
-	0, 2, 10,
+	0, -2, 1, 13, 3, 0, 4, 0, 14, 0,
+	6, 7, 9, 11, 12, 0, 15, 16, 0, 0,
+	0, 0, 5, 8, 0, 0, 17, 18, 19, 20,
+	21, 0, 0, 10, 2,
 }
 var asn1Tok1 = [...]int{
 
@@ -117,7 +137,7 @@ var asn1Tok1 = [...]int{
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	13, 14, 3, 3, 3, 3, 3, 3, 3, 3,
+	19, 20, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
@@ -125,11 +145,12 @@ var asn1Tok1 = [...]int{
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 3, 11, 3, 12,
+	3, 3, 3, 17, 3, 18,
 }
 var asn1Tok2 = [...]int{
 
-	2, 3, 4, 5, 6, 7, 8, 9, 10,
+	2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+	12, 13, 14, 15, 16,
 }
 var asn1Tok3 = [...]int{
 	0,
@@ -474,89 +495,137 @@ asn1default:
 
 	case 1:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:72
+		//line parser/asn1p.y:83
 		{
 			currentModule = asn1types.NewAsn1Module()
 		}
 	case 2:
-		asn1Dollar = asn1S[asn1pt-7 : asn1pt+1]
-		//line parser/asn1p.y:74
+		asn1Dollar = asn1S[asn1pt-8 : asn1pt+1]
+		//line parser/asn1p.y:87
 		{
 
-			asn1VAL.a_module = currentModule
-			asn1VAL.a_module.Name = asn1Dollar[1].str
-			fmt.Println(asn1VAL.a_module)
+			asn1VAL.module = currentModule
+			asn1VAL.module.Name = asn1Dollar[1].str
+			fmt.Println(asn1VAL.module)
 		}
 	case 3:
 		asn1Dollar = asn1S[asn1pt-0 : asn1pt+1]
-		//line parser/asn1p.y:82
+		//line parser/asn1p.y:95
 		{
-			asn1VAL.a_oid = nil
+			asn1VAL.oid = nil
 		}
 	case 4:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:83
+		//line parser/asn1p.y:96
 		{
-			asn1VAL.a_oid = asn1Dollar[1].a_oid
+			asn1VAL.oid = asn1Dollar[1].oid
 		}
 	case 5:
 		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
-		//line parser/asn1p.y:86
+		//line parser/asn1p.y:99
 		{
-			asn1VAL.a_oid = asn1Dollar[2].a_oid
+			asn1VAL.oid = asn1Dollar[2].oid
 		}
 	case 6:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:89
+		//line parser/asn1p.y:102
 		{
-			asn1VAL.a_oid = nil
+			asn1VAL.oid = nil
 		}
 	case 7:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:95
+		//line parser/asn1p.y:108
 		{
-			asn1VAL.a_oid = asn1types.NewAsn1Oid()
-			asn1VAL.a_oid.Arcs = append(asn1VAL.a_oid.Arcs, asn1Dollar[1].a_oid_arc)
+			asn1VAL.oid = asn1types.NewAsn1Oid()
+			asn1VAL.oid.Arcs = append(asn1VAL.oid.Arcs, asn1Dollar[1].oid_arc)
 		}
 	case 8:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:99
+		//line parser/asn1p.y:112
 		{
-			asn1VAL.a_oid = asn1Dollar[1].a_oid
-			asn1VAL.a_oid.Arcs = append(asn1VAL.a_oid.Arcs, asn1Dollar[2].a_oid_arc)
+			asn1VAL.oid = asn1Dollar[1].oid
+			asn1VAL.oid.Arcs = append(asn1VAL.oid.Arcs, asn1Dollar[2].oid_arc)
 		}
 	case 9:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:105
+		//line parser/asn1p.y:118
 		{ /* iso */
-			asn1VAL.a_oid_arc.Name = asn1Dollar[1].str
-			asn1VAL.a_oid_arc.Num = -1
+			asn1VAL.oid_arc.Name = asn1Dollar[1].str
+			asn1VAL.oid_arc.Num = -1
 		}
 	case 10:
 		asn1Dollar = asn1S[asn1pt-4 : asn1pt+1]
-		//line parser/asn1p.y:108
+		//line parser/asn1p.y:121
 		{ /* iso(1) */
-			asn1VAL.a_oid_arc.Name = asn1Dollar[1].str
-			asn1VAL.a_oid_arc.Num = asn1Dollar[3].num
+			asn1VAL.oid_arc.Name = asn1Dollar[1].str
+			asn1VAL.oid_arc.Num = asn1Dollar[3].num
 		}
 	case 11:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:111
+		//line parser/asn1p.y:124
 		{ /* 1 */
-			asn1VAL.a_oid_arc.Name = ""
-			asn1VAL.a_oid_arc.Num = asn1Dollar[1].num
+			asn1VAL.oid_arc.Name = ""
+			asn1VAL.oid_arc.Num = asn1Dollar[1].num
 		}
 	case 12:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:115
+		//line parser/asn1p.y:128
 		{
 			asn1VAL.str = asn1Dollar[1].str
 		}
 	case 13:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:120
+		//line parser/asn1p.y:133
 		{
 			asn1VAL.str = asn1Dollar[1].str
+		}
+	case 14:
+		asn1Dollar = asn1S[asn1pt-0 : asn1pt+1]
+		//line parser/asn1p.y:138
+		{
+			asn1VAL.module_flags = asn1types.ModuleFlagNoFlags
+		}
+	case 15:
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line parser/asn1p.y:139
+		{
+			asn1VAL.module_flags = asn1Dollar[1].module_flags
+		}
+	case 16:
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line parser/asn1p.y:145
+		{
+			asn1VAL.module_flags = asn1Dollar[1].module_flags
+		}
+	case 17:
+		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
+		//line parser/asn1p.y:148
+		{
+			asn1VAL.module_flags = asn1Dollar[1].module_flags | asn1Dollar[2].module_flags
+		}
+	case 18:
+		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
+		//line parser/asn1p.y:154
+		{
+			asn1VAL.module_flags = asn1types.ModuleFlagExplicitTags
+		}
+	case 19:
+		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
+		//line parser/asn1p.y:157
+		{
+			asn1VAL.module_flags = asn1types.ModuleFlagImplicitTags
+		}
+	case 20:
+		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
+		//line parser/asn1p.y:160
+		{
+			asn1VAL.module_flags = asn1types.ModuleFlagAutomaticTags
+		}
+	case 21:
+		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
+		//line parser/asn1p.y:163
+		{
+			asn1VAL.module_flags = asn1types.ModuleFlagExtensibilityImplied
 		}
 	}
 	goto asn1stack /* stack new state and value */

@@ -107,6 +107,21 @@ func (l *lexer) Lex(lval *asn1SymType) int {
 	case itemReservedDEFINITIONS:
 		return Tok_DEFINITIONS
 
+	case itemReservedEXPLICIT:
+		return Tok_EXPLICIT
+
+	case itemReservedIMPLICIT:
+		return Tok_IMPLICIT
+
+	case itemReservedTAGS:
+		return Tok_TAGS
+
+	case itemReservedEXTENSIBILITY:
+		return Tok_EXTENSIBILITY
+
+	case itemReservedIMPLIED:
+		return Tok_IMPLIED
+
 	case itemModuleReference:
 		lval.str = i.val
 		return Tok_TypeReference
