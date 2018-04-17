@@ -52,11 +52,11 @@ func (i item) String() string {
 	case i.typ == itemError:
 		return i.val
 	case i.typ >= itemReservedABSENT && i.typ <= itemReservedWITH:
-		return fmt.Sprintf("<%d:%s>", i.line, i.val)
+		return fmt.Sprintf("<%d:%s:%d>", i.line, i.val, i.typ)
 	case len(i.val) > 80:
-		return fmt.Sprintf("%d:%.80q...", i.line, i.val)
+		return fmt.Sprintf("%d:%.80q...:%d", i.line, i.val, i.typ)
 	}
-	return fmt.Sprintf("%d:%q", i.line, i.val)
+	return fmt.Sprintf("%d:%q:%d", i.line, i.val, i.typ)
 }
 
 const (
@@ -122,7 +122,10 @@ func (l *lexer) Lex(lval *asn1SymType) int {
 	case itemReservedIMPLIED:
 		return Tok_IMPLIED
 
-	case itemModuleReference:
+	case itemReservedINTEGER:
+		return Tok_INTEGER
+
+	case itemModuleReference, itemTypeReference:
 		lval.str = i.val
 		return Tok_TypeReference
 

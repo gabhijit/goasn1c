@@ -18,6 +18,8 @@ package asn1types
 
 // ASN1Expression is a type representing parsed expression
 type Asn1Expression struct {
+	Type       Asn1ExprType
+	Identifier string
 }
 
 type Asn1ExprType uint16

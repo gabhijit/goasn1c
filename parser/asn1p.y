@@ -54,6 +54,7 @@ var AllModules    *asn1types.Asn1Grammar
 	xports       *asn1types.Asn1Xports
 	expr         *asn1types.Asn1Expression
 	aid          *asn1types.Asn1AssignedIdentifier
+	expr_type    asn1types.Asn1ExprType
 }
 
 %token       Tok_BEGIN
@@ -70,6 +71,7 @@ var AllModules    *asn1types.Asn1Grammar
 %token       Tok_FROM
 %token       Tok_ALL
 %token       Tok_EXPORTS
+%token       Tok_INTEGER
 %token <str> Tok_TypeReference
 %token <num> Tok_Number
 %token <str> Tok_Identifier
@@ -90,7 +92,7 @@ var AllModules    *asn1types.Asn1Grammar
 %type <module>       ImportsBundleSet
 %type <xports>       ImportsBundle
 %type <xports>       ImportsList
-%type <xports>       ImportsElement
+%type <expr>         ImportsElement
 %type <aid>          AssignedIdentifier
 
 %type <module>       optExports
@@ -99,7 +101,9 @@ var AllModules    *asn1types.Asn1Grammar
 %type <expr>         ExportsElement
 
 %type <module>       AssignmentList
-%type <str>          Assignment
+%type <module>       Assignment
+%type <expr>         DataTypeReference
+%type <expr_type>    BasicType
 
 %type <oid>          optObjectIdentifier
 %type <oid>          ObjectIdentifier
@@ -138,6 +142,7 @@ ModuleDefinition:
 		Tok_BEGIN optModuleBody Tok_END {
 
 			$$ = currentModule
+			fmt.Println($$)
 			$$.Name = $1
 			fmt.Println($$)
 		};
@@ -219,7 +224,7 @@ ModuleDefinitionFlag:
 	} ;
 
 optModuleBody:
-	     { $$ = nil; }
+	     { $$ = nil;}
 	| ModuleBody {
 		$$ = $1;
 	};
@@ -228,8 +233,14 @@ ModuleBody:
 	optExports optImports AssignmentList {
 		$$ = asn1types.NewAsn1Module()
 
-		$$.Exports = $1
-		$$.Imports = $2
+		if $1 != nil {
+			$$.Exports = $1.Exports;
+		}
+		if $2 != nil {
+			$$.Imports = $2.Imports;
+		}
+
+		$$.Members = $3.Members
 		// FIXME: Use AssignmentList
 	};
 
@@ -238,18 +249,30 @@ AssignmentList:
 		$$ = $1;
 	}
 	| AssignmentList Assignment {
-		if($1) {
-			$$ = $1;
-		} else {
-			$$ = $2;
-			break;
+		$$ = $1
+		for _, m := range($2.Members) {
+			$$.Members = append($$.Members, m)
 		}
 	}
 	;
 
 /* TODO: Big implementation */
 Assignment:
-	  Tok_Identifier { $$ = nil;};
+	  DataTypeReference {
+		$$ = asn1types.NewAsn1Module()
+		$$.Members = append($$.Members, $1)
+	};
+
+DataTypeReference:
+	TypeRefName Tok_ASSIGNMENT BasicType {
+		$$ = asn1types.NewAsn1Expression()
+		$$.Identifier = $1
+		// FIXME : Need to add code for type of expression
+	};
+/* only integer type supported */
+BasicType:
+	 Tok_INTEGER { $$ = asn1types.Asn1ExprTypeInteger};
+
 /*
  * === EXAMPLE ===
  * IMPORTS Type1, value FROM Module { iso standard(0) } ;
@@ -267,7 +290,8 @@ ImportsDefinition:
 	 * Some error cases.
 	 */
 	| Tok_IMPORTS Tok_FROM /* ... */ {
-		return yyerror("Empty IMPORTS list");
+		// FIXME: Need to figure out how to call the Lexer's Error()
+		return -1;
 	}
 	;
 
@@ -278,11 +302,11 @@ optImportsBundleSet:
 ImportsBundleSet:
 	ImportsBundle {
 		$$ = asn1types.NewAsn1Module();
-		$$.Imports = append($$.Imports, $1)
+		$$.Imports = append($$.Imports, $1);
 	}
 	| ImportsBundleSet ImportsBundle {
 		$$ = $1;
-		$$.Imports = append($$.Imports, $1)
+		$$.Imports = append($$.Imports, $2);
 	}
 	;
 
@@ -303,42 +327,38 @@ ImportsBundle:
 ImportsList:
 	ImportsElement {
 		$$ = asn1types.NewAsn1Xports();
-		$$.Members = append($$.Members, $1)
+		$$.Members = append($$.Members, $1);
 	}
 	| ImportsList ',' ImportsElement {
 		$$ = $1;
-		TQ_ADD(&($$->members), $3, next);
+		$$.Members = append($$.Members, $3);
 	}
 	;
 
 ImportsElement:
 	TypeRefName {
-		$$ = asn1types.NewAsn1Expression()
-		checkmem($$);
-		$$->Identifier = $1;
-		$$->expr_type = A1TC_REFERENCE;
+		$$ = asn1types.NewAsn1Expression();
+		$$.Identifier = $1;
+		$$.Type = asn1types.Asn1ExprTypeReference;
 	}
 	| TypeRefName '{' '}' {		/* Completely equivalent to above */
-		$$ = NEW_EXPR();
-		checkmem($$);
-		$$->Identifier = $1;
-		$$->expr_type = A1TC_REFERENCE;
+		$$ = asn1types.NewAsn1Expression();
+		$$.Identifier = $1;
+		$$.Type = asn1types.Asn1ExprTypeReference;
 	}
 	| Identifier {
-		$$ = NEW_EXPR();
-		checkmem($$);
-		$$->Identifier = $1;
-		$$->expr_type = A1TC_REFERENCE;
+		$$ = asn1types.NewAsn1Expression();
+		$$.Identifier = $1;
+		$$.Type = asn1types.Asn1ExprTypeReference;
 	}
 	;
 
 optExports:
 	{ $$ = nil; }
 	| ExportsDefinition {
-		$$ = asn1p_module_new();
-		checkmem($$);
-		if($1) {
-			TQ_ADD(&($$->exports), $1, xp_next);
+		$$ = asn1types.NewAsn1Module();
+		if($1 == nil) {
+			$$.Exports = append($$.Exports, $1);
 		} else {
 			/* "EXPORTS ALL;" */
 		}
@@ -350,45 +370,42 @@ ExportsDefinition:
 		$$ = $2;
 	}
 	| Tok_EXPORTS Tok_ALL ';' {
-		$$ = 0;
+		$$ = nil;
 	}
 	| Tok_EXPORTS ';' {
 		/* Empty EXPORTS clause effectively prohibits export. */
-		$$ = asn1p_xports_new();
-		checkmem($$);
+		$$ = asn1types.NewAsn1Xports();
 	}
 	;
 
 ExportsBody:
 	ExportsElement {
-		$$ = asn1p_xports_new();
-		assert($$);
-		TQ_ADD(&($$->members), $1, next);
+		$$ = asn1types.NewAsn1Xports();
+		$$.Type = asn1types.Asn1XportsTypeExport;
+		$$.Members = append($$.Members, $1);
 	}
 	| ExportsBody ',' ExportsElement {
 		$$ = $1;
-		TQ_ADD(&($$->members), $3, next);
+		$$.Type = asn1types.Asn1XportsTypeExport;
+		$$.Members = append($$.Members, $3);
 	}
 	;
 
 ExportsElement:
 	TypeRefName {
-		$$ = NEW_EXPR();
-		checkmem($$);
-		$$->Identifier = $1;
-		$$->expr_type = A1TC_EXPORTVAR;
+		$$ = asn1types.NewAsn1Expression()
+		$$.Identifier = $1;
+		$$.Type = asn1types.Asn1ExprTypeExportVariable;
 	}
 	| TypeRefName '{' '}' {
-		$$ = NEW_EXPR();
-		checkmem($$);
-		$$->Identifier = $1;
-		$$->expr_type = A1TC_EXPORTVAR;
+		$$ = asn1types.NewAsn1Expression()
+		$$.Identifier = $1;
+		$$.Type = asn1types.Asn1ExprTypeExportVariable;
 	}
 	| Identifier {
-		$$ = NEW_EXPR();
-		checkmem($$);
-		$$->Identifier = $1;
-		$$->expr_type = A1TC_EXPORTVAR;
+		$$ = asn1types.NewAsn1Expression()
+		$$.Identifier = $1;
+		$$.Type = asn1types.Asn1ExprTypeExportVariable;
 	}
 	;
 
