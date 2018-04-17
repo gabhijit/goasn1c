@@ -17,8 +17,8 @@
 package asn1types
 
 type Asn1InfoObjectClassCell struct {
-	field *Asn1ParsedExpression
-	value *Asn1ParsedExpression
+	field *Asn1Expression
+	value *Asn1Expression
 }
 
 //

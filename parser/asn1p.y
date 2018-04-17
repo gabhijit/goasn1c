@@ -51,6 +51,9 @@ var AllModules    *asn1types.Asn1Grammar
 	oid	     *asn1types.Asn1Oid
 	oid_arc      asn1types.Asn1OidArc
 	module_flags asn1types.ModuleFlagType
+	xports       *asn1types.Asn1Xports
+	expr         *asn1types.Asn1Expression
+	aid          *asn1types.Asn1AssignedIdentifier
 }
 
 %token       Tok_BEGIN
@@ -63,6 +66,10 @@ var AllModules    *asn1types.Asn1Grammar
 %token       Tok_EXTENSIBILITY
 %token       Tok_TAGS
 %token       Tok_AUTOMATIC
+%token       Tok_IMPORTS
+%token       Tok_FROM
+%token       Tok_ALL
+%token       Tok_EXPORTS
 %token <str> Tok_TypeReference
 %token <num> Tok_Number
 %token <str> Tok_Identifier
@@ -71,7 +78,29 @@ var AllModules    *asn1types.Asn1Grammar
 %type <grammar>      ModuleList
 %type <str>          TypeRefName
 %type <str>          Identifier
+
 %type <module>       ModuleDefinition
+
+%type <module>       optModuleBody
+%type <module>       ModuleBody
+
+%type <module>       optImports
+%type <module>       ImportsDefinition
+%type <module>       optImportsBundleSet
+%type <module>       ImportsBundleSet
+%type <xports>       ImportsBundle
+%type <xports>       ImportsList
+%type <xports>       ImportsElement
+%type <aid>          AssignedIdentifier
+
+%type <module>       optExports
+%type <xports>       ExportsDefinition
+%type <xports>       ExportsBody
+%type <expr>         ExportsElement
+
+%type <module>       AssignmentList
+%type <str>          Assignment
+
 %type <oid>          optObjectIdentifier
 %type <oid>          ObjectIdentifier
 %type <oid>          ObjectIdentifierBody
@@ -106,7 +135,7 @@ ModuleDefinition:
 		optObjectIdentifier Tok_DEFINITIONS
 		optModuleDefinitionFlags
 		Tok_ASSIGNMENT
-		Tok_BEGIN Tok_END {
+		Tok_BEGIN optModuleBody Tok_END {
 
 			$$ = currentModule
 			$$.Name = $1
@@ -188,5 +217,179 @@ ModuleDefinitionFlag:
 	| Tok_EXTENSIBILITY Tok_IMPLIED {
 		$$ = asn1types.ModuleFlagExtensibilityImplied;
 	} ;
+
+optModuleBody:
+	     { $$ = nil; }
+	| ModuleBody {
+		$$ = $1;
+	};
+
+ModuleBody:
+	optExports optImports AssignmentList {
+		$$ = asn1types.NewAsn1Module()
+
+		$$.Exports = $1
+		$$.Imports = $2
+		// FIXME: Use AssignmentList
+	};
+
+AssignmentList:
+	Assignment {
+		$$ = $1;
+	}
+	| AssignmentList Assignment {
+		if($1) {
+			$$ = $1;
+		} else {
+			$$ = $2;
+			break;
+		}
+	}
+	;
+
+/* TODO: Big implementation */
+Assignment:
+	  Tok_Identifier { $$ = nil;};
+/*
+ * === EXAMPLE ===
+ * IMPORTS Type1, value FROM Module { iso standard(0) } ;
+ * === EOF ===
+*/
+optImports:
+	{ $$ = nil; }
+	| ImportsDefinition;
+
+ImportsDefinition:
+	Tok_IMPORTS optImportsBundleSet ';' {
+		$$ = $2;
+	}
+	/*
+	 * Some error cases.
+	 */
+	| Tok_IMPORTS Tok_FROM /* ... */ {
+		return yyerror("Empty IMPORTS list");
+	}
+	;
+
+optImportsBundleSet:
+	{ $$ = asn1types.NewAsn1Module(); }
+	| ImportsBundleSet;
+
+ImportsBundleSet:
+	ImportsBundle {
+		$$ = asn1types.NewAsn1Module();
+		$$.Imports = append($$.Imports, $1)
+	}
+	| ImportsBundleSet ImportsBundle {
+		$$ = $1;
+		$$.Imports = append($$.Imports, $1)
+	}
+	;
+
+AssignedIdentifier:
+	{ $$.Oid = nil; $$.Value = nil;}
+	| ObjectIdentifier { $$.Oid = $1;  $$.Value = nil};
+
+ImportsBundle:
+	ImportsList Tok_FROM TypeRefName AssignedIdentifier {
+		$$ = $1;
+
+		$$.Type = asn1types.Asn1XportsTypeImport;
+		$$.FromModule = $3;
+		$$.Identifier = $4;
+	}
+	;
+// From here
+ImportsList:
+	ImportsElement {
+		$$ = asn1types.NewAsn1Xports();
+		$$.Members = append($$.Members, $1)
+	}
+	| ImportsList ',' ImportsElement {
+		$$ = $1;
+		TQ_ADD(&($$->members), $3, next);
+	}
+	;
+
+ImportsElement:
+	TypeRefName {
+		$$ = asn1types.NewAsn1Expression()
+		checkmem($$);
+		$$->Identifier = $1;
+		$$->expr_type = A1TC_REFERENCE;
+	}
+	| TypeRefName '{' '}' {		/* Completely equivalent to above */
+		$$ = NEW_EXPR();
+		checkmem($$);
+		$$->Identifier = $1;
+		$$->expr_type = A1TC_REFERENCE;
+	}
+	| Identifier {
+		$$ = NEW_EXPR();
+		checkmem($$);
+		$$->Identifier = $1;
+		$$->expr_type = A1TC_REFERENCE;
+	}
+	;
+
+optExports:
+	{ $$ = nil; }
+	| ExportsDefinition {
+		$$ = asn1p_module_new();
+		checkmem($$);
+		if($1) {
+			TQ_ADD(&($$->exports), $1, xp_next);
+		} else {
+			/* "EXPORTS ALL;" */
+		}
+	}
+	;
+
+ExportsDefinition:
+	Tok_EXPORTS ExportsBody ';' {
+		$$ = $2;
+	}
+	| Tok_EXPORTS Tok_ALL ';' {
+		$$ = 0;
+	}
+	| Tok_EXPORTS ';' {
+		/* Empty EXPORTS clause effectively prohibits export. */
+		$$ = asn1p_xports_new();
+		checkmem($$);
+	}
+	;
+
+ExportsBody:
+	ExportsElement {
+		$$ = asn1p_xports_new();
+		assert($$);
+		TQ_ADD(&($$->members), $1, next);
+	}
+	| ExportsBody ',' ExportsElement {
+		$$ = $1;
+		TQ_ADD(&($$->members), $3, next);
+	}
+	;
+
+ExportsElement:
+	TypeRefName {
+		$$ = NEW_EXPR();
+		checkmem($$);
+		$$->Identifier = $1;
+		$$->expr_type = A1TC_EXPORTVAR;
+	}
+	| TypeRefName '{' '}' {
+		$$ = NEW_EXPR();
+		checkmem($$);
+		$$->Identifier = $1;
+		$$->expr_type = A1TC_EXPORTVAR;
+	}
+	| Identifier {
+		$$ = NEW_EXPR();
+		checkmem($$);
+		$$->Identifier = $1;
+		$$->expr_type = A1TC_EXPORTVAR;
+	}
+	;
 
 %%

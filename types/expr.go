@@ -17,7 +17,7 @@
 package asn1types
 
 // ASN1Expression is a type representing parsed expression
-type Asn1ParsedExpression struct {
+type Asn1Expression struct {
 }
 
 type Asn1ExprType uint16
@@ -98,3 +98,9 @@ const (
 
 	Asn1ExprTypeMax
 )
+
+func NewAsn1Expression() *Asn1Expression {
+	n := &Asn1Expression{}
+
+	return n
+}

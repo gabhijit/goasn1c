@@ -18,7 +18,9 @@ package asn1types
 
 // Asn1Module is a type representing ASN.1 Module
 type Asn1Module struct {
-	Name string
+	Name    string
+	Imports []Asn1Xports
+	Exports []Asn1Xports
 }
 
 type ModuleFlagType uint16
