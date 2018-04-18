@@ -55,6 +55,7 @@ var AllModules    *asn1types.Asn1Grammar
 	expr         *asn1types.Asn1Expression
 	aid          *asn1types.Asn1AssignedIdentifier
 	expr_type    asn1types.Asn1ExprType
+	tag          *asn1types.Asn1Tag
 }
 
 %token       Tok_BEGIN
@@ -72,6 +73,10 @@ var AllModules    *asn1types.Asn1Grammar
 %token       Tok_ALL
 %token       Tok_EXPORTS
 %token       Tok_INTEGER
+%token       Tok_UNIVERSAL
+%token       Tok_APPLICATION
+%token       Tok_PRIVATE
+%token       Tok_BOOLEAN
 %token <str> Tok_TypeReference
 %token <num> Tok_Number
 %token <str> Tok_Identifier
@@ -103,7 +108,19 @@ var AllModules    *asn1types.Asn1Grammar
 %type <module>       AssignmentList
 %type <module>       Assignment
 %type <expr>         DataTypeReference
-%type <expr_type>    BasicType
+
+%type <expr>         Type
+%type <expr>         TaggedType
+%type <expr>         UntaggedType
+%type <expr>         BuiltinType
+%type <expr>         ConcreteTypeDeclaration
+
+
+%type <tag>          optTag
+%type <tag>          Tag
+%type <tag>          TagTypeValue
+%type <tag>          TagPlicit
+%type <tag>          TagClass
 
 %type <oid>          optObjectIdentifier
 %type <oid>          ObjectIdentifier
@@ -250,35 +267,6 @@ ModuleBody:
 		$$.Members = $3.Members
 	};
 
-AssignmentList:
-	Assignment {
-		$$ = $1;
-	}
-	| AssignmentList Assignment {
-		$$ = $1
-		for _, m := range($2.Members) {
-			$$.Members = append($$.Members, m)
-		}
-	}
-	;
-
-/* TODO: Big implementation */
-Assignment:
-	  DataTypeReference {
-		$$ = asn1types.NewAsn1Module()
-		$$.Members = append($$.Members, $1)
-	};
-
-DataTypeReference:
-	TypeRefName Tok_ASSIGNMENT BasicType {
-		$$ = asn1types.NewAsn1Expression()
-		$$.Identifier = $1
-		// FIXME : Need to add code for type of expression
-	};
-/* only integer type supported */
-BasicType:
-	 Tok_INTEGER { $$ = asn1types.Asn1ExprTypeInteger};
-
 /*
  * === EXAMPLE ===
  * IMPORTS Type1, value FROM Module { iso standard(0) } ;
@@ -415,4 +403,90 @@ ExportsElement:
 	}
 	;
 
+
+AssignmentList:
+	Assignment {
+		$$ = $1;
+	}
+	| AssignmentList Assignment {
+		$$ = $1
+		for _, m := range($2.Members) {
+			$$.Members = append($$.Members, m)
+		}
+	}
+	;
+
+/* TODO: Big implementation */
+Assignment:
+	  DataTypeReference {
+		$$ = asn1types.NewAsn1Module()
+		$$.Members = append($$.Members, $1)
+	};
+
+DataTypeReference:
+	TypeRefName Tok_ASSIGNMENT Type {
+		$$ = asn1types.NewAsn1Expression()
+		$$.Identifier = $1
+		// FIXME : Need to add code for type of expression
+	};
+
+Type:TaggedType;
+
+
+TaggedType:
+	optTag UntaggedType {
+	};
+
+optTag:
+	{ $$ = nil; }
+	| Tag { $$ = $1; }
+	;
+
+Tag:
+	TagTypeValue TagPlicit {
+		$$ = $1;
+		$$.Mode = $2.Mode;
+	}
+	;
+
+TagTypeValue:
+	'[' TagClass Tok_Number ']' {
+		$$ = $2;
+		$$.Val = $3;
+	};
+
+TagClass:
+	{ $$ = asn1types.NewAsn1Tag(); $$.Class = asn1types.Asn1TagClassContextSpec; }
+	| Tok_UNIVERSAL { $$ = asn1types.NewAsn1Tag(); $$.Class = asn1types.Asn1TagClassUniversal; }
+	| Tok_APPLICATION { $$ = asn1types.NewAsn1Tag(); $$.Class = asn1types.Asn1TagClassApplication; }
+	| Tok_PRIVATE { $$ = asn1types.NewAsn1Tag(); $$.Class = asn1types.Asn1TagClassPrivate; }
+	;
+
+TagPlicit:
+	{ $$ = asn1types.NewAsn1Tag(); $$.Mode = asn1types.Asn1TagModeDefault; }
+	| Tok_IMPLICIT { $$ = asn1types.NewAsn1Tag(); $$.Mode = asn1types.Asn1TagModeImplicit; }
+	| Tok_EXPLICIT { $$ = asn1types.NewAsn1Tag(); $$.Mode = asn1types.Asn1TagModeImplicit; }
+	;
+
+UntaggedType:
+	    TypeDeclaration {
+	};
+
+TypeDeclaration:
+	ConcreteTypeDeclaration;
+	/*| DefinedType ; */
+
+ConcreteTypeDeclaration: BuiltinType;
+
+BuiltinType:
+	Tok_BOOLEAN {
+		$$ = asn1types.NewAsn1Expression();
+		$$.Type = asn1types.Asn1ExprTypeBoolean;
+
+	}
+	| Tok_INTEGER {
+		$$ = asn1types.NewAsn1Expression();
+		$$.Type = asn1types.Asn1ExprTypeInteger;
+
+	};
 %%

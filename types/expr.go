@@ -106,3 +106,33 @@ func NewAsn1Expression() *Asn1Expression {
 
 	return n
 }
+
+type Asn1Tag struct {
+	Class Asn1TagClass
+	Mode  Asn1TagMode
+	Val   int64
+}
+
+type Asn1TagClass int
+
+const (
+	Asn1TagClassNoClass Asn1TagClass = iota
+	Asn1TagClassUniversal
+	Asn1TagClassApplication
+	Asn1TagClassContextSpec
+	Asn1TagClassPrivate
+)
+
+type Asn1TagMode int
+
+const (
+	Asn1TagModeDefault Asn1TagMode = iota
+	Asn1TagModeImplicit
+	Asn1TagModeExplicit
+)
+
+func NewAsn1Tag() *Asn1Tag {
+	n := &Asn1Tag{}
+
+	return n
+}
