@@ -72,11 +72,26 @@ var AllModules    *asn1types.Asn1Grammar
 %token       Tok_FROM
 %token       Tok_ALL
 %token       Tok_EXPORTS
-%token       Tok_INTEGER
 %token       Tok_UNIVERSAL
 %token       Tok_APPLICATION
 %token       Tok_PRIVATE
 %token       Tok_BOOLEAN
+%token       Tok_NULL
+%token       Tok_REAL
+%token       Tok_OCTET
+%token       Tok_STRING
+%token       Tok_OBJECT
+%token       Tok_IDENTIFIER
+%token       Tok_RELATIVE_OID
+%token       Tok_EXTERNAL
+%token       Tok_EMBEDDED
+%token       Tok_PDV
+%token       Tok_CHARACTER
+%token       Tok_UTCTime
+%token       Tok_GeneralizedTime
+%token       Tok_INTEGER
+%token       Tok_ENUMERATED
+%token       Tok_BIT
 %token <str> Tok_TypeReference
 %token <num> Tok_Number
 %token <str> Tok_Identifier
@@ -115,6 +130,8 @@ var AllModules    *asn1types.Asn1Grammar
 %type <expr>         BuiltinType
 %type <expr>         ConcreteTypeDeclaration
 
+%type <expr_type>    BasicTypeId
+%type <expr_type>    BasicTypeId_UniverationCompatible
 
 %type <tag>          optTag
 %type <tag>          Tag
@@ -479,14 +496,38 @@ TypeDeclaration:
 ConcreteTypeDeclaration: BuiltinType;
 
 BuiltinType:
-	Tok_BOOLEAN {
+	BasicTypeId {
 		$$ = asn1types.NewAsn1Expression();
-		$$.Type = asn1types.Asn1ExprTypeBoolean;
+		$$.Type = $1;
 
 	}
-	| Tok_INTEGER {
+	/* | Tok_INTEGER {
 		$$ = asn1types.NewAsn1Expression();
 		$$.Type = asn1types.Asn1ExprTypeInteger;
 
-	};
+	}*/;
+
+BasicTypeId:
+	Tok_BOOLEAN { $$ = asn1types.Asn1ExprTypeBoolean; }
+	| Tok_NULL { $$ = asn1types.Asn1ExprTypeNull; }
+	| Tok_REAL { $$ = asn1types.Asn1ExprTypeReal; }
+	| Tok_OCTET Tok_STRING { $$ = asn1types.Asn1ExprTypeOctetString; }
+	| Tok_EMBEDDED Tok_PDV { $$ = asn1types.Asn1ExprTypeEmbeddedPdv; }
+	| Tok_CHARACTER Tok_STRING { $$ = asn1types.Asn1ExprTypeCharacterString; }
+	| Tok_UTCTime { $$ = asn1types.Asn1ExprTypeUtcTime; }
+	| Tok_GeneralizedTime { $$ = asn1types.Asn1ExprTypeGeneralizedTime; }
+	| Tok_OBJECT Tok_IDENTIFIER { $$ = asn1types.Asn1ExprTypeObjectIdentifier; }
+	| Tok_RELATIVE_OID { $$ = asn1types.Asn1ExprTypeRelativeOid; }
+	| Tok_EXTERNAL { $$ = asn1types.Asn1ExprTypeExternal; }
+	/* | BasicString --- Not supported Yet */
+
+	| BasicTypeId_UniverationCompatible
+	;
+
+BasicTypeId_UniverationCompatible:
+	Tok_INTEGER { $$ = asn1types.Asn1ExprTypeInteger; }
+	| Tok_ENUMERATED { $$ = asn1types.Asn1ExprTypeEnumerated; }
+	| Tok_BIT Tok_STRING { $$ = asn1types.Asn1ExprTypeBitString; }
+	;
+
 %%
