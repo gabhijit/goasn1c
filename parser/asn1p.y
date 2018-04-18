@@ -144,6 +144,13 @@ ModuleDefinition:
 			$$ = currentModule
 			fmt.Println($$)
 			$$.Name = $1
+
+			// We have been given a module body
+			if ($8 != nil) {
+				$$.Imports = $8.Imports
+				$$.Exports = $8.Exports
+				$$.Members = $8.Members
+			}
 			fmt.Println($$)
 		};
 
@@ -241,7 +248,6 @@ ModuleBody:
 		}
 
 		$$.Members = $3.Members
-		// FIXME: Use AssignmentList
 	};
 
 AssignmentList:
