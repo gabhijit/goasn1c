@@ -34,6 +34,7 @@ const (
 	Asn1ExprTypeUniversal
 	Asn1ExprTypeBitVector
 	Asn1ExprTypeOpaque
+	Asn1ExprTypeExtensible
 	Asn1ExprTypeComponentsOf
 	Asn1ExprTypeValueSet
 	Asn1ExprTypeClassDef

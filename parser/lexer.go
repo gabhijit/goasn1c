@@ -125,6 +125,9 @@ func (l *lexer) Lex(lval *asn1SymType) int {
 	case itemReservedINTEGER:
 		return Tok_INTEGER
 
+	case itemReservedENUMERATED:
+		return Tok_ENUMERATED
+
 	case itemModuleReference, itemTypeReference:
 		lval.str = i.val
 		return Tok_TypeReference
@@ -132,11 +135,14 @@ func (l *lexer) Lex(lval *asn1SymType) int {
 	case itemAssignment:
 		return Tok_ASSIGNMENT
 
+	case itemEllipsis:
+		return Tok_Ellipsis
+
 	case itemNumber:
 		lval.num, _ = strconv.ParseInt(i.val, 10, 64)
 		return Tok_Number
 
-	case itemIdentifier:
+	case itemIdentifier, itemValueReference:
 		lval.str = i.val
 		return Tok_Identifier
 

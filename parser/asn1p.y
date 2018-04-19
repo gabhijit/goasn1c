@@ -96,6 +96,7 @@ var AllModules    *asn1types.Asn1Grammar
 %token       Tok_INTEGER
 %token       Tok_ENUMERATED
 %token       Tok_BIT
+%token       Tok_Ellipsis
 %token <str> Tok_TypeReference
 %token <num> Tok_Number
 %token <str> Tok_Identifier
@@ -155,6 +156,10 @@ var AllModules    *asn1types.Asn1Grammar
 %type <value>        BitStringValue
 %type <value>        IdentifierAsValue
 %type <ref>          IdentifierAsReference
+
+%type <expr>         Enumerations
+%type <expr>         UniverationList
+%type <expr>         UniverationElement
 
 %type <oid>          optObjectIdentifier
 %type <oid>          ObjectIdentifier
@@ -351,7 +356,7 @@ ImportsBundle:
 		$$.Identifier = $4;
 	}
 	;
-// From here
+
 ImportsList:
 	ImportsElement {
 		$$ = asn1types.NewAsn1Xports();
@@ -474,6 +479,7 @@ Type:TaggedType;
 
 TaggedType:
 	optTag UntaggedType {
+		$$ = $2
 	};
 
 optTag:
@@ -530,6 +536,11 @@ BuiltinType:
 		$$->meta_type = AMT_TYPE;
     	}
 */
+	| Tok_ENUMERATED '{' Enumerations '}' {
+		$$ = $3;
+		$$.Type = asn1types.Asn1ExprTypeEnumerated;
+		$$.Meta = asn1types.Asn1ExprMetaTypeValue;
+	}
 	;
 
 BasicTypeId:
@@ -551,7 +562,7 @@ BasicTypeId:
 
 BasicTypeId_UniverationCompatible:
 	Tok_INTEGER { $$ = asn1types.Asn1ExprTypeInteger; }
-	| Tok_ENUMERATED { $$ = asn1types.Asn1ExprTypeEnumerated; }
+	| Tok_ENUMERATED { fmt.Println("DDD"); $$ = asn1types.Asn1ExprTypeEnumerated; }
 	| Tok_BIT Tok_STRING { $$ = asn1types.Asn1ExprTypeBitString; }
 	;
 
@@ -666,6 +677,60 @@ BitStringValue:
 	}
 	| Tok_HString {
 		$$ = asn1types.NewAsn1Value()
+	}
+	;
+
+Enumerations:
+    UniverationList {
+		$$ = $1;
+		// TODO handle Enumeration validation
+    }
+
+UniverationList:
+	UniverationElement {
+		$$ = asn1types.NewAsn1Expression()
+	}
+	| UniverationList ',' UniverationElement {
+		$$ = $1;
+		// $$.Members = append($$.Members, $3)
+	}
+	;
+
+UniverationElement:
+	Identifier {
+		$$ = asn1types.NewAsn1Expression()
+		$$.Type = asn1types.Asn1ExprTypeUniversal;
+
+		$$.Meta = asn1types.Asn1ExprMetaTypeValue;
+		$$.Identifier = $1;
+	}
+	| Identifier '(' SignedNumber ')' {
+		$$ = asn1types.NewAsn1Expression()
+		$$.Type = asn1types.Asn1ExprTypeUniversal;
+
+		$$.Meta = asn1types.Asn1ExprMetaTypeValue;
+		$$.Identifier = $1;
+	}
+	| Identifier '(' DefinedValue ')' {
+		$$ = asn1types.NewAsn1Expression()
+		$$.Type = asn1types.Asn1ExprTypeUniversal;
+
+		$$.Meta = asn1types.Asn1ExprMetaTypeValue;
+		$$.Identifier = $1;
+	}
+	| SignedNumber {
+		$$ = asn1types.NewAsn1Expression()
+		$$.Type = asn1types.Asn1ExprTypeUniversal;
+
+		$$.Meta = asn1types.Asn1ExprMetaTypeValue;
+		//$$.Identifier = $1;
+	}
+	| Tok_Ellipsis {
+		$$ = asn1types.NewAsn1Expression()
+		$$.Type = asn1types.Asn1ExprTypeExtensible;
+
+		$$.Meta = asn1types.Asn1ExprMetaTypeValue;
+		$$.Identifier = "...";
 	}
 	;
 
