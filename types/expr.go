@@ -20,6 +20,7 @@ package asn1types
 type Asn1Expression struct {
 	Type       Asn1ExprType
 	Identifier string
+	Meta       Asn1ExprMetaType
 }
 
 type Asn1ExprType uint16
@@ -106,6 +107,20 @@ func NewAsn1Expression() *Asn1Expression {
 
 	return n
 }
+
+type Asn1ExprMetaType int
+
+const (
+	Asn1ExprMetaTypeInvalid Asn1ExprMetaType = iota
+	Asn1ExprMetaTypeType
+	Asn1ExprMetaTypeTypeRef
+	Asn1ExprMetaTypeValue
+	Asn1ExprMetaTypeValueSet
+	Asn1ExprMetaTypeObject
+	Asn1ExprMetaTypeObjectClass
+	Asn1ExprMetaTypeObjectField
+	Asn1ExprMetaTypeMax
+)
 
 type Asn1Tag struct {
 	Class Asn1TagClass

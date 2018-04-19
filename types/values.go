@@ -23,8 +23,8 @@ type Asn1Value struct {
 type Asn1ValueType int
 
 const (
-	Asn1ValueTypeNoValue Asn1ValueType = iota,
-		Asn1ValueTypeContainingType
+	Asn1ValueTypeNoValue Asn1ValueType = iota
+	Asn1ValueTypeContainingType
 	Asn1ValueTypeNull
 	Asn1ValueTypeReal
 	Asn1ValueTypeInteger
@@ -41,9 +41,9 @@ const (
 	Asn1ValueTypeChoiceIdentifier
 )
 
-func NewAsn1ParsedValue() *Asn1ParsedValue {
+func NewAsn1Value() *Asn1Value {
 
-	n := &Asn1ParsedValue{}
+	n := &Asn1Value{}
 
 	return n
 }

@@ -508,8 +508,8 @@ TagPlicit:
 	;
 
 UntaggedType:
-	    TypeDeclaration {
-	};
+	    TypeDeclaration {}/* FIXME: Constraints not done yet */
+	;
 
 TypeDeclaration:
 	ConcreteTypeDeclaration;
@@ -563,10 +563,8 @@ BasicTypeId_UniverationCompatible:
 ValueAssignment:
 	Identifier Type Tok_ASSIGNMENT Value {
 		$$ = $2;
-		assert($$->Identifier == NULL);
-		$$->Identifier = $1;
-		$$->meta_type = AMT_VALUE;
-		$$->value = $4;
+		$$.Identifier = $1;
+		$$.Meta = asn1types.Asn1ExprMetaTypeValue;
 	}
 	;
 
@@ -585,19 +583,16 @@ Value:
 
 SimpleValue:
 	Tok_NULL {
-		$$ = asn1p_value_fromint(0);
-		checkmem($$);
-		$$->type = ATV_NULL;
+		$$ = asn1types.NewAsn1Value();
+		$$.Type = asn1types.Asn1ValueTypeNull;
 	}
 	| Tok_FALSE {
-		$$ = asn1p_value_fromint(0);
-		checkmem($$);
-		$$->type = ATV_FALSE;
+		$$ = asn1types.NewAsn1Value();
+		$$.Type = asn1types.Asn1ValueTypeFalse;
 	}
 	| Tok_TRUE {
-		$$ = asn1p_value_fromint(1);
-		checkmem($$);
-		$$->type = ATV_TRUE;
+		$$ = asn1types.NewAsn1Value();
+		$$.Type = asn1types.Asn1ValueTypeTrue;
 	}
 	| SignedNumber
 	/* TODO : | RealValue */
@@ -608,67 +603,69 @@ SimpleValue:
 DefinedValue:
 	IdentifierAsValue
 	| TypeRefName '.' Identifier {
-		asn1p_ref_t *ref;
-		int ret;
-		ref = asn1p_ref_new(yylineno, currentModule);
-		checkmem(ref);
-		ret = asn1p_ref_add_component(ref, $1, RLT_UNKNOWN);
-		checkmem(ret == 0);
-		ret = asn1p_ref_add_component(ref, $3, RLT_lowercase);
-		checkmem(ret == 0);
-		$$ = asn1p_value_fromref(ref, 0);
-		checkmem($$);
-		free($1);
-		free($3);
+		ref := asn1types.NewAsn1Reference()
+		_ = ref
+		$$ = asn1types.NewAsn1Value()
 	}
 	;
 
 
 RestrictedCharacterStringValue:
 	Tok_CString {
-		$$ = asn1p_value_frombuf($1.buf, $1.len, 0);
-		checkmem($$);
+		$$ = asn1types.NewAsn1Value()
 	}
 	| '{' Tok_Number ',' Tok_Number '}' {
-		$$ = asn1p_value_fromint($2);
-		checkmem($$);
-		$$->type = ATV_TUPLE;
+		if $2 < 0 || $2 > 7 {
+			return -1;
+		}
+		if $4 < 0 || $4 > 15 {
+			return -1;
+		}
+		//value := $2 << 4 + $4;
+
+		$$ = asn1types.NewAsn1Value()
+		$$.Type = asn1types.Asn1ValueTypeTuple;
 	}
 	| '{' Tok_Number ',' Tok_Number ',' Tok_Number ',' Tok_Number '}' {
-		$$ = asn1p_value_fromint($2);
-		checkmem($$);
-		$$->type = ATV_QUADRUPLE;
+		if $2 < 0 || $2 > 127 {
+			return -1
+		}
+		if $4 < 0 || $4 > 255 {
+			return -1
+		}
+		if $6 < 0 || $6 > 255 {
+			return -1
+		}
+		if $8 < 0 || $8 > 255 {
+			return -1
+		}
+		$$ = asn1types.NewAsn1Value()
+		$$.Type = asn1types.Asn1ValueTypeQuadruple;
 	}
 	;
 
 SignedNumber:
 	Tok_Number {
-		$$ = $1
+		$$ = asn1types.NewAsn1Value()
 	}
 	;
 
 IdentifierAsReference:
     Identifier {
-		$$ = asn1p_ref_new(yylineno, currentModule);
-		asn1p_ref_add_component($$, $1, RLT_lowercase);
-		free($1);
+		$$ = asn1types.NewAsn1Reference()
     };
 
 IdentifierAsValue:
     IdentifierAsReference {
-		$$ = asn1p_value_fromref($1, 0);
+		$$ = asn1types.NewAsn1Value()
     };
 
 BitStringValue:
 	Tok_BString {
-		$$ = _convert_bitstring2binary($1, 'B');
-		checkmem($$);
-		free($1);
+		$$ = asn1types.NewAsn1Value()
 	}
 	| Tok_HString {
-		$$ = _convert_bitstring2binary($1, 'H');
-		checkmem($$);
-		free($1);
+		$$ = asn1types.NewAsn1Value()
 	}
 	;
 
