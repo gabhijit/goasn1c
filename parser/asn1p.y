@@ -56,6 +56,8 @@ var AllModules    *asn1types.Asn1Grammar
 	aid          *asn1types.Asn1AssignedIdentifier
 	expr_type    asn1types.Asn1ExprType
 	tag          *asn1types.Asn1Tag
+	value        *asn1types.Asn1Value
+	ref          *asn1types.Asn1Reference
 }
 
 %token       Tok_BEGIN
@@ -77,6 +79,8 @@ var AllModules    *asn1types.Asn1Grammar
 %token       Tok_PRIVATE
 %token       Tok_BOOLEAN
 %token       Tok_NULL
+%token       Tok_FALSE
+%token       Tok_TRUE
 %token       Tok_REAL
 %token       Tok_OCTET
 %token       Tok_STRING
@@ -95,7 +99,9 @@ var AllModules    *asn1types.Asn1Grammar
 %token <str> Tok_TypeReference
 %token <num> Tok_Number
 %token <str> Tok_Identifier
-
+%token <str> Tok_CString
+%token <str> Tok_BString
+%token <str> Tok_HString
 
 %type <grammar>      ModuleList
 %type <str>          TypeRefName
@@ -138,6 +144,17 @@ var AllModules    *asn1types.Asn1Grammar
 %type <tag>          TagTypeValue
 %type <tag>          TagPlicit
 %type <tag>          TagClass
+
+%type <expr>         ValueAssignment
+%type <value>        Value
+%type <value>        SimpleValue
+%type <value>        DefinedValue
+%type <value>        SignedNumber
+/* %type <value>        RealValue */
+%type <value>        RestrictedCharacterStringValue
+%type <value>        BitStringValue
+%type <value>        IdentifierAsValue
+%type <ref>          IdentifierAsReference
 
 %type <oid>          optObjectIdentifier
 %type <oid>          ObjectIdentifier
@@ -438,7 +455,12 @@ Assignment:
 	  DataTypeReference {
 		$$ = asn1types.NewAsn1Module()
 		$$.Members = append($$.Members, $1)
-	};
+	}
+	| ValueAssignment {
+		$$ = asn1types.NewAsn1Module();
+		$$.Members = append($$.Members, $1)
+	}
+	;
 
 DataTypeReference:
 	TypeRefName Tok_ASSIGNMENT Type {
@@ -501,11 +523,14 @@ BuiltinType:
 		$$.Type = $1;
 
 	}
-	/* | Tok_INTEGER {
-		$$ = asn1types.NewAsn1Expression();
-		$$.Type = asn1types.Asn1ExprTypeInteger;
-
-	}*/;
+/*
+	| TOK_INTEGER '{' NamedNumberList '}' {
+		$$ = $3;
+		$$->expr_type = ASN_BASIC_INTEGER;
+		$$->meta_type = AMT_TYPE;
+    	}
+*/
+	;
 
 BasicTypeId:
 	Tok_BOOLEAN { $$ = asn1types.Asn1ExprTypeBoolean; }
@@ -528,6 +553,123 @@ BasicTypeId_UniverationCompatible:
 	Tok_INTEGER { $$ = asn1types.Asn1ExprTypeInteger; }
 	| Tok_ENUMERATED { $$ = asn1types.Asn1ExprTypeEnumerated; }
 	| Tok_BIT Tok_STRING { $$ = asn1types.Asn1ExprTypeBitString; }
+	;
+
+/*
+ * === EXAMPLE ===
+ * value INTEGER ::= 1
+ * === EOF ===
+ */
+ValueAssignment:
+	Identifier Type Tok_ASSIGNMENT Value {
+		$$ = $2;
+		assert($$->Identifier == NULL);
+		$$->Identifier = $1;
+		$$->meta_type = AMT_VALUE;
+		$$->value = $4;
+	}
+	;
+
+
+Value:
+	SimpleValue
+	| DefinedValue
+/* TODO: Opaque not supported yet. Need to understand this first
+	| '{' { asn1p_lexer_hack_push_opaque_state(); } Opaque {
+		$$ = asn1p_value_frombuf($3.buf, $3.len, 0);
+		checkmem($$);
+		$$->type = ATV_UNPARSED;
+	}
+*/
+    ;
+
+SimpleValue:
+	Tok_NULL {
+		$$ = asn1p_value_fromint(0);
+		checkmem($$);
+		$$->type = ATV_NULL;
+	}
+	| Tok_FALSE {
+		$$ = asn1p_value_fromint(0);
+		checkmem($$);
+		$$->type = ATV_FALSE;
+	}
+	| Tok_TRUE {
+		$$ = asn1p_value_fromint(1);
+		checkmem($$);
+		$$->type = ATV_TRUE;
+	}
+	| SignedNumber
+	/* TODO : | RealValue */
+	| RestrictedCharacterStringValue
+	| BitStringValue
+	;
+
+DefinedValue:
+	IdentifierAsValue
+	| TypeRefName '.' Identifier {
+		asn1p_ref_t *ref;
+		int ret;
+		ref = asn1p_ref_new(yylineno, currentModule);
+		checkmem(ref);
+		ret = asn1p_ref_add_component(ref, $1, RLT_UNKNOWN);
+		checkmem(ret == 0);
+		ret = asn1p_ref_add_component(ref, $3, RLT_lowercase);
+		checkmem(ret == 0);
+		$$ = asn1p_value_fromref(ref, 0);
+		checkmem($$);
+		free($1);
+		free($3);
+	}
+	;
+
+
+RestrictedCharacterStringValue:
+	Tok_CString {
+		$$ = asn1p_value_frombuf($1.buf, $1.len, 0);
+		checkmem($$);
+	}
+	| '{' Tok_Number ',' Tok_Number '}' {
+		$$ = asn1p_value_fromint($2);
+		checkmem($$);
+		$$->type = ATV_TUPLE;
+	}
+	| '{' Tok_Number ',' Tok_Number ',' Tok_Number ',' Tok_Number '}' {
+		$$ = asn1p_value_fromint($2);
+		checkmem($$);
+		$$->type = ATV_QUADRUPLE;
+	}
+	;
+
+SignedNumber:
+	Tok_Number {
+		$$ = $1
+	}
+	;
+
+IdentifierAsReference:
+    Identifier {
+		$$ = asn1p_ref_new(yylineno, currentModule);
+		asn1p_ref_add_component($$, $1, RLT_lowercase);
+		free($1);
+    };
+
+IdentifierAsValue:
+    IdentifierAsReference {
+		$$ = asn1p_value_fromref($1, 0);
+    };
+
+BitStringValue:
+	Tok_BString {
+		$$ = _convert_bitstring2binary($1, 'B');
+		checkmem($$);
+		free($1);
+	}
+	| Tok_HString {
+		$$ = _convert_bitstring2binary($1, 'H');
+		checkmem($$);
+		free($1);
+	}
 	;
 
 %%

@@ -24,8 +24,8 @@ type Asn1Xports struct {
 }
 
 type Asn1AssignedIdentifier struct {
-	Oid   *Asn1Oid         // Object Identifier
-	Value *Asn1ParsedValue // Defined Value
+	Oid   *Asn1Oid   // Object Identifier
+	Value *Asn1Value // Defined Value
 }
 
 type Asn1XportsType int

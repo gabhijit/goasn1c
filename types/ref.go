@@ -12,38 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Parsed Values
+//  Reference to the types defined somewhere else
 
 package asn1types
 
-type Asn1Value struct {
-	Type Asn1ValueType
+type Asn1Reference struct {
+	Type Asn1ReferenceType
 }
 
-type Asn1ValueType int
+type Asn1ReferenceType int
 
 const (
-	Asn1ValueTypeNoValue Asn1ValueType = iota,
-		Asn1ValueTypeContainingType
-	Asn1ValueTypeNull
-	Asn1ValueTypeReal
-	Asn1ValueTypeInteger
-	Asn1ValueTypeMax
-	Asn1ValueTypeMin
-	Asn1ValueTypeTrue
-	Asn1ValueTypeFalse
-	Asn1ValueTypeTuple
-	Asn1ValueTypeQuadruple
-	Asn1ValueTypeUnparsed
-	Asn1ValueTypeBitVector
-	Asn1ValueTypeValueSet
-	Asn1ValueTypeReferenced
-	Asn1ValueTypeChoiceIdentifier
+	Asn1ReferenceTypeUnknown Asn1ReferenceType = iota
+	Asn1ReferenceTypeCapitals
+	Asn1ReferenceTypeUpperCase
+	Asn1ReferenceTypeLowerCase
+	Asn1ReferenceTypeAmpUpperCase
+	Asn1ReferenceTypeAmpLowerCase
+	Asn1ReferenceTypeAtLowerCase
+	Asn1ReferenceTypeAtDotLowerCase
+	Asn1ReferenceTypeMax
 )
 
-func NewAsn1ParsedValue() *Asn1ParsedValue {
+func NewAsn1Reference() *Asn1Reference {
 
-	n := &Asn1ParsedValue{}
+	n := &Asn1Reference{}
 
 	return n
 }
