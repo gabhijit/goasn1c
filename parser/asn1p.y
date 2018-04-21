@@ -136,6 +136,7 @@ var AllModules    *asn1types.Asn1Grammar
 %type <expr>         UntaggedType
 %type <expr>         BuiltinType
 %type <expr>         ConcreteTypeDeclaration
+%type <expr>         DefinedType
 
 %type <expr_type>    BasicTypeId
 %type <expr_type>    BasicTypeId_UniverationCompatible
@@ -156,6 +157,8 @@ var AllModules    *asn1types.Asn1Grammar
 %type <value>        BitStringValue
 %type <value>        IdentifierAsValue
 %type <ref>          IdentifierAsReference
+
+%type <ref>          ComplexTypeReference
 
 %type <expr>         Enumerations
 %type <expr>         UniverationList
@@ -518,8 +521,8 @@ UntaggedType:
 	;
 
 TypeDeclaration:
-	ConcreteTypeDeclaration;
-	/*| DefinedType ; */
+	ConcreteTypeDeclaration
+	| DefinedType ;
 
 ConcreteTypeDeclaration: BuiltinType;
 
@@ -734,4 +737,37 @@ UniverationElement:
 	}
 	;
 
+DefinedType:
+	/*
+	 * A DefinedType reference.
+	 * "CLASS1.&id.&id2"
+	 * or
+	 * "Module.Type"
+	 * or
+	 * "Module.identifier"
+	 * or
+	 * "Type"
+	 */
+	ComplexTypeReference {
+		$$ = asn1types.NewAsn1Expression();
+		$$.Type = asn1types.Asn1ExprTypeReference;
+		$$.Meta = asn1types.Asn1ExprMetaTypeTypeRef;
+	}
+	/* TODO: parameterized Types not supported
+	 * A parameterized assignment.
+	| ComplexTypeReference '{' ActualParameterList '}' {
+		$$ = NEW_EXPR();
+		checkmem($$);
+		$$->reference = $1;
+		$$->rhs_pspecs = $3;
+		$$->expr_type = A1TC_REFERENCE;
+		$$->meta_type = AMT_TYPEREF;
+	}
+	 */
+	;
+
+ComplexTypeReference:
+	Tok_TypeReference {
+		$$ = asn1types.NewAsn1Reference()
+	};
 %%
