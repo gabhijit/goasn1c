@@ -58,45 +58,49 @@ var AllModules    *asn1types.Asn1Grammar
 	tag          *asn1types.Asn1Tag
 	value        *asn1types.Asn1Value
 	ref          *asn1types.Asn1Reference
+	constraint   *asn1types.Asn1Constraint
 }
 
-%token       Tok_BEGIN
-%token       Tok_END
-%token       Tok_DEFINITIONS
+%token       Tok_ALL
+%token       Tok_APPLICATION
 %token       Tok_ASSIGNMENT
+%token       Tok_AUTOMATIC
+%token       Tok_BEGIN
+%token       Tok_BIT
+%token       Tok_BOOLEAN
+%token       Tok_CHARACTER
+%token       Tok_DEFINITIONS
+%token       Tok_EMBEDDED
+%token       Tok_END
+%token       Tok_ENUMERATED
+%token       Tok_EXCEPT
+%token       Tok_EXPLICIT
+%token       Tok_EXPORTS
+%token       Tok_EXTENSIBILITY
+%token       Tok_EXTERNAL
+%token       Tok_Ellipsis
+%token       Tok_FALSE
+%token       Tok_FROM
+%token       Tok_GeneralizedTime
+%token       Tok_IDENTIFIER
 %token       Tok_IMPLICIT
 %token       Tok_IMPLIED
-%token       Tok_EXPLICIT
-%token       Tok_EXTENSIBILITY
-%token       Tok_TAGS
-%token       Tok_AUTOMATIC
 %token       Tok_IMPORTS
-%token       Tok_FROM
-%token       Tok_ALL
-%token       Tok_EXPORTS
-%token       Tok_UNIVERSAL
-%token       Tok_APPLICATION
-%token       Tok_PRIVATE
-%token       Tok_BOOLEAN
-%token       Tok_NULL
-%token       Tok_FALSE
-%token       Tok_TRUE
-%token       Tok_REAL
-%token       Tok_OCTET
-%token       Tok_STRING
-%token       Tok_OBJECT
-%token       Tok_IDENTIFIER
-%token       Tok_RELATIVE_OID
-%token       Tok_EXTERNAL
-%token       Tok_EMBEDDED
-%token       Tok_PDV
-%token       Tok_CHARACTER
-%token       Tok_UTCTime
-%token       Tok_GeneralizedTime
 %token       Tok_INTEGER
-%token       Tok_ENUMERATED
-%token       Tok_BIT
-%token       Tok_Ellipsis
+%token       Tok_INTERSECTION
+%token       Tok_NULL
+%token       Tok_OBJECT
+%token       Tok_OCTET
+%token       Tok_PDV
+%token       Tok_PRIVATE
+%token       Tok_REAL
+%token       Tok_RELATIVE_OID
+%token       Tok_STRING
+%token       Tok_TAGS
+%token       Tok_TRUE
+%token       Tok_UNION
+%token       Tok_UNIVERSAL
+%token       Tok_UTCTime
 %token <str> Tok_TypeReference
 %token <num> Tok_Number
 %token <str> Tok_Identifier
@@ -159,6 +163,21 @@ var AllModules    *asn1types.Asn1Grammar
 %type <ref>          IdentifierAsReference
 
 %type <ref>          ComplexTypeReference
+
+%type <expr>         NamedNumberList
+%type <expr>         NamedNumber
+
+%type <expr>         ValueSetTypeAssignment
+%type <constraint>   ValueSet
+%type <constraint>   ElementSetSpecs
+%type <constraint>   ElementSetSpec
+%type <constraint>   Unions
+%type <constraint>   Intersections
+%type <constraint>   IntersectionElements
+%type <constraint>   Elements
+%type <constraint>   SubtypeElements
+%type <value>        SingleValue
+
 
 %type <expr>         Enumerations
 %type <expr>         UniverationList
@@ -468,6 +487,10 @@ Assignment:
 		$$ = asn1types.NewAsn1Module();
 		$$.Members = append($$.Members, $1)
 	}
+	| ValueSetTypeAssignment {
+		$$ = asn1types.NewAsn1Module();
+		$$.Members = append($$.Members, $1)
+	}
 	;
 
 DataTypeReference:
@@ -532,13 +555,11 @@ BuiltinType:
 		$$.Type = $1;
 
 	}
-/*
-	| TOK_INTEGER '{' NamedNumberList '}' {
+	| Tok_INTEGER '{' NamedNumberList '}' {
 		$$ = $3;
-		$$->expr_type = ASN_BASIC_INTEGER;
-		$$->meta_type = AMT_TYPE;
+		$$.Type = asn1types.Asn1ExprTypeInteger;
+		$$.Meta = asn1types.Asn1ExprMetaTypeType;
     	}
-*/
 	| Tok_ENUMERATED '{' Enumerations '}' {
 		$$ = $3;
 		$$.Type = asn1types.Asn1ExprTypeEnumerated;
@@ -770,4 +791,409 @@ ComplexTypeReference:
 	Tok_TypeReference {
 		$$ = asn1types.NewAsn1Reference()
 	};
+
+NamedNumberList:
+	NamedNumber {
+		$$ = asn1types.NewAsn1Expression()
+	}
+	| NamedNumberList ',' NamedNumber {
+		$$ = $1;
+	}
+	;
+
+NamedNumber:
+	Identifier '(' SignedNumber ')' {
+		$$ = asn1types.NewAsn1Expression()
+		$$.Type = asn1types.Asn1ExprTypeUniversal;
+		$$.Meta = asn1types.Asn1ExprMetaTypeValue;
+		$$.Identifier = $1;
+	}
+	| Identifier '(' DefinedValue ')' {
+		$$ = asn1types.NewAsn1Expression()
+		$$.Type = asn1types.Asn1ExprTypeUniversal;
+		$$.Meta = asn1types.Asn1ExprMetaTypeValue;
+		$$.Identifier = $1;
+	};
+
+/*
+ * Data type constraints.
+ */
+UnionMark:		'|' | Tok_UNION;
+IntersectionMark:	'^' | Tok_INTERSECTION;
+
+ValueSet: '{' ElementSetSpecs '}' { $$ = $2; };
+
+ValueSetTypeAssignment:
+	TypeRefName Type Tok_ASSIGNMENT ValueSet {
+		$$ = $2;
+		$$.Identifier = $1;
+		$$.Meta = asn1types.Asn1ExprMetaTypeValueSet;
+	}
+	;
+
+ElementSetSpecs:
+	Tok_Ellipsis  {
+		$$ = asn1types.NewAsn1Constraint()
+		$$.Type = asn1types.ConstraintTypeExtensibilityMark;
+	}
+   | ElementSetSpec
+   | ElementSetSpec ',' Tok_Ellipsis {
+       $$ = asn1types.NewAsn1Constraint()
+       $$.Type = asn1types.ConstraintTypeExtensibilityMark;
+   }
+   | ElementSetSpec ',' Tok_Ellipsis ',' ElementSetSpec {
+       $$ = asn1types.NewAsn1Constraint()
+       $$.Type = asn1types.ConstraintTypeExtensibilityMark;
+   }
+;
+
+ElementSetSpec:
+	Unions
+	| Tok_ALL Tok_EXCEPT Elements {
+	}
+	;
+
+Unions:
+	Intersections
+	| Unions UnionMark Intersections {
+	}
+	;
+
+Intersections:
+	IntersectionElements
+	|  Intersections IntersectionMark IntersectionElements {
+	}
+	;
+
+
+IntersectionElements:
+	Elements
+	| Elements Tok_EXCEPT Elements {
+	}
+	;
+
+Elements:
+    SubtypeElements
+    | '(' ElementSetSpec ')' {
+	$$ = asn1types.NewAsn1Constraint();
+	$$.Type = asn1types.ConstraintTypeSet;
+    }
+    ;
+
+SubtypeElements:
+	SingleValue {
+		$$ = asn1types.NewAsn1Constraint();
+		$$.Type = asn1types.ConstraintTypeValue;
+	}
+/*
+	| ContainedSubtype {
+		$$ = asn1p_constraint_new(yylineno, currentModule);
+		checkmem($$);
+		$$->type = ACT_EL_TYPE;
+		$$->containedSubtype = $1;
+	}
+    | PermittedAlphabet /* FROM ... * /
+    | SizeConstraint    /* SIZE ... */
+    /* | TypeConstraint is via ContainedSubtype * /
+	| InnerTypeConstraints  /* WITH COMPONENT[S] ... * /
+	| PatternConstraint     /* PATTERN ... * /
+	| ValueRange
+*/
+	;
+
+
+/* TODO: Constraints not implemented yet
+PermittedAlphabet:
+	TOK_FROM Constraint {
+		CONSTRAINT_INSERT($$, ACT_CT_FROM, $2, 0);
+	};
+
+SizeConstraint:
+	TOK_SIZE Constraint {
+		CONSTRAINT_INSERT($$, ACT_CT_SIZE, $2, 0);
+	};
+
+PatternConstraint:
+	TOK_PATTERN TOK_cstring {
+		$$ = asn1p_constraint_new(yylineno, currentModule);
+		$$->type = ACT_CT_PATTERN;
+		$$->value = asn1p_value_frombuf($2.buf, $2.len, 0);
+	}
+	| TOK_PATTERN Identifier {
+		asn1p_ref_t *ref;
+		$$ = asn1p_constraint_new(yylineno, currentModule);
+		$$->type = ACT_CT_PATTERN;
+		ref = asn1p_ref_new(yylineno, currentModule);
+		asn1p_ref_add_component(ref, $2, RLT_lowercase);
+		$$->value = asn1p_value_fromref(ref, 0);
+		free($2);
+	}
+	;
+
+ValueRange:
+    LowerEndValue ConstraintRangeSpec UpperEndValue {
+		$$ = asn1p_constraint_new(yylineno, currentModule);
+		checkmem($$);
+		$$->type = $2;
+		$$->range_start = $1;
+		$$->range_stop = $3;
+    };
+
+LowerEndValue:
+    SingleValue
+    | TOK_MIN {
+		$$ = asn1p_value_fromint(-123);
+		$$->type = ATV_MIN;
+    };
+
+UpperEndValue:
+    SingleValue
+    | TOK_MAX {
+		$$ = asn1p_value_fromint(321);
+		$$->type = ATV_MAX;
+    };
+
+*/
+
+SingleValue: Value;
+
+/* TODO: Add support one by one
+BitStringValue:
+	TOK_bstring {
+		$$ = _convert_bitstring2binary($1, 'B');
+		checkmem($$);
+		free($1);
+	}
+	| TOK_hstring {
+		$$ = _convert_bitstring2binary($1, 'H');
+		checkmem($$);
+		free($1);
+	}
+	;
+
+ContainedSubtype:
+    TOK_INCLUDES Type {
+		$$ = asn1p_value_fromtype($2);
+		checkmem($$);
+		asn1p_expr_free($2);
+    }
+    /* Can't put Type here because of conflicts. Simplified subset * /
+    | DefinedUntaggedType {
+		$$ = asn1p_value_fromtype($1);
+		checkmem($$);
+		asn1p_expr_free($1);
+    }
+	;
+
+*/
+
+/*
+ * X.680 08/2015
+ * #51.8.5
+ * /
+InnerTypeConstraints:
+	TOK_WITH TOK_COMPONENT SingleTypeConstraint {
+		CONSTRAINT_INSERT($$, ACT_CT_WCOMP, $3, 0);
+	}
+	| TOK_WITH TOK_COMPONENTS MultipleTypeConstraints {
+        assert($3->type == ACT_CA_CSV);
+        $3->type = ACT_CT_WCOMPS;
+        $$ = $3;
+	}
+	;
+SingleTypeConstraint: Constraint;
+MultipleTypeConstraints: FullSpecification | PartialSpecification;
+FullSpecification: '{' TypeConstraints '}' { $$ = $2; };
+PartialSpecification:
+    '{' Tok_Ellipsis ',' TypeConstraints '}' {
+        assert($4->type == ACT_CA_CSV);
+		$$ = asn1p_constraint_new(yylineno, currentModule);
+        $$->type = ACT_CA_CSV;
+		asn1p_constraint_t *ct = asn1p_constraint_new(yylineno, currentModule);
+		checkmem($$);
+		ct->type = asn1types.ConstraintTypeExtensibilityMark;
+        asn1p_constraint_insert($$, ct);
+        for(unsigned i = 0; i < $4->el_count; i++) {
+            asn1p_constraint_insert($$, $4->elements[i]);
+        }
+    };
+TypeConstraints:
+    NamedConstraint {
+        $$ = asn1p_constraint_new(yylineno, currentModule);
+        $$->type = ACT_CA_CSV;
+        asn1p_constraint_insert($$, $1);
+    }
+    | TypeConstraints ',' NamedConstraint {
+        $$ = $1;
+        asn1p_constraint_insert($$, $3);
+	}
+	;
+NamedConstraint:
+	IdentifierAsValue optConstraint optPresenceConstraint {
+        $$ = asn1p_constraint_new(yylineno, currentModule);
+        checkmem($$);
+        $$->type = ACT_EL_VALUE;
+        $$->value = $1;
+        if($2) asn1p_constraint_insert($$, $2);
+        $$->presence = $3;
+    }
+    ;
+
+*/
+
+/*
+ * presence constraint for NamedConstraint
+ * /
+optPresenceConstraint:
+	{ $$ = ACPRES_DEFAULT; }
+	| PresenceConstraint { $$ = $1; }
+	;
+
+PresenceConstraint:
+	TOK_PRESENT {
+		$$ = ACPRES_PRESENT;
+	}
+	| TOK_ABSENT {
+		$$ = ACPRES_ABSENT;
+	}
+	| TOK_OPTIONAL {
+		$$ = ACPRES_OPTIONAL;
+	}
+	;
+
+*/
+/* X.682 * /
+GeneralConstraint:
+	UserDefinedConstraint
+	| TableConstraint
+	| ContentsConstraint
+	;
+
+UserDefinedConstraint:
+	TOK_CONSTRAINED TOK_BY '{'
+		{ asn1p_lexer_hack_push_opaque_state(); } Opaque /* '}' * / {
+		$$ = asn1p_constraint_new(yylineno, currentModule);
+		checkmem($$);
+		$$->type = ACT_CT_CTDBY;
+		$$->value = asn1p_value_frombuf($5.buf, $5.len, 0);
+		checkmem($$->value);
+		$$->value->type = ATV_UNPARSED;
+	}
+	;
+
+ContentsConstraint:
+	TOK_CONTAINING Type {
+		$$ = asn1p_constraint_new(yylineno, currentModule);
+		$$->type = ACT_CT_CTNG;
+		$$->value = asn1p_value_fromtype($2);
+		asn1p_expr_free($2);
+	}
+	;
+
+ConstraintRangeSpec:
+	TOK_TwoDots		{ $$ = ACT_EL_RANGE; }
+	| TOK_TwoDots '<'	{ $$ = ACT_EL_RLRANGE; }
+	| '<' TOK_TwoDots	{ $$ = ACT_EL_LLRANGE; }
+	| '<' TOK_TwoDots '<'	{ $$ = ACT_EL_ULRANGE; }
+	;
+TableConstraint:
+	SimpleTableConstraint {
+		$$ = $1;
+	}
+	| ComponentRelationConstraint {
+		$$ = $1;
+	}
+	;
+
+*/
+/* TODO :
+ * "{ExtensionSet}"
+ * /
+SimpleTableConstraint:
+	'{' TypeRefName '}' {
+		asn1p_ref_t *ref = asn1p_ref_new(yylineno, currentModule);
+		asn1p_constraint_t *ct;
+		int ret;
+		ret = asn1p_ref_add_component(ref, $2, 0);
+		checkmem(ret == 0);
+		ct = asn1p_constraint_new(yylineno, currentModule);
+		checkmem($$);
+		ct->type = ACT_EL_VALUE;
+		ct->value = asn1p_value_fromref(ref, 0);
+		CONSTRAINT_INSERT($$, ACT_CA_CRC, ct, 0);
+		free($2);
+	}
+	;
+
+ComponentRelationConstraint:
+	SimpleTableConstraint '{' AtNotationList '}' {
+		CONSTRAINT_INSERT($$, ACT_CA_CRC, $1, $3);
+	}
+	;
+
+AtNotationList:
+	AtNotationElement {
+		$$ = asn1p_constraint_new(yylineno, currentModule);
+		checkmem($$);
+		$$->type = ACT_EL_VALUE;
+		$$->value = asn1p_value_fromref($1, 0);
+	}
+	| AtNotationList ',' AtNotationElement {
+		asn1p_constraint_t *ct;
+		ct = asn1p_constraint_new(yylineno, currentModule);
+		checkmem(ct);
+		ct->type = ACT_EL_VALUE;
+		ct->value = asn1p_value_fromref($3, 0);
+		CONSTRAINT_INSERT($$, ACT_CA_CSV, $1, ct);
+	}
+	;
+
+/*
+ * @blah
+ * /
+AtNotationElement:
+	'@' ComponentIdList {
+		char *p = malloc(strlen($2) + 2);
+		int ret;
+		*p = '@';
+		strcpy(p + 1, $2);
+		$$ = asn1p_ref_new(yylineno, currentModule);
+		ret = asn1p_ref_add_component($$, p, 0);
+		checkmem(ret == 0);
+		free(p);
+		free($2);
+	}
+	| '@' '.' ComponentIdList {
+		char *p = malloc(strlen($3) + 3);
+		int ret;
+		p[0] = '@';
+		p[1] = '.';
+		strcpy(p + 2, $3);
+		$$ = asn1p_ref_new(yylineno, currentModule);
+		ret = asn1p_ref_add_component($$, p, 0);
+		checkmem(ret == 0);
+		free(p);
+		free($3);
+	}
+	;
+
+/* identifier "." ... * /
+ComponentIdList:
+	Identifier {
+		$$ = $1;
+	}
+	| ComponentIdList '.' Identifier {
+		int l1 = strlen($1);
+		int l3 = strlen($3);
+		$$ = malloc(l1 + 1 + l3 + 1);
+		memcpy($$, $1, l1);
+		$$[l1] = '.';
+		memcpy($$ + l1 + 1, $3, l3);
+		$$[l1 + 1 + l3] = '\0';
+		free($1);
+		free($3);
+	}
+	;
+
+*/
 %%

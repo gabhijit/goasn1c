@@ -16,34 +16,35 @@
 
 package asn1types
 
-type Asn1ConstraintKind uint8
+type Asn1ConstraintType uint8
 
 const (
-	ConstraintTypeInvalid Asn1ConstraintKind = iota
+	ConstraintTypeInvalid Asn1ConstraintType = iota
 
 	// constraint elements
-	ConstraintKindSubType // WeekEnd
-	ConstraintKindValue
-	ConstraintKindSimpleRange            // 1..2
-	ConstraintKindLeftExcludedRange      // 0<..MAX (positive integers)
-	ConstraintKindRightExcludedRange     // MIN..<0 (negative integers)
-	ConstraintKindLeftRightExcludedRange // MIN<..<Max
+	ConstraintTypeSubType // WeekEnd
+	ConstraintTypeValue
+	ConstraintTypeSimpleRange            // 1..2
+	ConstraintTypeLeftExcludedRange      // 0<..MAX (positive integers)
+	ConstraintTypeRightExcludedRange     // MIN..<0 (negative integers)
+	ConstraintTypeLeftRightExcludedRange // MIN<..<Max
+	ConstraintTypeExtensibilityMark
 
 	// constrained types
-	ConstraintKindSize
-	ConstraintKindFrom
-	ConstraintKindWithComponent
-	ConstraintKindWithComponents
-	ConstraintKindContstrainedBy
-	ConstraintKindContainingType
-	ConstraintKindPattern
+	ConstraintTypeSize
+	ConstraintTypeFrom
+	ConstraintTypeWithComponent
+	ConstraintTypeWithComponents
+	ConstraintTypeContstrainedBy
+	ConstraintTypeContainingType
+	ConstraintTypePattern
 
-	ConstraintKindSet
-	ConstraintKindCrc // Not sure what is this?
-	ConstraintKindUnion
-	ConstraintKindIntersection
-	ConstraintKindExcept
-	ConstraintKindAllExcept
+	ConstraintTypeSet
+	ConstraintTypeCrc // Not sure what is this?
+	ConstraintTypeUnion
+	ConstraintTypeIntersection
+	ConstraintTypeExcept
+	ConstraintTypeAllExcept
 )
 
 type Asn1ConstraintPresentType uint8
@@ -55,5 +56,14 @@ const (
 	ConstraintOptional
 )
 
-type Asn1ConstraintType struct {
+type Asn1Constraint struct {
+	Type Asn1ConstraintType
+}
+
+func NewAsn1Constraint() *Asn1Constraint {
+
+	n := &Asn1Constraint{}
+
+	return n
+
 }
