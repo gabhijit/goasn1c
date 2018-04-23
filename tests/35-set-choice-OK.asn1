@@ -11,6 +11,7 @@ ModuleTestSetAndUntaggedChoice
 	DEFINITIONS ::=
 BEGIN
 
+/*
 	T ::= SET {
 		a NumericString,
 		b CHOICE {			-- Untagged choice
@@ -22,7 +23,7 @@ BEGIN
 		...,
 		d OID
 	}
-
+*/
 	Choice ::= CHOICE {			-- One more level
 		ch-a OCTET STRING,
 		ch-b BIT STRING

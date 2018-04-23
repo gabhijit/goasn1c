@@ -49,44 +49,46 @@ const Tok_BEGIN = 57350
 const Tok_BIT = 57351
 const Tok_BOOLEAN = 57352
 const Tok_CHARACTER = 57353
-const Tok_DEFINITIONS = 57354
-const Tok_EMBEDDED = 57355
-const Tok_END = 57356
-const Tok_ENUMERATED = 57357
-const Tok_EXCEPT = 57358
-const Tok_EXPLICIT = 57359
-const Tok_EXPORTS = 57360
-const Tok_EXTENSIBILITY = 57361
-const Tok_EXTERNAL = 57362
-const Tok_Ellipsis = 57363
-const Tok_FALSE = 57364
-const Tok_FROM = 57365
-const Tok_GeneralizedTime = 57366
-const Tok_IDENTIFIER = 57367
-const Tok_IMPLICIT = 57368
-const Tok_IMPLIED = 57369
-const Tok_IMPORTS = 57370
-const Tok_INTEGER = 57371
-const Tok_INTERSECTION = 57372
-const Tok_NULL = 57373
-const Tok_OBJECT = 57374
-const Tok_OCTET = 57375
-const Tok_PDV = 57376
-const Tok_PRIVATE = 57377
-const Tok_REAL = 57378
-const Tok_RELATIVE_OID = 57379
-const Tok_STRING = 57380
-const Tok_TAGS = 57381
-const Tok_TRUE = 57382
-const Tok_UNION = 57383
-const Tok_UNIVERSAL = 57384
-const Tok_UTCTime = 57385
-const Tok_TypeReference = 57386
-const Tok_Number = 57387
-const Tok_Identifier = 57388
-const Tok_CString = 57389
-const Tok_BString = 57390
-const Tok_HString = 57391
+const Tok_CHOICE = 57354
+const Tok_DEFINITIONS = 57355
+const Tok_EMBEDDED = 57356
+const Tok_END = 57357
+const Tok_ENUMERATED = 57358
+const Tok_EXCEPT = 57359
+const Tok_EXPLICIT = 57360
+const Tok_EXPORTS = 57361
+const Tok_EXTENSIBILITY = 57362
+const Tok_EXTERNAL = 57363
+const Tok_Ellipsis = 57364
+const Tok_FALSE = 57365
+const Tok_FROM = 57366
+const Tok_GeneralizedTime = 57367
+const Tok_IDENTIFIER = 57368
+const Tok_IMPLICIT = 57369
+const Tok_IMPLIED = 57370
+const Tok_IMPORTS = 57371
+const Tok_INTEGER = 57372
+const Tok_INTERSECTION = 57373
+const Tok_NULL = 57374
+const Tok_OBJECT = 57375
+const Tok_OCTET = 57376
+const Tok_PDV = 57377
+const Tok_PRIVATE = 57378
+const Tok_REAL = 57379
+const Tok_RELATIVE_OID = 57380
+const Tok_STRING = 57381
+const Tok_TAGS = 57382
+const Tok_TRUE = 57383
+const Tok_UNION = 57384
+const Tok_UNIVERSAL = 57385
+const Tok_UTCTime = 57386
+const Tok_TypeReference = 57387
+const Tok_CAPITALREFERENCE = 57388
+const Tok_Number = 57389
+const Tok_Identifier = 57390
+const Tok_CString = 57391
+const Tok_BString = 57392
+const Tok_HString = 57393
 
 var asn1Toknames = [...]string{
 	"$end",
@@ -100,6 +102,7 @@ var asn1Toknames = [...]string{
 	"Tok_BIT",
 	"Tok_BOOLEAN",
 	"Tok_CHARACTER",
+	"Tok_CHOICE",
 	"Tok_DEFINITIONS",
 	"Tok_EMBEDDED",
 	"Tok_END",
@@ -133,6 +136,7 @@ var asn1Toknames = [...]string{
 	"Tok_UNIVERSAL",
 	"Tok_UTCTime",
 	"Tok_TypeReference",
+	"Tok_CAPITALREFERENCE",
 	"Tok_Number",
 	"Tok_Identifier",
 	"Tok_CString",
@@ -149,6 +153,7 @@ var asn1Toknames = [...]string{
 	"'.'",
 	"'|'",
 	"'^'",
+	"'!'",
 }
 var asn1Statenames = [...]string{}
 
@@ -156,194 +161,204 @@ const asn1EofCode = 1
 const asn1ErrCode = 2
 const asn1InitialStackSize = 16
 
-//line parser/asn1p.y:1193
+//line parser/asn1p.y:1256
 
 //line yacctab:1
 var asn1Exca = [...]int{
 	-1, 1,
 	1, -1,
 	-2, 0,
-	-1, 35,
-	14, 25,
-	-2, 44,
+	-1, 36,
+	15, 26,
+	-2, 45,
 }
 
 const asn1Private = 57344
 
-const asn1Last = 283
+const asn1Last = 312
 
 var asn1Act = [...]int{
 
-	155, 150, 139, 160, 159, 170, 135, 158, 64, 166,
-	9, 49, 15, 164, 15, 143, 4, 73, 4, 185,
-	181, 62, 175, 174, 72, 78, 214, 188, 82, 47,
-	215, 189, 67, 68, 53, 218, 209, 195, 180, 192,
-	178, 80, 69, 51, 213, 58, 212, 66, 211, 184,
-	210, 201, 36, 193, 58, 190, 27, 50, 220, 57,
-	83, 65, 191, 66, 157, 177, 16, 17, 57, 5,
-	51, 17, 25, 122, 78, 157, 79, 65, 86, 48,
-	85, 154, 137, 81, 50, 66, 10, 71, 16, 17,
-	87, 136, 121, 137, 13, 126, 125, 124, 120, 65,
-	138, 84, 136, 70, 5, 144, 17, 145, 147, 148,
-	146, 138, 162, 17, 173, 5, 144, 17, 145, 147,
-	148, 146, 5, 162, 17, 137, 219, 167, 171, 172,
-	217, 152, 208, 133, 136, 5, 144, 17, 144, 17,
-	176, 60, 132, 138, 34, 5, 32, 5, 144, 17,
-	145, 147, 148, 146, 31, 162, 137, 45, 30, 131,
-	129, 127, 5, 187, 17, 136, 128, 33, 130, 196,
-	41, 186, 20, 182, 138, 42, 117, 194, 5, 144,
-	17, 145, 147, 148, 146, 11, 198, 197, 199, 35,
-	200, 167, 29, 203, 171, 172, 206, 204, 205, 202,
-	207, 111, 99, 104, 119, 103, 118, 97, 23, 14,
-	216, 88, 109, 116, 28, 183, 106, 114, 21, 179,
-	24, 96, 26, 100, 107, 102, 113, 22, 101, 108,
-	3, 90, 7, 6, 1, 105, 98, 19, 18, 12,
-	8, 169, 168, 163, 161, 156, 153, 123, 56, 165,
-	94, 149, 142, 141, 140, 134, 55, 115, 112, 77,
-	76, 75, 110, 95, 92, 91, 93, 89, 74, 54,
-	52, 46, 40, 39, 151, 63, 61, 59, 44, 43,
-	38, 37, 2,
+	159, 154, 143, 170, 163, 180, 75, 162, 65, 139,
+	10, 176, 50, 16, 168, 16, 74, 201, 147, 4,
+	195, 4, 63, 164, 191, 185, 174, 184, 73, 231,
+	202, 79, 198, 232, 203, 83, 199, 68, 69, 237,
+	235, 226, 209, 190, 52, 206, 59, 188, 67, 81,
+	70, 194, 18, 48, 230, 59, 229, 228, 227, 54,
+	215, 51, 79, 58, 67, 66, 205, 37, 84, 207,
+	204, 52, 58, 161, 28, 11, 80, 17, 18, 187,
+	79, 66, 86, 26, 125, 82, 67, 87, 51, 130,
+	88, 158, 141, 124, 5, 6, 129, 18, 17, 18,
+	128, 140, 123, 66, 14, 49, 127, 85, 161, 71,
+	142, 18, 236, 72, 5, 6, 148, 18, 149, 151,
+	152, 150, 61, 166, 234, 5, 6, 141, 18, 225,
+	171, 177, 181, 182, 156, 173, 140, 137, 5, 6,
+	148, 18, 186, 5, 6, 142, 18, 136, 141, 5,
+	6, 148, 18, 149, 151, 152, 150, 140, 166, 183,
+	5, 6, 120, 35, 33, 135, 142, 197, 32, 31,
+	5, 6, 148, 18, 149, 151, 152, 150, 200, 166,
+	133, 131, 132, 46, 148, 18, 117, 208, 34, 134,
+	42, 210, 196, 121, 192, 116, 43, 211, 213, 12,
+	119, 171, 21, 216, 218, 177, 173, 220, 181, 182,
+	223, 217, 222, 141, 221, 219, 212, 224, 15, 36,
+	214, 122, 140, 30, 89, 29, 3, 233, 193, 7,
+	189, 142, 27, 91, 8, 5, 6, 148, 18, 149,
+	151, 152, 150, 114, 102, 107, 95, 1, 106, 24,
+	99, 20, 19, 13, 9, 112, 179, 178, 172, 109,
+	22, 169, 25, 167, 98, 165, 103, 110, 105, 23,
+	160, 104, 111, 157, 126, 57, 175, 96, 108, 100,
+	101, 153, 146, 145, 144, 138, 56, 118, 115, 78,
+	77, 76, 113, 97, 93, 92, 94, 90, 55, 53,
+	47, 41, 40, 155, 64, 62, 60, 45, 44, 39,
+	38, 2,
 }
 var asn1Pact = [...]int{
 
-	101, -1000, 101, -1000, -1000, -1000, -1000, 36, 173, -1000,
-	43, 201, 21, -1000, -1000, 4, -1000, -1000, 208, 201,
-	-1000, 119, 115, 107, 140, -1000, -1000, 99, 181, -1000,
-	-1000, -1000, -1000, -1000, -1, 152, -1000, 161, -1000, 129,
-	-1000, 25, -1000, 78, -1000, 118, -22, -12, -1000, -1000,
-	53, -1000, 78, -1000, -1000, -1000, -1000, 18, -31, -13,
-	-1000, 78, -1000, 5, -1000, 51, -1000, -1000, 78, -1000,
-	27, -1000, -31, 205, -1000, 192, -1000, 200, 171, 198,
-	-1000, -1000, 101, 78, 22, -1000, -1000, -1000, 47, -1000,
-	-1000, -1000, -1000, -1000, -1000, -1000, 46, 45, -1000, -1000,
-	-1000, -1000, 123, 132, 122, -1000, -1000, 143, -1000, -1000,
-	-1000, 121, -1000, -1000, -1000, 97, -1000, -1000, -1000, 134,
-	36, -1000, -1000, -1000, 60, 67, 93, -1000, -1000, -1000,
-	-1000, -1000, -34, -1000, -1000, -1000, -1000, -1000, -1000, -1000,
-	-1000, -1000, -1000, -36, -1000, -1000, 95, -1000, -1000, -1000,
-	-1000, -1000, -1000, 14, -1000, -15, -21, 157, -11, -1000,
-	155, -1000, 71, -1000, -1000, -24, -1000, 3, 11, -16,
-	-1000, 1, -1000, -1000, -1000, 67, -18, -1000, 148, 103,
-	-1000, -1000, 103, 103, -1000, -1000, 103, -2, -1000, 67,
-	91, -1000, 93, 91, -1000, 87, -19, -11, -1000, -1000,
-	-1000, -1000, -1000, -3, -5, -1000, -7, -9, -25, 71,
-	-1000, -1000, -1000, -1000, -1000, 85, -1000, -20, 81, 7,
-	-1000,
+	115, -1000, 115, -1000, -1000, -1000, -1000, -1000, 23, 186,
+	-1000, 51, 242, 30, -1000, -1000, 20, -1000, -1000, 219,
+	242, -1000, 129, 128, 124, 160, -1000, -1000, 116, 211,
+	-1000, -1000, -1000, -1000, -1000, 12, 171, -1000, 181, -1000,
+	154, -1000, 49, -1000, 80, -1000, 98, -19, -6, -1000,
+	-1000, 57, -1000, 80, -1000, -1000, -1000, -1000, 22, -27,
+	-7, -1000, 80, -1000, 11, -1000, 55, -1000, -1000, 80,
+	-1000, 34, -1000, -27, 218, -1000, 234, -1000, 168, 157,
+	215, -1000, -1000, 115, 80, 31, -1000, -1000, -1000, 54,
+	-1000, -1000, -1000, -1000, -1000, 48, -1000, -1000, 44, 37,
+	-1000, -1000, -1000, -1000, -1000, 142, 147, 141, -1000, -1000,
+	163, -1000, -1000, -1000, 126, -1000, -1000, -1000, 100, -1000,
+	-1000, -1000, 190, 23, -1000, -1000, -1000, 69, 4, 63,
+	137, -1000, -1000, -1000, -1000, -1000, -32, -1000, -1000, -1000,
+	-1000, -1000, -1000, -1000, -1000, -1000, -1000, -35, -1000, -1000,
+	95, -1000, -1000, -1000, -1000, -1000, -1000, 26, -1000, -10,
+	-18, 177, -11, -1000, 175, -1000, 104, -1000, -1000, -21,
+	-1000, -27, -1000, -1000, -46, -23, -1000, 16, 13, -12,
+	-1000, 15, -1000, -1000, -1000, 63, -15, -1000, 169, 125,
+	-1000, -1000, 125, 125, -1000, -1000, 125, 5, -1000, 4,
+	-1000, 93, -1000, 63, 93, -1000, 137, 93, -1000, 82,
+	-16, -11, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000,
+	3, 2, -1000, 1, -1, -24, 104, -1000, -1000, -1000,
+	-1000, -1000, 77, -1000, -17, 65, -14, -1000,
 }
 var asn1Pgo = [...]int{
 
-	0, 282, 15, 1, 230, 281, 280, 279, 278, 277,
-	276, 21, 275, 8, 274, 273, 272, 271, 11, 270,
-	34, 269, 17, 268, 267, 266, 265, 264, 263, 262,
-	261, 260, 259, 258, 257, 256, 13, 255, 6, 2,
-	254, 253, 252, 251, 250, 249, 9, 248, 247, 246,
-	0, 245, 7, 4, 3, 244, 243, 242, 241, 5,
-	240, 10, 239, 209, 238, 237, 172, 234, 232, 231,
-	219, 215,
+	0, 311, 18, 1, 226, 310, 309, 308, 307, 306,
+	305, 22, 304, 8, 303, 302, 301, 300, 12, 299,
+	59, 298, 16, 6, 297, 296, 295, 294, 293, 292,
+	291, 290, 289, 288, 287, 286, 14, 285, 9, 2,
+	284, 283, 282, 281, 277, 276, 11, 275, 274, 273,
+	0, 270, 7, 4, 23, 265, 263, 261, 3, 258,
+	257, 256, 5, 254, 10, 253, 218, 252, 251, 202,
+	247, 234, 233, 230, 228,
 }
 var asn1R1 = [...]int{
 
-	0, 67, 1, 1, 68, 4, 60, 60, 61, 61,
-	62, 62, 63, 63, 63, 3, 2, 64, 64, 65,
-	65, 66, 66, 66, 66, 5, 5, 6, 7, 7,
-	8, 8, 9, 9, 10, 10, 14, 14, 11, 12,
-	12, 13, 13, 13, 15, 15, 16, 16, 16, 17,
-	17, 18, 18, 18, 19, 19, 20, 20, 20, 21,
-	22, 23, 30, 30, 31, 32, 34, 34, 34, 34,
-	33, 33, 33, 24, 69, 69, 26, 25, 25, 25,
-	28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
-	28, 28, 29, 29, 29, 35, 36, 36, 37, 37,
-	37, 37, 37, 37, 38, 38, 40, 40, 40, 39,
-	43, 42, 41, 41, 57, 58, 58, 59, 59, 59,
-	59, 59, 27, 44, 45, 45, 46, 46, 70, 70,
-	71, 71, 48, 47, 49, 49, 49, 49, 50, 50,
-	51, 51, 52, 52, 53, 53, 54, 54, 55, 56,
+	0, 70, 1, 1, 71, 4, 63, 63, 64, 64,
+	65, 65, 66, 66, 66, 3, 2, 2, 67, 67,
+	68, 68, 69, 69, 69, 69, 5, 5, 6, 7,
+	7, 8, 8, 9, 9, 10, 10, 14, 14, 11,
+	12, 12, 13, 13, 13, 15, 15, 16, 16, 16,
+	17, 17, 18, 18, 18, 19, 19, 20, 20, 20,
+	21, 22, 23, 30, 30, 31, 32, 34, 34, 34,
+	34, 33, 33, 33, 24, 72, 72, 26, 26, 25,
+	25, 25, 28, 28, 28, 28, 28, 28, 28, 28,
+	28, 28, 28, 28, 29, 29, 29, 35, 36, 36,
+	37, 37, 37, 37, 37, 37, 38, 38, 40, 40,
+	40, 39, 43, 42, 41, 41, 60, 61, 61, 62,
+	62, 62, 62, 62, 27, 44, 44, 45, 45, 46,
+	46, 73, 73, 74, 74, 48, 47, 49, 49, 49,
+	49, 50, 50, 51, 51, 52, 52, 53, 53, 54,
+	54, 55, 57, 57, 58, 58, 58, 59, 59, 59,
+	56,
 }
 var asn1R2 = [...]int{
 
 	0, 1, 1, 2, 0, 9, 0, 1, 3, 2,
-	1, 2, 1, 4, 1, 1, 1, 0, 1, 1,
-	2, 2, 2, 2, 2, 0, 1, 3, 0, 1,
-	3, 2, 0, 1, 1, 2, 0, 1, 4, 1,
-	3, 1, 3, 1, 0, 1, 3, 3, 2, 1,
-	3, 1, 3, 1, 1, 2, 1, 1, 1, 3,
-	1, 2, 0, 1, 2, 4, 0, 1, 1, 1,
-	0, 1, 1, 1, 1, 1, 1, 1, 4, 4,
-	1, 1, 1, 2, 2, 2, 1, 1, 2, 1,
-	1, 1, 1, 1, 2, 4, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 3, 1, 5, 9, 1,
-	1, 1, 1, 1, 1, 1, 3, 1, 4, 4,
-	1, 1, 1, 1, 1, 3, 4, 4, 1, 1,
-	1, 1, 3, 4, 1, 1, 3, 5, 1, 3,
-	1, 3, 1, 3, 1, 3, 1, 3, 1, 1,
+	1, 2, 1, 4, 1, 1, 1, 1, 0, 1,
+	1, 2, 2, 2, 2, 2, 0, 1, 3, 0,
+	1, 3, 2, 0, 1, 1, 2, 0, 1, 4,
+	1, 3, 1, 3, 1, 0, 1, 3, 3, 2,
+	1, 3, 1, 3, 1, 1, 2, 1, 1, 1,
+	3, 1, 2, 0, 1, 2, 4, 0, 1, 1,
+	1, 0, 1, 1, 1, 1, 1, 1, 4, 1,
+	4, 4, 1, 1, 1, 2, 2, 2, 1, 1,
+	2, 1, 1, 1, 1, 1, 2, 4, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 3, 1, 5,
+	9, 1, 1, 1, 1, 1, 1, 1, 3, 1,
+	4, 4, 1, 1, 1, 1, 1, 1, 3, 4,
+	4, 1, 1, 1, 1, 3, 4, 1, 1, 3,
+	5, 1, 3, 1, 3, 1, 3, 1, 3, 1,
+	3, 1, 1, 3, 2, 1, 1, 1, 3, 3,
+	1,
 }
 var asn1Chk = [...]int{
 
-	-1000, -67, -1, -4, -2, 44, -4, -68, -60, -61,
-	50, 12, -62, 51, -63, -3, 45, 46, -64, -65,
-	-66, 17, 26, 7, 19, 51, -63, 52, 6, -66,
-	39, 39, 39, 27, 45, 8, 53, -5, -6, -15,
-	-16, 18, 14, -7, -8, 28, -17, 4, 54, -18,
-	-2, -3, -19, -20, -21, -35, -47, -2, -3, -9,
-	23, -10, -11, -12, -13, -2, -3, 54, 55, 54,
-	50, -20, 6, -22, -23, -30, -31, -32, 56, -22,
-	54, -11, 23, 55, 50, -18, 51, -22, 6, -24,
-	-69, -26, -27, -25, -44, -28, 29, 15, 44, 10,
-	31, 36, 33, 13, 11, 43, 24, 32, 37, 20,
-	-29, 9, -33, 26, 17, -34, 42, 5, 35, 6,
-	-2, -13, 51, -48, 50, 50, 50, 38, 34, 38,
-	25, 38, 45, -36, -37, -38, 31, 22, 40, -39,
-	-40, -41, -42, -2, 45, 47, 50, 48, 49, -43,
-	-3, -14, -61, -49, 21, -50, -51, 4, -52, -53,
-	-54, -55, 52, -56, -36, -45, -46, -3, -57, -58,
-	-59, -3, -39, 21, 57, 58, 45, 51, 55, -70,
-	59, 41, 16, -71, 60, 30, 16, -50, 51, 55,
-	52, 51, 55, 52, -3, 55, 21, -52, -54, -53,
-	-54, 53, -46, -39, -38, -59, -39, -38, 45, 55,
-	53, 53, 53, 53, 51, 55, -50, 45, 55, 45,
-	51,
+	-1000, -70, -1, -4, -2, 45, 46, -4, -71, -63,
+	-64, 52, 13, -65, 53, -66, -3, 47, 48, -67,
+	-68, -69, 18, 27, 7, 20, 53, -66, 54, 6,
+	-69, 40, 40, 40, 28, 47, 8, 55, -5, -6,
+	-15, -16, 19, 15, -7, -8, 29, -17, 4, 56,
+	-18, -2, -3, -19, -20, -21, -35, -47, -2, -3,
+	-9, 24, -10, -11, -12, -13, -2, -3, 56, 57,
+	56, 52, -20, 6, -22, -23, -30, -31, -32, 58,
+	-22, 56, -11, 24, 57, 52, -18, 53, -22, 6,
+	-24, -72, -26, -27, -25, 12, -44, -28, 30, 16,
+	45, 46, 10, 32, 37, 34, 14, 11, 44, 25,
+	33, 38, 21, -29, 9, -33, 27, 18, -34, 43,
+	5, 36, 6, -2, -13, 53, -48, 52, 52, 52,
+	52, 39, 35, 39, 26, 39, 47, -36, -37, -38,
+	32, 23, 41, -39, -40, -41, -42, -2, 47, 49,
+	52, 50, 51, -43, -3, -14, -64, -49, 22, -50,
+	-51, 4, -52, -53, -54, -55, 54, -56, -36, -57,
+	-58, -3, -59, -23, 22, -45, -46, -3, -60, -61,
+	-62, -3, -39, 22, 59, 60, 47, 53, 57, -73,
+	61, 42, 17, -74, 62, 31, 17, -50, 53, 57,
+	-23, 63, 53, 57, 54, 53, 57, 54, -3, 57,
+	22, -52, -54, -53, -54, 55, -58, -38, -39, -46,
+	-39, -38, -62, -39, -38, 47, 57, 55, 55, 55,
+	55, 53, 57, -50, 47, 57, 47, 53,
 }
 var asn1Def = [...]int{
 
-	0, -2, 1, 2, 4, 16, 3, 6, 0, 7,
-	0, 17, 0, 9, 10, 12, 14, 15, 0, 18,
-	19, 0, 0, 0, 0, 8, 11, 0, 0, 20,
-	21, 22, 23, 24, 0, -2, 13, 0, 26, 28,
-	45, 0, 5, 0, 29, 32, 0, 0, 48, 49,
-	51, 53, 27, 54, 56, 57, 58, 62, 62, 0,
-	31, 33, 34, 0, 39, 41, 43, 46, 0, 47,
-	0, 55, 62, 0, 60, 0, 63, 70, 66, 0,
-	30, 35, 0, 0, 0, 50, 52, 59, 0, 61,
-	73, 74, 75, 76, 122, 77, 92, 93, 123, 80,
-	81, 82, 0, 0, 0, 86, 87, 0, 89, 90,
-	91, 0, 64, 71, 72, 0, 67, 68, 69, 0,
-	36, 40, 42, 133, 0, 0, 0, 83, 84, 85,
-	88, 94, 0, 95, 96, 97, 98, 99, 100, 101,
-	102, 103, 104, 0, 109, 106, 0, 112, 113, 111,
-	110, 38, 37, 0, 134, 135, 138, 0, 140, 142,
-	144, 146, 0, 148, 149, 0, 124, 0, 0, 114,
-	115, 117, 120, 121, 65, 0, 0, 132, 0, 0,
-	128, 129, 0, 0, 130, 131, 0, 0, 78, 0,
-	0, 79, 0, 0, 105, 0, 136, 141, 139, 143,
-	145, 147, 125, 0, 0, 116, 0, 0, 0, 0,
-	126, 127, 118, 119, 107, 0, 137, 0, 0, 0,
-	108,
+	0, -2, 1, 2, 4, 16, 17, 3, 6, 0,
+	7, 0, 18, 0, 9, 10, 12, 14, 15, 0,
+	19, 20, 0, 0, 0, 0, 8, 11, 0, 0,
+	21, 22, 23, 24, 25, 0, -2, 13, 0, 27,
+	29, 46, 0, 5, 0, 30, 33, 0, 0, 49,
+	50, 52, 54, 28, 55, 57, 58, 59, 63, 63,
+	0, 32, 34, 35, 0, 40, 42, 44, 47, 0,
+	48, 0, 56, 63, 0, 61, 0, 64, 71, 67,
+	0, 31, 36, 0, 0, 0, 51, 53, 60, 0,
+	62, 74, 75, 76, 77, 0, 124, 79, 94, 95,
+	125, 126, 82, 83, 84, 0, 0, 0, 88, 89,
+	0, 91, 92, 93, 0, 65, 72, 73, 0, 68,
+	69, 70, 0, 37, 41, 43, 136, 0, 63, 0,
+	0, 85, 86, 87, 90, 96, 0, 97, 98, 99,
+	100, 101, 102, 103, 104, 105, 106, 0, 111, 108,
+	0, 114, 115, 113, 112, 39, 38, 0, 137, 138,
+	141, 0, 143, 145, 147, 149, 0, 151, 160, 0,
+	152, 63, 155, 156, 157, 0, 127, 0, 0, 116,
+	117, 119, 122, 123, 66, 0, 0, 135, 0, 0,
+	131, 132, 0, 0, 133, 134, 0, 0, 78, 63,
+	154, 0, 80, 0, 0, 81, 0, 0, 107, 0,
+	139, 144, 142, 146, 148, 150, 153, 158, 159, 128,
+	0, 0, 118, 0, 0, 0, 0, 129, 130, 120,
+	121, 109, 0, 140, 0, 0, 0, 110,
 }
 var asn1Tok1 = [...]int{
 
 	1, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	52, 53, 3, 3, 55, 3, 58, 3, 3, 3,
-	3, 3, 3, 3, 3, 3, 3, 3, 3, 54,
-	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 56, 3, 57, 60, 3, 3, 3, 3, 3,
+	3, 3, 3, 63, 3, 3, 3, 3, 3, 3,
+	54, 55, 3, 3, 57, 3, 60, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 56,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 3, 50, 59, 51,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 58, 3, 59, 62, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 52, 61, 53,
 }
 var asn1Tok2 = [...]int{
 
@@ -351,7 +366,7 @@ var asn1Tok2 = [...]int{
 	12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
 	22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
 	32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
-	42, 43, 44, 45, 46, 47, 48, 49,
+	42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
 }
 var asn1Tok3 = [...]int{
 	0,
@@ -696,34 +711,34 @@ asn1default:
 
 	case 1:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:198
+		//line parser/asn1p.y:203
 		{
 			AllModules = asn1Dollar[1].grammar
 			fmt.Println(AllModules)
 		}
 	case 2:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:205
+		//line parser/asn1p.y:210
 		{
 			asn1VAL.grammar = asn1types.NewAsn1Grammar()
 			asn1VAL.grammar.Modules = append(asn1VAL.grammar.Modules, asn1Dollar[1].module)
 		}
 	case 3:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:209
+		//line parser/asn1p.y:214
 		{
 			asn1VAL.grammar = asn1Dollar[1].grammar
 			asn1VAL.grammar.Modules = append(asn1VAL.grammar.Modules, asn1Dollar[2].module)
 		}
 	case 4:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:216
+		//line parser/asn1p.y:221
 		{
 			currentModule = asn1types.NewAsn1Module()
 		}
 	case 5:
 		asn1Dollar = asn1S[asn1pt-9 : asn1pt+1]
-		//line parser/asn1p.y:220
+		//line parser/asn1p.y:225
 		{
 
 			asn1VAL.module = currentModule
@@ -740,138 +755,144 @@ asn1default:
 		}
 	case 6:
 		asn1Dollar = asn1S[asn1pt-0 : asn1pt+1]
-		//line parser/asn1p.y:236
+		//line parser/asn1p.y:241
 		{
 			asn1VAL.oid = nil
 		}
 	case 7:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:237
+		//line parser/asn1p.y:242
 		{
 			asn1VAL.oid = asn1Dollar[1].oid
 		}
 	case 8:
 		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
-		//line parser/asn1p.y:240
+		//line parser/asn1p.y:245
 		{
 			asn1VAL.oid = asn1Dollar[2].oid
 		}
 	case 9:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:243
+		//line parser/asn1p.y:248
 		{
 			asn1VAL.oid = nil
 		}
 	case 10:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:249
+		//line parser/asn1p.y:254
 		{
 			asn1VAL.oid = asn1types.NewAsn1Oid()
 			asn1VAL.oid.Arcs = append(asn1VAL.oid.Arcs, asn1Dollar[1].oid_arc)
 		}
 	case 11:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:253
+		//line parser/asn1p.y:258
 		{
 			asn1VAL.oid = asn1Dollar[1].oid
 			asn1VAL.oid.Arcs = append(asn1VAL.oid.Arcs, asn1Dollar[2].oid_arc)
 		}
 	case 12:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:259
+		//line parser/asn1p.y:264
 		{ /* iso */
 			asn1VAL.oid_arc.Name = asn1Dollar[1].str
 			asn1VAL.oid_arc.Num = -1
 		}
 	case 13:
 		asn1Dollar = asn1S[asn1pt-4 : asn1pt+1]
-		//line parser/asn1p.y:262
+		//line parser/asn1p.y:267
 		{ /* iso(1) */
 			asn1VAL.oid_arc.Name = asn1Dollar[1].str
 			asn1VAL.oid_arc.Num = asn1Dollar[3].num
 		}
 	case 14:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:265
+		//line parser/asn1p.y:270
 		{ /* 1 */
 			asn1VAL.oid_arc.Name = ""
 			asn1VAL.oid_arc.Num = asn1Dollar[1].num
 		}
 	case 15:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:269
+		//line parser/asn1p.y:274
 		{
 			asn1VAL.str = asn1Dollar[1].str
 		}
 	case 16:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:274
+		//line parser/asn1p.y:279
 		{
 			asn1VAL.str = asn1Dollar[1].str
 		}
 	case 17:
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line parser/asn1p.y:282
+		{
+			asn1VAL.str = asn1Dollar[1].str
+		}
+	case 18:
 		asn1Dollar = asn1S[asn1pt-0 : asn1pt+1]
-		//line parser/asn1p.y:279
+		//line parser/asn1p.y:287
 		{
 			asn1VAL.module_flags = asn1types.ModuleFlagNoFlags
 		}
-	case 18:
-		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:280
-		{
-			asn1VAL.module_flags = asn1Dollar[1].module_flags
-		}
 	case 19:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:286
+		//line parser/asn1p.y:288
 		{
 			asn1VAL.module_flags = asn1Dollar[1].module_flags
 		}
 	case 20:
-		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:289
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line parser/asn1p.y:294
 		{
-			asn1VAL.module_flags = asn1Dollar[1].module_flags | asn1Dollar[2].module_flags
+			asn1VAL.module_flags = asn1Dollar[1].module_flags
 		}
 	case 21:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:295
+		//line parser/asn1p.y:297
 		{
-			asn1VAL.module_flags = asn1types.ModuleFlagExplicitTags
+			asn1VAL.module_flags = asn1Dollar[1].module_flags | asn1Dollar[2].module_flags
 		}
 	case 22:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:298
+		//line parser/asn1p.y:303
 		{
-			asn1VAL.module_flags = asn1types.ModuleFlagImplicitTags
+			asn1VAL.module_flags = asn1types.ModuleFlagExplicitTags
 		}
 	case 23:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:301
+		//line parser/asn1p.y:306
 		{
-			asn1VAL.module_flags = asn1types.ModuleFlagAutomaticTags
+			asn1VAL.module_flags = asn1types.ModuleFlagImplicitTags
 		}
 	case 24:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:304
+		//line parser/asn1p.y:309
+		{
+			asn1VAL.module_flags = asn1types.ModuleFlagAutomaticTags
+		}
+	case 25:
+		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
+		//line parser/asn1p.y:312
 		{
 			asn1VAL.module_flags = asn1types.ModuleFlagExtensibilityImplied
 		}
-	case 25:
+	case 26:
 		asn1Dollar = asn1S[asn1pt-0 : asn1pt+1]
-		//line parser/asn1p.y:309
+		//line parser/asn1p.y:317
 		{
 			asn1VAL.module = nil
 		}
-	case 26:
+	case 27:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:310
+		//line parser/asn1p.y:318
 		{
 			asn1VAL.module = asn1Dollar[1].module
 		}
-	case 27:
+	case 28:
 		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
-		//line parser/asn1p.y:315
+		//line parser/asn1p.y:323
 		{
 			asn1VAL.module = asn1types.NewAsn1Module()
 
@@ -884,64 +905,64 @@ asn1default:
 
 			asn1VAL.module.Members = asn1Dollar[3].module.Members
 		}
-	case 28:
+	case 29:
 		asn1Dollar = asn1S[asn1pt-0 : asn1pt+1]
-		//line parser/asn1p.y:334
+		//line parser/asn1p.y:342
 		{
 			asn1VAL.module = nil
 		}
-	case 30:
+	case 31:
 		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
-		//line parser/asn1p.y:338
+		//line parser/asn1p.y:346
 		{
 			asn1VAL.module = asn1Dollar[2].module
 		}
-	case 31:
+	case 32:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:344
+		//line parser/asn1p.y:352
 		{
 			// FIXME: Need to figure out how to call the Lexer's Error()
 			return -1
 		}
-	case 32:
+	case 33:
 		asn1Dollar = asn1S[asn1pt-0 : asn1pt+1]
-		//line parser/asn1p.y:351
+		//line parser/asn1p.y:359
 		{
 			asn1VAL.module = asn1types.NewAsn1Module()
 		}
-	case 34:
+	case 35:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:355
+		//line parser/asn1p.y:363
 		{
 			asn1VAL.module = asn1types.NewAsn1Module()
 			asn1VAL.module.Imports = append(asn1VAL.module.Imports, asn1Dollar[1].xports)
 		}
-	case 35:
+	case 36:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:359
+		//line parser/asn1p.y:367
 		{
 			asn1VAL.module = asn1Dollar[1].module
 			asn1VAL.module.Imports = append(asn1VAL.module.Imports, asn1Dollar[2].xports)
 		}
-	case 36:
+	case 37:
 		asn1Dollar = asn1S[asn1pt-0 : asn1pt+1]
-		//line parser/asn1p.y:366
+		//line parser/asn1p.y:374
 		{
 			asn1VAL.aid = asn1types.NewAsn1AssignedIdentifier()
 			asn1VAL.aid.Oid = nil
 			asn1VAL.aid.Value = nil
 		}
-	case 37:
+	case 38:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:367
+		//line parser/asn1p.y:375
 		{
 			asn1VAL.aid = asn1types.NewAsn1AssignedIdentifier()
 			asn1VAL.aid.Oid = asn1Dollar[1].oid
 			asn1VAL.aid.Value = nil
 		}
-	case 38:
+	case 39:
 		asn1Dollar = asn1S[asn1pt-4 : asn1pt+1]
-		//line parser/asn1p.y:370
+		//line parser/asn1p.y:378
 		{
 			asn1VAL.xports = asn1Dollar[1].xports
 
@@ -949,53 +970,53 @@ asn1default:
 			asn1VAL.xports.FromModule = asn1Dollar[3].str
 			asn1VAL.xports.Identifier = asn1Dollar[4].aid
 		}
-	case 39:
+	case 40:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:380
+		//line parser/asn1p.y:388
 		{
 			asn1VAL.xports = asn1types.NewAsn1Xports()
 			asn1VAL.xports.Members = append(asn1VAL.xports.Members, asn1Dollar[1].expr)
 		}
-	case 40:
+	case 41:
 		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
-		//line parser/asn1p.y:384
+		//line parser/asn1p.y:392
 		{
 			asn1VAL.xports = asn1Dollar[1].xports
 			asn1VAL.xports.Members = append(asn1VAL.xports.Members, asn1Dollar[3].expr)
 		}
-	case 41:
-		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:391
-		{
-			asn1VAL.expr = asn1types.NewAsn1Expression()
-			asn1VAL.expr.Identifier = asn1Dollar[1].str
-			asn1VAL.expr.Type = asn1types.Asn1ExprTypeReference
-		}
 	case 42:
-		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
-		//line parser/asn1p.y:396
-		{ /* Completely equivalent to above */
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line parser/asn1p.y:399
+		{
 			asn1VAL.expr = asn1types.NewAsn1Expression()
 			asn1VAL.expr.Identifier = asn1Dollar[1].str
 			asn1VAL.expr.Type = asn1types.Asn1ExprTypeReference
 		}
 	case 43:
-		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:400
-		{
+		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
+		//line parser/asn1p.y:404
+		{ /* Completely equivalent to above */
 			asn1VAL.expr = asn1types.NewAsn1Expression()
 			asn1VAL.expr.Identifier = asn1Dollar[1].str
 			asn1VAL.expr.Type = asn1types.Asn1ExprTypeReference
 		}
 	case 44:
-		asn1Dollar = asn1S[asn1pt-0 : asn1pt+1]
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
 		//line parser/asn1p.y:408
+		{
+			asn1VAL.expr = asn1types.NewAsn1Expression()
+			asn1VAL.expr.Identifier = asn1Dollar[1].str
+			asn1VAL.expr.Type = asn1types.Asn1ExprTypeReference
+		}
+	case 45:
+		asn1Dollar = asn1S[asn1pt-0 : asn1pt+1]
+		//line parser/asn1p.y:416
 		{
 			asn1VAL.module = nil
 		}
-	case 45:
+	case 46:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:409
+		//line parser/asn1p.y:417
 		{
 			asn1VAL.module = asn1types.NewAsn1Module()
 			if asn1Dollar[1].xports == nil {
@@ -1004,60 +1025,52 @@ asn1default:
 				/* "EXPORTS ALL;" */
 			}
 		}
-	case 46:
+	case 47:
 		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
-		//line parser/asn1p.y:419
+		//line parser/asn1p.y:427
 		{
 			asn1VAL.xports = asn1Dollar[2].xports
 		}
-	case 47:
+	case 48:
 		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
-		//line parser/asn1p.y:422
+		//line parser/asn1p.y:430
 		{
 			asn1VAL.xports = nil
 		}
-	case 48:
+	case 49:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:425
+		//line parser/asn1p.y:433
 		{
 			/* Empty EXPORTS clause effectively prohibits export. */
 			asn1VAL.xports = asn1types.NewAsn1Xports()
 		}
-	case 49:
+	case 50:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:431
+		//line parser/asn1p.y:439
 		{
 			asn1VAL.xports = asn1types.NewAsn1Xports()
 			asn1VAL.xports.Type = asn1types.Asn1XportsTypeExport
 			asn1VAL.xports.Members = append(asn1VAL.xports.Members, asn1Dollar[1].expr)
 		}
-	case 50:
+	case 51:
 		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
-		//line parser/asn1p.y:436
+		//line parser/asn1p.y:444
 		{
 			asn1VAL.xports = asn1Dollar[1].xports
 			asn1VAL.xports.Type = asn1types.Asn1XportsTypeExport
 			asn1VAL.xports.Members = append(asn1VAL.xports.Members, asn1Dollar[3].expr)
 		}
-	case 51:
-		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:444
-		{
-			asn1VAL.expr = asn1types.NewAsn1Expression()
-			asn1VAL.expr.Identifier = asn1Dollar[1].str
-			asn1VAL.expr.Type = asn1types.Asn1ExprTypeExportVariable
-		}
 	case 52:
-		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
-		//line parser/asn1p.y:449
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line parser/asn1p.y:452
 		{
 			asn1VAL.expr = asn1types.NewAsn1Expression()
 			asn1VAL.expr.Identifier = asn1Dollar[1].str
 			asn1VAL.expr.Type = asn1types.Asn1ExprTypeExportVariable
 		}
 	case 53:
-		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:454
+		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
+		//line parser/asn1p.y:457
 		{
 			asn1VAL.expr = asn1types.NewAsn1Expression()
 			asn1VAL.expr.Identifier = asn1Dollar[1].str
@@ -1065,289 +1078,305 @@ asn1default:
 		}
 	case 54:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:463
+		//line parser/asn1p.y:462
+		{
+			asn1VAL.expr = asn1types.NewAsn1Expression()
+			asn1VAL.expr.Identifier = asn1Dollar[1].str
+			asn1VAL.expr.Type = asn1types.Asn1ExprTypeExportVariable
+		}
+	case 55:
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line parser/asn1p.y:471
 		{
 			asn1VAL.module = asn1Dollar[1].module
 		}
-	case 55:
+	case 56:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:466
+		//line parser/asn1p.y:474
 		{
 			asn1VAL.module = asn1Dollar[1].module
 			for _, m := range asn1Dollar[2].module.Members {
 				asn1VAL.module.Members = append(asn1VAL.module.Members, m)
 			}
 		}
-	case 56:
-		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:476
-		{
-			asn1VAL.module = asn1types.NewAsn1Module()
-			asn1VAL.module.Members = append(asn1VAL.module.Members, asn1Dollar[1].expr)
-		}
 	case 57:
-		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:480
-		{
-			asn1VAL.module = asn1types.NewAsn1Module()
-			asn1VAL.module.Members = append(asn1VAL.module.Members, asn1Dollar[1].expr)
-		}
-	case 58:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
 		//line parser/asn1p.y:484
 		{
 			asn1VAL.module = asn1types.NewAsn1Module()
 			asn1VAL.module.Members = append(asn1VAL.module.Members, asn1Dollar[1].expr)
 		}
+	case 58:
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line parser/asn1p.y:488
+		{
+			asn1VAL.module = asn1types.NewAsn1Module()
+			asn1VAL.module.Members = append(asn1VAL.module.Members, asn1Dollar[1].expr)
+		}
 	case 59:
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line parser/asn1p.y:492
+		{
+			asn1VAL.module = asn1types.NewAsn1Module()
+			asn1VAL.module.Members = append(asn1VAL.module.Members, asn1Dollar[1].expr)
+		}
+	case 60:
 		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
-		//line parser/asn1p.y:491
+		//line parser/asn1p.y:499
 		{
 			asn1VAL.expr = asn1types.NewAsn1Expression()
 			asn1VAL.expr.Identifier = asn1Dollar[1].str
 			// FIXME : Need to add code for type of expression
 		}
-	case 61:
+	case 62:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:501
+		//line parser/asn1p.y:509
 		{
 			asn1VAL.expr = asn1Dollar[2].expr
 		}
-	case 62:
+	case 63:
 		asn1Dollar = asn1S[asn1pt-0 : asn1pt+1]
-		//line parser/asn1p.y:506
+		//line parser/asn1p.y:514
 		{
 			asn1VAL.tag = nil
 		}
-	case 63:
+	case 64:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:507
+		//line parser/asn1p.y:515
 		{
 			asn1VAL.tag = asn1Dollar[1].tag
 		}
-	case 64:
+	case 65:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:511
+		//line parser/asn1p.y:519
 		{
 			asn1VAL.tag = asn1Dollar[1].tag
 			asn1VAL.tag.Mode = asn1Dollar[2].tag.Mode
 		}
-	case 65:
+	case 66:
 		asn1Dollar = asn1S[asn1pt-4 : asn1pt+1]
-		//line parser/asn1p.y:518
+		//line parser/asn1p.y:526
 		{
 			asn1VAL.tag = asn1Dollar[2].tag
 			asn1VAL.tag.Val = asn1Dollar[3].num
 		}
-	case 66:
+	case 67:
 		asn1Dollar = asn1S[asn1pt-0 : asn1pt+1]
-		//line parser/asn1p.y:524
+		//line parser/asn1p.y:532
 		{
 			asn1VAL.tag = asn1types.NewAsn1Tag()
 			asn1VAL.tag.Class = asn1types.Asn1TagClassContextSpec
 		}
-	case 67:
+	case 68:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:525
+		//line parser/asn1p.y:533
 		{
 			asn1VAL.tag = asn1types.NewAsn1Tag()
 			asn1VAL.tag.Class = asn1types.Asn1TagClassUniversal
 		}
-	case 68:
+	case 69:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:526
+		//line parser/asn1p.y:534
 		{
 			asn1VAL.tag = asn1types.NewAsn1Tag()
 			asn1VAL.tag.Class = asn1types.Asn1TagClassApplication
 		}
-	case 69:
+	case 70:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:527
+		//line parser/asn1p.y:535
 		{
 			asn1VAL.tag = asn1types.NewAsn1Tag()
 			asn1VAL.tag.Class = asn1types.Asn1TagClassPrivate
 		}
-	case 70:
+	case 71:
 		asn1Dollar = asn1S[asn1pt-0 : asn1pt+1]
-		//line parser/asn1p.y:531
+		//line parser/asn1p.y:539
 		{
 			asn1VAL.tag = asn1types.NewAsn1Tag()
 			asn1VAL.tag.Mode = asn1types.Asn1TagModeDefault
 		}
-	case 71:
-		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:532
-		{
-			asn1VAL.tag = asn1types.NewAsn1Tag()
-			asn1VAL.tag.Mode = asn1types.Asn1TagModeImplicit
-		}
 	case 72:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:533
+		//line parser/asn1p.y:540
 		{
 			asn1VAL.tag = asn1types.NewAsn1Tag()
 			asn1VAL.tag.Mode = asn1types.Asn1TagModeImplicit
 		}
 	case 73:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:537
+		//line parser/asn1p.y:541
+		{
+			asn1VAL.tag = asn1types.NewAsn1Tag()
+			asn1VAL.tag.Mode = asn1types.Asn1TagModeImplicit
+		}
+	case 74:
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line parser/asn1p.y:545
 		{
 		}
-	case 77:
+	case 78:
+		asn1Dollar = asn1S[asn1pt-4 : asn1pt+1]
+		//line parser/asn1p.y:554
+		{
+			asn1VAL.expr = asn1Dollar[3].expr
+			asn1VAL.expr.Type = asn1types.Asn1ExprTypeConstrChoice
+			asn1VAL.expr.Meta = asn1types.Asn1ExprMetaTypeType
+		}
+	case 79:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:547
+		//line parser/asn1p.y:561
 		{
 			asn1VAL.expr = asn1types.NewAsn1Expression()
 			asn1VAL.expr.Type = asn1Dollar[1].expr_type
 
 		}
-	case 78:
+	case 80:
 		asn1Dollar = asn1S[asn1pt-4 : asn1pt+1]
-		//line parser/asn1p.y:552
+		//line parser/asn1p.y:566
 		{
 			asn1VAL.expr = asn1Dollar[3].expr
 			asn1VAL.expr.Type = asn1types.Asn1ExprTypeInteger
 			asn1VAL.expr.Meta = asn1types.Asn1ExprMetaTypeType
 		}
-	case 79:
+	case 81:
 		asn1Dollar = asn1S[asn1pt-4 : asn1pt+1]
-		//line parser/asn1p.y:557
+		//line parser/asn1p.y:571
 		{
 			asn1VAL.expr = asn1Dollar[3].expr
 			asn1VAL.expr.Type = asn1types.Asn1ExprTypeEnumerated
 			asn1VAL.expr.Meta = asn1types.Asn1ExprMetaTypeValue
 		}
-	case 80:
+	case 82:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:565
+		//line parser/asn1p.y:579
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeBoolean
 		}
-	case 81:
+	case 83:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:566
+		//line parser/asn1p.y:580
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeNull
 		}
-	case 82:
+	case 84:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:567
+		//line parser/asn1p.y:581
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeReal
 		}
-	case 83:
+	case 85:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:568
+		//line parser/asn1p.y:582
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeOctetString
 		}
-	case 84:
+	case 86:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:569
+		//line parser/asn1p.y:583
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeEmbeddedPdv
 		}
-	case 85:
+	case 87:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:570
+		//line parser/asn1p.y:584
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeCharacterString
 		}
-	case 86:
+	case 88:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:571
+		//line parser/asn1p.y:585
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeUtcTime
 		}
-	case 87:
+	case 89:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:572
+		//line parser/asn1p.y:586
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeGeneralizedTime
 		}
-	case 88:
+	case 90:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:573
+		//line parser/asn1p.y:587
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeObjectIdentifier
 		}
-	case 89:
+	case 91:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:574
+		//line parser/asn1p.y:588
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeRelativeOid
 		}
-	case 90:
+	case 92:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:575
+		//line parser/asn1p.y:589
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeExternal
 		}
-	case 92:
+	case 94:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:582
+		//line parser/asn1p.y:596
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeInteger
 		}
-	case 93:
+	case 95:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:583
+		//line parser/asn1p.y:597
 		{
 			fmt.Println("DDD")
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeEnumerated
 		}
-	case 94:
+	case 96:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:584
+		//line parser/asn1p.y:598
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeBitString
 		}
-	case 95:
+	case 97:
 		asn1Dollar = asn1S[asn1pt-4 : asn1pt+1]
-		//line parser/asn1p.y:593
+		//line parser/asn1p.y:607
 		{
 			asn1VAL.expr = asn1Dollar[2].expr
 			asn1VAL.expr.Identifier = asn1Dollar[1].str
 			asn1VAL.expr.Meta = asn1types.Asn1ExprMetaTypeValue
 		}
-	case 98:
+	case 100:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:614
+		//line parser/asn1p.y:628
 		{
 			asn1VAL.value = asn1types.NewAsn1Value()
 			asn1VAL.value.Type = asn1types.Asn1ValueTypeNull
 		}
-	case 99:
+	case 101:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:618
+		//line parser/asn1p.y:632
 		{
 			asn1VAL.value = asn1types.NewAsn1Value()
 			asn1VAL.value.Type = asn1types.Asn1ValueTypeFalse
 		}
-	case 100:
+	case 102:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:622
+		//line parser/asn1p.y:636
 		{
 			asn1VAL.value = asn1types.NewAsn1Value()
 			asn1VAL.value.Type = asn1types.Asn1ValueTypeTrue
 		}
-	case 105:
+	case 107:
 		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
-		//line parser/asn1p.y:634
+		//line parser/asn1p.y:648
 		{
 			ref := asn1types.NewAsn1Reference()
 			_ = ref
 			asn1VAL.value = asn1types.NewAsn1Value()
 		}
-	case 106:
+	case 108:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:643
+		//line parser/asn1p.y:657
 		{
 			asn1VAL.value = asn1types.NewAsn1Value()
 		}
-	case 107:
+	case 109:
 		asn1Dollar = asn1S[asn1pt-5 : asn1pt+1]
-		//line parser/asn1p.y:646
+		//line parser/asn1p.y:660
 		{
 			if asn1Dollar[2].num < 0 || asn1Dollar[2].num > 7 {
 				return -1
@@ -1360,9 +1389,9 @@ asn1default:
 			asn1VAL.value = asn1types.NewAsn1Value()
 			asn1VAL.value.Type = asn1types.Asn1ValueTypeTuple
 		}
-	case 108:
+	case 110:
 		asn1Dollar = asn1S[asn1pt-9 : asn1pt+1]
-		//line parser/asn1p.y:658
+		//line parser/asn1p.y:672
 		{
 			if asn1Dollar[2].num < 0 || asn1Dollar[2].num > 127 {
 				return -1
@@ -1379,78 +1408,58 @@ asn1default:
 			asn1VAL.value = asn1types.NewAsn1Value()
 			asn1VAL.value.Type = asn1types.Asn1ValueTypeQuadruple
 		}
-	case 109:
-		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:677
-		{
-			asn1VAL.value = asn1types.NewAsn1Value()
-		}
-	case 110:
-		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:683
-		{
-			asn1VAL.ref = asn1types.NewAsn1Reference()
-		}
 	case 111:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:688
+		//line parser/asn1p.y:691
 		{
 			asn1VAL.value = asn1types.NewAsn1Value()
 		}
 	case 112:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:693
+		//line parser/asn1p.y:697
 		{
-			asn1VAL.value = asn1types.NewAsn1Value()
+			asn1VAL.ref = asn1types.NewAsn1Reference()
 		}
 	case 113:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:696
+		//line parser/asn1p.y:702
 		{
 			asn1VAL.value = asn1types.NewAsn1Value()
 		}
 	case 114:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:702
+		//line parser/asn1p.y:707
+		{
+			asn1VAL.value = asn1types.NewAsn1Value()
+		}
+	case 115:
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line parser/asn1p.y:710
+		{
+			asn1VAL.value = asn1types.NewAsn1Value()
+		}
+	case 116:
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line parser/asn1p.y:716
 		{
 			asn1VAL.expr = asn1Dollar[1].expr
 			// TODO handle Enumeration validation
 		}
-	case 115:
+	case 117:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:708
+		//line parser/asn1p.y:722
 		{
 			asn1VAL.expr = asn1types.NewAsn1Expression()
 		}
-	case 116:
+	case 118:
 		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
-		//line parser/asn1p.y:711
+		//line parser/asn1p.y:725
 		{
 			asn1VAL.expr = asn1Dollar[1].expr
 			// $$.Members = append($$.Members, $3)
 		}
-	case 117:
-		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:718
-		{
-			asn1VAL.expr = asn1types.NewAsn1Expression()
-			asn1VAL.expr.Type = asn1types.Asn1ExprTypeUniversal
-
-			asn1VAL.expr.Meta = asn1types.Asn1ExprMetaTypeValue
-			asn1VAL.expr.Identifier = asn1Dollar[1].str
-		}
-	case 118:
-		asn1Dollar = asn1S[asn1pt-4 : asn1pt+1]
-		//line parser/asn1p.y:725
-		{
-			asn1VAL.expr = asn1types.NewAsn1Expression()
-			asn1VAL.expr.Type = asn1types.Asn1ExprTypeUniversal
-
-			asn1VAL.expr.Meta = asn1types.Asn1ExprMetaTypeValue
-			asn1VAL.expr.Identifier = asn1Dollar[1].str
-		}
 	case 119:
-		asn1Dollar = asn1S[asn1pt-4 : asn1pt+1]
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
 		//line parser/asn1p.y:732
 		{
 			asn1VAL.expr = asn1types.NewAsn1Expression()
@@ -1460,8 +1469,28 @@ asn1default:
 			asn1VAL.expr.Identifier = asn1Dollar[1].str
 		}
 	case 120:
-		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		asn1Dollar = asn1S[asn1pt-4 : asn1pt+1]
 		//line parser/asn1p.y:739
+		{
+			asn1VAL.expr = asn1types.NewAsn1Expression()
+			asn1VAL.expr.Type = asn1types.Asn1ExprTypeUniversal
+
+			asn1VAL.expr.Meta = asn1types.Asn1ExprMetaTypeValue
+			asn1VAL.expr.Identifier = asn1Dollar[1].str
+		}
+	case 121:
+		asn1Dollar = asn1S[asn1pt-4 : asn1pt+1]
+		//line parser/asn1p.y:746
+		{
+			asn1VAL.expr = asn1types.NewAsn1Expression()
+			asn1VAL.expr.Type = asn1types.Asn1ExprTypeUniversal
+
+			asn1VAL.expr.Meta = asn1types.Asn1ExprMetaTypeValue
+			asn1VAL.expr.Identifier = asn1Dollar[1].str
+		}
+	case 122:
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line parser/asn1p.y:753
 		{
 			asn1VAL.expr = asn1types.NewAsn1Expression()
 			asn1VAL.expr.Type = asn1types.Asn1ExprTypeUniversal
@@ -1469,9 +1498,9 @@ asn1default:
 			asn1VAL.expr.Meta = asn1types.Asn1ExprMetaTypeValue
 			//$$.Identifier = $1;
 		}
-	case 121:
+	case 123:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:746
+		//line parser/asn1p.y:760
 		{
 			asn1VAL.expr = asn1types.NewAsn1Expression()
 			asn1VAL.expr.Type = asn1types.Asn1ExprTypeExtensible
@@ -1479,118 +1508,182 @@ asn1default:
 			asn1VAL.expr.Meta = asn1types.Asn1ExprMetaTypeValue
 			asn1VAL.expr.Identifier = "..."
 		}
-	case 122:
+	case 124:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:766
+		//line parser/asn1p.y:780
 		{
 			asn1VAL.expr = asn1types.NewAsn1Expression()
 			asn1VAL.expr.Type = asn1types.Asn1ExprTypeReference
 			asn1VAL.expr.Meta = asn1types.Asn1ExprMetaTypeTypeRef
 		}
-	case 123:
+	case 125:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:785
+		//line parser/asn1p.y:799
 		{
 			asn1VAL.ref = asn1types.NewAsn1Reference()
 		}
-	case 124:
+	case 126:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:790
+		//line parser/asn1p.y:802
+		{
+			asn1VAL.ref = asn1types.NewAsn1Reference()
+		}
+	case 127:
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line parser/asn1p.y:807
 		{
 			asn1VAL.expr = asn1types.NewAsn1Expression()
 		}
-	case 125:
+	case 128:
 		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
-		//line parser/asn1p.y:793
+		//line parser/asn1p.y:810
 		{
 			asn1VAL.expr = asn1Dollar[1].expr
 		}
-	case 126:
+	case 129:
 		asn1Dollar = asn1S[asn1pt-4 : asn1pt+1]
-		//line parser/asn1p.y:799
+		//line parser/asn1p.y:816
 		{
 			asn1VAL.expr = asn1types.NewAsn1Expression()
 			asn1VAL.expr.Type = asn1types.Asn1ExprTypeUniversal
 			asn1VAL.expr.Meta = asn1types.Asn1ExprMetaTypeValue
 			asn1VAL.expr.Identifier = asn1Dollar[1].str
 		}
-	case 127:
+	case 130:
 		asn1Dollar = asn1S[asn1pt-4 : asn1pt+1]
-		//line parser/asn1p.y:805
+		//line parser/asn1p.y:822
 		{
 			asn1VAL.expr = asn1types.NewAsn1Expression()
 			asn1VAL.expr.Type = asn1types.Asn1ExprTypeUniversal
 			asn1VAL.expr.Meta = asn1types.Asn1ExprMetaTypeValue
 			asn1VAL.expr.Identifier = asn1Dollar[1].str
 		}
-	case 132:
+	case 135:
 		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
-		//line parser/asn1p.y:818
+		//line parser/asn1p.y:835
 		{
 			asn1VAL.constraint = asn1Dollar[2].constraint
 		}
-	case 133:
+	case 136:
 		asn1Dollar = asn1S[asn1pt-4 : asn1pt+1]
-		//line parser/asn1p.y:821
+		//line parser/asn1p.y:838
 		{
 			asn1VAL.expr = asn1Dollar[2].expr
 			asn1VAL.expr.Identifier = asn1Dollar[1].str
 			asn1VAL.expr.Meta = asn1types.Asn1ExprMetaTypeValueSet
 		}
-	case 134:
-		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:829
-		{
-			asn1VAL.constraint = asn1types.NewAsn1Constraint()
-			asn1VAL.constraint.Type = asn1types.ConstraintTypeExtensibilityMark
-		}
-	case 136:
-		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
-		//line parser/asn1p.y:834
-		{
-			asn1VAL.constraint = asn1types.NewAsn1Constraint()
-			asn1VAL.constraint.Type = asn1types.ConstraintTypeExtensibilityMark
-		}
 	case 137:
-		asn1Dollar = asn1S[asn1pt-5 : asn1pt+1]
-		//line parser/asn1p.y:838
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line parser/asn1p.y:846
 		{
 			asn1VAL.constraint = asn1types.NewAsn1Constraint()
 			asn1VAL.constraint.Type = asn1types.ConstraintTypeExtensibilityMark
 		}
 	case 139:
 		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
-		//line parser/asn1p.y:846
+		//line parser/asn1p.y:851
+		{
+			asn1VAL.constraint = asn1types.NewAsn1Constraint()
+			asn1VAL.constraint.Type = asn1types.ConstraintTypeExtensibilityMark
+		}
+	case 140:
+		asn1Dollar = asn1S[asn1pt-5 : asn1pt+1]
+		//line parser/asn1p.y:855
+		{
+			asn1VAL.constraint = asn1types.NewAsn1Constraint()
+			asn1VAL.constraint.Type = asn1types.ConstraintTypeExtensibilityMark
+		}
+	case 142:
+		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
+		//line parser/asn1p.y:863
 		{
 		}
-	case 141:
+	case 144:
 		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
-		//line parser/asn1p.y:852
+		//line parser/asn1p.y:869
 		{
 		}
-	case 143:
+	case 146:
 		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
-		//line parser/asn1p.y:858
+		//line parser/asn1p.y:875
 		{
 		}
-	case 145:
+	case 148:
 		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
-		//line parser/asn1p.y:865
+		//line parser/asn1p.y:882
 		{
 		}
-	case 147:
+	case 150:
 		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
-		//line parser/asn1p.y:871
+		//line parser/asn1p.y:888
 		{
 			asn1VAL.constraint = asn1types.NewAsn1Constraint()
 			asn1VAL.constraint.Type = asn1types.ConstraintTypeSet
 		}
-	case 148:
+	case 151:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:878
+		//line parser/asn1p.y:895
 		{
 			asn1VAL.constraint = asn1types.NewAsn1Constraint()
 			asn1VAL.constraint.Type = asn1types.ConstraintTypeValue
+		}
+	case 152:
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line parser/asn1p.y:903
+		{
+			asn1VAL.expr = asn1types.NewAsn1Expression()
+		}
+	case 153:
+		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
+		//line parser/asn1p.y:906
+		{
+			asn1VAL.expr = asn1types.NewAsn1Expression()
+		}
+	case 154:
+		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
+		//line parser/asn1p.y:912
+		{
+			fmt.Println("XXX")
+			asn1VAL.expr = asn1Dollar[2].expr
+		}
+	case 155:
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line parser/asn1p.y:916
+		{
+			asn1VAL.expr = asn1Dollar[1].expr
+		}
+	case 156:
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line parser/asn1p.y:919
+		{
+			asn1VAL.expr = asn1Dollar[1].expr
+		}
+	case 157:
+		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
+		//line parser/asn1p.y:925
+		{
+			asn1VAL.expr = asn1types.NewAsn1Expression()
+			asn1VAL.expr.Identifier = "..."
+			asn1VAL.expr.Type = asn1types.Asn1ExprTypeExtensible
+			asn1VAL.expr.Meta = asn1types.Asn1ExprMetaTypeType
+		}
+	case 158:
+		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
+		//line parser/asn1p.y:931
+		{
+			asn1VAL.expr = asn1types.NewAsn1Expression()
+			asn1VAL.expr.Identifier = "..."
+			asn1VAL.expr.Type = asn1types.Asn1ExprTypeExtensible
+			asn1VAL.expr.Meta = asn1types.Asn1ExprMetaTypeType
+		}
+	case 159:
+		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
+		//line parser/asn1p.y:937
+		{
+			asn1VAL.expr = asn1types.NewAsn1Expression()
+			asn1VAL.expr.Identifier = "..."
+			asn1VAL.expr.Type = asn1types.Asn1ExprTypeExtensible
+			asn1VAL.expr.Meta = asn1types.Asn1ExprMetaTypeType
 		}
 	}
 	goto asn1stack /* stack new state and value */

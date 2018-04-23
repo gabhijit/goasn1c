@@ -101,6 +101,9 @@ func (l *lexer) Lex(lval *asn1SymType) int {
 	case itemReservedBEGIN:
 		return Tok_BEGIN
 
+	case itemReservedCHOICE:
+		return Tok_CHOICE
+
 	case itemReservedEND:
 		return Tok_END
 
@@ -137,9 +140,37 @@ func (l *lexer) Lex(lval *asn1SymType) int {
 	case itemReservedEXPORTS:
 		return Tok_EXPORTS
 
+	case itemReservedOCTET:
+		return Tok_OCTET
+
+	case itemReservedSTRING:
+		return Tok_STRING
+
+	case itemReservedBIT:
+		return Tok_BIT
+
+	case itemReservedOBJECT:
+		return Tok_OBJECT
+
+	case itemReservedIDENTIFIER:
+		return Tok_IDENTIFIER
+
+	case itemReservedRELATIVE_OID:
+		return Tok_RELATIVE_OID
+
+	case itemReservedAUTOMATIC:
+		return Tok_AUTOMATIC
+
+	case itemReservedNULL:
+		return Tok_NULL
+
 	case itemModuleReference, itemTypeReference:
 		lval.str = i.val
 		return Tok_TypeReference
+
+	case itemCapitalReference:
+		lval.str = i.val
+		return Tok_CAPITALREFERENCE
 
 	case itemAssignment:
 		return Tok_ASSIGNMENT
@@ -381,8 +412,8 @@ func (l *lexer) processWordModuleBody(word string) error {
 
 	if strings.IndexAny(word, capitalLetters) == 0 {
 		if strings.ToUpper(word) == word {
-			// All caps not a keyword objectclass reference (X.681 - 7.1)
-			l.emit(itemObjectClassReference)
+			// All Caps is a valid Object Class or Type, Parser will decide what it is
+			l.emit(itemCapitalReference)
 		} else {
 			l.emit(itemTypeReference)
 		}
@@ -1011,8 +1042,9 @@ const (
 	itemReservedVideotexString
 	itemReservedVisibleString
 	itemReservedWITH
-	itemReservedlBIT
+	itemReservedBIT
 
+	itemCapitalReference
 	// X.681 Section 7
 	itemObjectClassReference
 	itemObjectReference
@@ -1035,7 +1067,7 @@ var reservedWordsMap = map[string]itemType{
 	"APPLICATION":     itemReservedAPPLICATION,
 	"AUTOMATIC":       itemReservedAUTOMATIC,
 	"BEGIN":           itemReservedBEGIN,
-	"BIT":             itemReservedlBIT,
+	"BIT":             itemReservedBIT,
 	"BMPString":       itemReservedBMPString,
 	"BOOLEAN":         itemReservedBOOLEAN,
 	"BY":              itemReservedBY,

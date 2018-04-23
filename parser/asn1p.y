@@ -69,6 +69,7 @@ var AllModules    *asn1types.Asn1Grammar
 %token       Tok_BIT
 %token       Tok_BOOLEAN
 %token       Tok_CHARACTER
+%token       Tok_CHOICE
 %token       Tok_DEFINITIONS
 %token       Tok_EMBEDDED
 %token       Tok_END
@@ -102,6 +103,7 @@ var AllModules    *asn1types.Asn1Grammar
 %token       Tok_UNIVERSAL
 %token       Tok_UTCTime
 %token <str> Tok_TypeReference
+%token <str> Tok_CAPITALREFERENCE
 %token <num> Tok_Number
 %token <str> Tok_Identifier
 %token <str> Tok_CString
@@ -178,6 +180,9 @@ var AllModules    *asn1types.Asn1Grammar
 %type <constraint>   SubtypeElements
 %type <value>        SingleValue
 
+%type <expr>         AlternativeTypeLists
+%type <expr>         AlternativeType
+%type <expr>         ExtensionAndException
 
 %type <expr>         Enumerations
 %type <expr>         UniverationList
@@ -274,7 +279,10 @@ Identifier: Tok_Identifier {
 };
 
 TypeRefName:
-	   Tok_TypeReference {
+	Tok_TypeReference {
+		$$ = $1
+	}
+	| Tok_CAPITALREFERENCE {
 		$$ = $1
 	};
 
@@ -547,7 +555,13 @@ TypeDeclaration:
 	ConcreteTypeDeclaration
 	| DefinedType ;
 
-ConcreteTypeDeclaration: BuiltinType;
+ConcreteTypeDeclaration:
+	BuiltinType
+	| Tok_CHOICE '{' AlternativeTypeLists '}' {
+		$$ = $3;
+		$$.Type = asn1types.Asn1ExprTypeConstrChoice;
+		$$.Meta = asn1types.Asn1ExprMetaTypeType;
+	}
 
 BuiltinType:
 	BasicTypeId {
@@ -790,6 +804,9 @@ DefinedType:
 ComplexTypeReference:
 	Tok_TypeReference {
 		$$ = asn1types.NewAsn1Reference()
+	}
+	| Tok_CAPITALREFERENCE {
+		$$ = asn1types.NewAsn1Reference()
 	};
 
 NamedNumberList:
@@ -885,6 +902,51 @@ SubtypeElements:
 		$$ = asn1types.NewAsn1Constraint();
 		$$.Type = asn1types.ConstraintTypeValue;
 	}
+	;
+
+
+AlternativeTypeLists:
+	AlternativeType {
+		$$ = asn1types.NewAsn1Expression()
+	}
+	| AlternativeTypeLists ',' AlternativeType {
+		$$ = asn1types.NewAsn1Expression()
+	}
+	;
+
+AlternativeType:
+	Identifier TaggedType {
+		$$ = $2;
+	}
+	| ExtensionAndException {
+		$$ = $1;
+	}
+	| TaggedType {
+		$$ = $1;
+	}
+	;
+
+ExtensionAndException:
+	Tok_Ellipsis {
+		$$ = asn1types.NewAsn1Expression()
+		$$.Identifier = "...";
+		$$.Type = asn1types.Asn1ExprTypeExtensible;
+		$$.Meta = asn1types.Asn1ExprMetaTypeType;
+	}
+	| Tok_Ellipsis '!' DefinedValue {
+		$$ = asn1types.NewAsn1Expression()
+		$$.Identifier = "...";
+		$$.Type = asn1types.Asn1ExprTypeExtensible;
+		$$.Meta = asn1types.Asn1ExprMetaTypeType;
+	}
+	| Tok_Ellipsis '!' SignedNumber {
+		$$ = asn1types.NewAsn1Expression()
+		$$.Identifier = "...";
+		$$.Type = asn1types.Asn1ExprTypeExtensible;
+		$$.Meta = asn1types.Asn1ExprMetaTypeType;
+	}
+	;
+
 /*
 	| ContainedSubtype {
 		$$ = asn1p_constraint_new(yylineno, currentModule);
