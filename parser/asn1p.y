@@ -1059,11 +1059,11 @@ BasicString:
 	Tok_BMPString { $$ = asn1types.Asn1ExprTypeBMPString; }
 	| Tok_GeneralString {
 		$$ = asn1types.Asn1ExprTypeGeneralString;
-		fmt.Println("WARNING: GeneralString is not fully supported\n");
+		fmt.Println("WARNING: GeneralString is not fully supported");
 	}
 	| Tok_GraphicString {
 		$$ = asn1types.Asn1ExprTypeGraphicsString;
-		fmt.Println("WARNING: GraphicString is not fully supported\n");
+		fmt.Println("WARNING: GraphicString is not fully supported");
 	}
 	| Tok_IA5String { $$ = asn1types.Asn1ExprTypeIA5String; }
 	| Tok_ISO646String { $$ = asn1types.Asn1ExprTypeISO646String; }
@@ -1071,14 +1071,14 @@ BasicString:
 	| Tok_PrintableString { $$ = asn1types.Asn1ExprTypePrintableString; }
 	| Tok_T61String {
 		$$ = asn1types.Asn1ExprTypeT61String
-		fmt.Println("WARNING: T61String is not fully supported\n");
+		fmt.Println("WARNING: T61String is not fully supported");
 	}
 	| Tok_TeletexString { $$ = asn1types.Asn1ExprTypeTeletexString; }
 	| Tok_UniversalString { $$ = asn1types.Asn1ExprTypeUniversalString; }
 	| Tok_UTF8String { $$ = asn1types.Asn1ExprTypeUtf8String; }
 	| Tok_VideotexString {
 		$$ = asn1types.Asn1ExprTypeVideoTexString;
-		fmt.Println("WARNING: VideotexString is not fully supported\n");
+		fmt.Println("WARNING: VideotexString is not fully supported");
 	}
 	| Tok_VisibleString { $$ = asn1types.Asn1ExprTypeVisibleString; }
 	| Tok_ObjectDescriptor { $$ = asn1types.Asn1ExprTypeObjectDescriptor; }

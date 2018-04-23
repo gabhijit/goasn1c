@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Testing for the Lexer - test ASN.1 files are taken from asn1c/testing @
+// Testing for the Parser - test ASN.1 files are taken from asn1c/testing @
 // https://github.com/vlm/asn1c/tree/master/tests
 
-// +build lexer all
+// +build parser all
 
 package parser
 
@@ -25,13 +25,10 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
 	"testing"
 )
 
-var skipTests = []string{"85"}
-
-func TestLexer(t *testing.T) {
+func TestParser(t *testing.T) {
 	args := os.Args[1:] // ignore the executable name
 
 	var testsDir string
@@ -52,27 +49,18 @@ func TestLexer(t *testing.T) {
 
 	tests, err := f.Readdir(0)
 
+	sort.Sort(byName(tests))
+
 	if err != nil {
 		t.Error("Unable to read tests directory.")
 	}
 
-	sort.Sort(byName(tests))
-
-TestLoop:
 	for _, test := range tests {
 		if test.IsDir() {
 			continue
 		}
 
 		name := test.Name()
-
-		for _, skip := range skipTests {
-			if strings.Index(name, skip) == 0 {
-				fmt.Println("skipping", name)
-				continue TestLoop
-			}
-		}
-
 		name = filepath.Join(testsDir, name)
 		name, _ = filepath.Abs(name)
 
@@ -81,12 +69,13 @@ TestLoop:
 			t.Error("Unable to read file: ", name)
 		}
 
-		fmt.Println("Running Lexer for : ", name)
+		//fmt.Println("Running parser for : ", name)
 		s := string(d)
 		p := NewParser(name)
-		err = p.RunLexer(name, s, false)
+		err = p.Parse(name, s, false)
 		if err != nil {
-			//t.Error("Error during tokenization of file :", name)
+			fmt.Println(err)
+			t.Error("Error during parsing file :", name)
 		}
 	}
 }

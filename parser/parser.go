@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Driver for the `go yacc` generated parser and lexer
 package parser
 
 import (
@@ -23,6 +24,8 @@ type Parser struct {
 	name string
 	ap   asn1Parser
 }
+
+var ParserError = errors.New("parser error")
 
 func NewParser(name string) *Parser {
 	ap := asn1NewParser()
@@ -37,7 +40,7 @@ func (p *Parser) Parse(name, input string, lexdebug bool) error {
 	if err == 0 {
 		return nil
 	} else {
-		return errors.New("parser error.")
+		return ParserError
 	}
 }
 

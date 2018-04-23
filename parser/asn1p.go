@@ -206,7 +206,7 @@ const asn1EofCode = 1
 const asn1ErrCode = 2
 const asn1InitialStackSize = 16
 
-//line parser/asn1p.y:1398
+//line parser/asn1p.y:1393
 
 //line yacctab:1
 var asn1Exca = [...]int{
@@ -1805,41 +1805,36 @@ asn1default:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
 		//line parser/asn1p.y:997
 		{
-			fmt.Println("XXX")
 			asn1VAL.expr = asn1types.NewAsn1Expression()
 		}
 	case 166:
 		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
-		//line parser/asn1p.y:1001
+		//line parser/asn1p.y:1000
 		{
-			fmt.Println("YYY")
 			asn1VAL.expr = asn1Dollar[1].expr
 		}
 	case 167:
 		asn1Dollar = asn1S[asn1pt-5 : asn1pt+1]
-		//line parser/asn1p.y:1005
+		//line parser/asn1p.y:1003
 		{
-			fmt.Println("ZZZ")
 			asn1VAL.expr = asn1Dollar[1].expr
 		}
 	case 168:
 		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
-		//line parser/asn1p.y:1012
+		//line parser/asn1p.y:1009
 		{
-			fmt.Println("ZZZ1")
 			asn1VAL.expr = asn1Dollar[2].expr
 			asn1VAL.expr.Identifier = asn1Dollar[1].str
 		}
 	case 169:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:1017
+		//line parser/asn1p.y:1013
 		{
-			fmt.Println("ZZZ2")
 			asn1VAL.expr = asn1Dollar[1].expr
 		}
 	case 170:
 		asn1Dollar = asn1S[asn1pt-3 : asn1pt+1]
-		//line parser/asn1p.y:1021
+		//line parser/asn1p.y:1016
 		{
 			asn1VAL.expr = asn1types.NewAsn1Expression()
 			//$$.Meta = $3.Meta
@@ -1847,13 +1842,13 @@ asn1default:
 		}
 	case 171:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:1026
+		//line parser/asn1p.y:1021
 		{
 			asn1VAL.expr = asn1Dollar[1].expr
 		}
 	case 172:
 		asn1Dollar = asn1S[asn1pt-0 : asn1pt+1]
-		//line parser/asn1p.y:1036
+		//line parser/asn1p.y:1031
 		{
 			asn1VAL.marker = asn1types.NewAsn1Marker()
 			asn1VAL.marker.Flags = asn1types.Asn1MarkerFlagNoMark
@@ -1861,13 +1856,13 @@ asn1default:
 		}
 	case 173:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:1041
+		//line parser/asn1p.y:1036
 		{
 			asn1VAL.marker = asn1Dollar[1].marker
 		}
 	case 174:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:1045
+		//line parser/asn1p.y:1040
 		{
 			asn1VAL.marker = asn1types.NewAsn1Marker()
 			asn1VAL.marker.Flags = asn1types.Asn1MarkerFlagOptional | asn1types.Asn1MarkerFlagIndirect
@@ -1875,7 +1870,7 @@ asn1default:
 		}
 	case 175:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
-		//line parser/asn1p.y:1050
+		//line parser/asn1p.y:1045
 		{
 			asn1VAL.marker = asn1types.NewAsn1Marker()
 			asn1VAL.marker.Flags = asn1types.Asn1MarkerFlagDefault
@@ -1883,89 +1878,89 @@ asn1default:
 		}
 	case 176:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:1058
+		//line parser/asn1p.y:1053
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeBMPString
 		}
 	case 177:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:1059
+		//line parser/asn1p.y:1054
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeGeneralString
-			fmt.Println("WARNING: GeneralString is not fully supported\n")
+			fmt.Println("WARNING: GeneralString is not fully supported")
 		}
 	case 178:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:1063
+		//line parser/asn1p.y:1058
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeGraphicsString
-			fmt.Println("WARNING: GraphicString is not fully supported\n")
+			fmt.Println("WARNING: GraphicString is not fully supported")
 		}
 	case 179:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:1067
+		//line parser/asn1p.y:1062
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeIA5String
 		}
 	case 180:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:1068
+		//line parser/asn1p.y:1063
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeISO646String
 		}
 	case 181:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:1069
+		//line parser/asn1p.y:1064
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeNumericString
 		}
 	case 182:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:1070
+		//line parser/asn1p.y:1065
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypePrintableString
 		}
 	case 183:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:1071
+		//line parser/asn1p.y:1066
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeT61String
-			fmt.Println("WARNING: T61String is not fully supported\n")
+			fmt.Println("WARNING: T61String is not fully supported")
 		}
 	case 184:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:1075
+		//line parser/asn1p.y:1070
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeTeletexString
 		}
 	case 185:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:1076
+		//line parser/asn1p.y:1071
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeUniversalString
 		}
 	case 186:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:1077
+		//line parser/asn1p.y:1072
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeUtf8String
 		}
 	case 187:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:1078
+		//line parser/asn1p.y:1073
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeVideoTexString
-			fmt.Println("WARNING: VideotexString is not fully supported\n")
+			fmt.Println("WARNING: VideotexString is not fully supported")
 		}
 	case 188:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:1082
+		//line parser/asn1p.y:1077
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeVisibleString
 		}
 	case 189:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
-		//line parser/asn1p.y:1083
+		//line parser/asn1p.y:1078
 		{
 			asn1VAL.expr_type = asn1types.Asn1ExprTypeObjectDescriptor
 		}
