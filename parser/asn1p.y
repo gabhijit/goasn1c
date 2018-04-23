@@ -59,6 +59,7 @@ var AllModules    *asn1types.Asn1Grammar
 	value        *asn1types.Asn1Value
 	ref          *asn1types.Asn1Reference
 	constraint   *asn1types.Asn1Constraint
+	marker       *asn1types.Asn1Marker
 }
 
 %token       Tok_ALL
@@ -70,6 +71,8 @@ var AllModules    *asn1types.Asn1Grammar
 %token       Tok_BOOLEAN
 %token       Tok_CHARACTER
 %token       Tok_CHOICE
+%token       Tok_COMPONENTS
+%token       Tok_DEFAULT
 %token       Tok_DEFINITIONS
 %token       Tok_EMBEDDED
 %token       Tok_END
@@ -79,7 +82,6 @@ var AllModules    *asn1types.Asn1Grammar
 %token       Tok_EXPORTS
 %token       Tok_EXTENSIBILITY
 %token       Tok_EXTERNAL
-%token       Tok_Ellipsis
 %token       Tok_FALSE
 %token       Tok_FROM
 %token       Tok_GeneralizedTime
@@ -90,18 +92,41 @@ var AllModules    *asn1types.Asn1Grammar
 %token       Tok_INTEGER
 %token       Tok_INTERSECTION
 %token       Tok_NULL
+%token       Tok_OF
 %token       Tok_OBJECT
 %token       Tok_OCTET
+%token       Tok_OPTIONAL
 %token       Tok_PDV
 %token       Tok_PRIVATE
 %token       Tok_REAL
 %token       Tok_RELATIVE_OID
+%token       Tok_SEQUENCE
+%token       Tok_SET
 %token       Tok_STRING
 %token       Tok_TAGS
 %token       Tok_TRUE
 %token       Tok_UNION
 %token       Tok_UNIVERSAL
 %token       Tok_UTCTime
+
+%token       Tok_BMPString
+%token       Tok_GeneralString
+%token       Tok_GraphicString
+%token       Tok_IA5String
+%token       Tok_ISO646String
+%token       Tok_NumericString
+%token       Tok_PrintableString
+%token       Tok_T61String
+%token       Tok_TeletexString
+%token       Tok_UniversalString
+%token       Tok_UTF8String
+%token       Tok_VideotexString
+%token       Tok_VisibleString
+%token       Tok_ObjectDescriptor
+
+%token       Tok_Ellipsis
+%token       Tok_TwoLeftBrackets Tok_TwoRightBrackets
+
 %token <str> Tok_TypeReference
 %token <str> Tok_CAPITALREFERENCE
 %token <num> Tok_Number
@@ -141,6 +166,7 @@ var AllModules    *asn1types.Asn1Grammar
 %type <expr>         TaggedType
 %type <expr>         UntaggedType
 %type <expr>         BuiltinType
+%type <expr>         TypeDeclaration
 %type <expr>         ConcreteTypeDeclaration
 %type <expr>         DefinedType
 
@@ -183,6 +209,15 @@ var AllModules    *asn1types.Asn1Grammar
 %type <expr>         AlternativeTypeLists
 %type <expr>         AlternativeType
 %type <expr>         ExtensionAndException
+
+%type <expr>         optComponentTypeLists
+%type <expr>         ComponentTypeLists
+%type <expr>         ComponentType
+
+%type <marker>       optMarker
+%type <marker>       Marker
+
+%type <expr_type>    BasicString
 
 %type <expr>         Enumerations
 %type <expr>         UniverationList
@@ -548,11 +583,11 @@ TagPlicit:
 	;
 
 UntaggedType:
-	    TypeDeclaration {}/* FIXME: Constraints not done yet */
+	    TypeDeclaration {$$ = $1; }/* FIXME: Constraints not done yet */
 	;
 
 TypeDeclaration:
-	ConcreteTypeDeclaration
+	ConcreteTypeDeclaration { $$ = $1;}
 	| DefinedType ;
 
 ConcreteTypeDeclaration:
@@ -560,6 +595,17 @@ ConcreteTypeDeclaration:
 	| Tok_CHOICE '{' AlternativeTypeLists '}' {
 		$$ = $3;
 		$$.Type = asn1types.Asn1ExprTypeConstrChoice;
+		$$.Meta = asn1types.Asn1ExprMetaTypeType;
+	}
+	| Tok_SEQUENCE '{' optComponentTypeLists '}' {
+		$$ = $3;
+		$$.Type = asn1types.Asn1ExprTypeConstrSequence;
+		$$.Meta = asn1types.Asn1ExprMetaTypeType;
+	}
+	| Tok_SET '{' optComponentTypeLists '}' {
+		fmt.Println("AAA")
+		$$ = $3;
+		$$.Type = asn1types.Asn1ExprTypeConstrSet;
 		$$.Meta = asn1types.Asn1ExprMetaTypeType;
 	}
 
@@ -593,8 +639,7 @@ BasicTypeId:
 	| Tok_OBJECT Tok_IDENTIFIER { $$ = asn1types.Asn1ExprTypeObjectIdentifier; }
 	| Tok_RELATIVE_OID { $$ = asn1types.Asn1ExprTypeRelativeOid; }
 	| Tok_EXTERNAL { $$ = asn1types.Asn1ExprTypeExternal; }
-	/* | BasicString --- Not supported Yet */
-
+	| BasicString
 	| BasicTypeId_UniverationCompatible
 	;
 
@@ -946,6 +991,99 @@ ExtensionAndException:
 		$$.Meta = asn1types.Asn1ExprMetaTypeType;
 	}
 	;
+
+/*
+ * A collection of constructed data type members.
+ */
+optComponentTypeLists:
+	{ $$ = asn1types.NewAsn1Expression(); }
+	| ComponentTypeLists { $$ = $1; };
+
+ComponentTypeLists:
+	ComponentType {
+		$$ = asn1types.NewAsn1Expression()
+	}
+	| ComponentTypeLists ',' ComponentType {
+		$$ = $1;
+	}
+	| ComponentTypeLists ',' Tok_TwoLeftBrackets ComponentTypeLists Tok_TwoRightBrackets {
+		$$ = $1;
+	}
+	;
+
+ComponentType:
+	Identifier TaggedType optMarker {
+		$$ = $2;
+		$$.Identifier = $1;
+	}
+	| TaggedType optMarker {
+		$$ = $1;
+	}
+	| Tok_COMPONENTS Tok_OF TaggedType {
+		$$ = asn1types.NewAsn1Expression()
+		//$$.Meta = $3.Meta
+		$$.Type = asn1types.Asn1ExprTypeComponentsOf;
+	}
+	| ExtensionAndException {
+		$$ = $1;
+	}
+	;
+
+/*
+ * MARKERS
+ */
+
+optMarker:
+	{
+		$$ = asn1types.NewAsn1Marker()
+		$$.Flags = asn1types.Asn1MarkerFlagNoMark;
+		$$.Value = nil
+	}
+	| Marker { $$ = $1; }
+	;
+
+Marker:
+	Tok_OPTIONAL {
+		$$ = asn1types.NewAsn1Marker()
+		$$.Flags = asn1types.Asn1MarkerFlagOptional | asn1types.Asn1MarkerFlagIndirect;
+		$$.Value = nil;
+	}
+	| Tok_DEFAULT Value {
+		$$ = asn1types.NewAsn1Marker()
+		$$.Flags = asn1types.Asn1MarkerFlagDefault;
+		$$.Value = $2;
+	}
+	;
+
+BasicString:
+	Tok_BMPString { $$ = asn1types.Asn1ExprTypeBMPString; }
+	| Tok_GeneralString {
+		$$ = asn1types.Asn1ExprTypeGeneralString;
+		fmt.Println("WARNING: GeneralString is not fully supported\n");
+	}
+	| Tok_GraphicString {
+		$$ = asn1types.Asn1ExprTypeGraphicsString;
+		fmt.Println("WARNING: GraphicString is not fully supported\n");
+	}
+	| Tok_IA5String { $$ = asn1types.Asn1ExprTypeIA5String; }
+	| Tok_ISO646String { $$ = asn1types.Asn1ExprTypeISO646String; }
+	| Tok_NumericString { $$ = asn1types.Asn1ExprTypeNumericString; }
+	| Tok_PrintableString { $$ = asn1types.Asn1ExprTypePrintableString; }
+	| Tok_T61String {
+		$$ = asn1types.Asn1ExprTypeT61String
+		fmt.Println("WARNING: T61String is not fully supported\n");
+	}
+	| Tok_TeletexString { $$ = asn1types.Asn1ExprTypeTeletexString; }
+	| Tok_UniversalString { $$ = asn1types.Asn1ExprTypeUniversalString; }
+	| Tok_UTF8String { $$ = asn1types.Asn1ExprTypeUtf8String; }
+	| Tok_VideotexString {
+		$$ = asn1types.Asn1ExprTypeVideoTexString;
+		fmt.Println("WARNING: VideotexString is not fully supported\n");
+	}
+	| Tok_VisibleString { $$ = asn1types.Asn1ExprTypeVisibleString; }
+	| Tok_ObjectDescriptor { $$ = asn1types.Asn1ExprTypeObjectDescriptor; }
+	;
+
 
 /*
 	| ContainedSubtype {

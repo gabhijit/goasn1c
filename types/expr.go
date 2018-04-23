@@ -54,10 +54,10 @@ const (
 
 // Constructed Types
 const (
-	Asn1ExprTypeConstrSeq Asn1ExprType = 0x20 + iota
+	Asn1ExprTypeConstrSequence Asn1ExprType = 0x20 + iota
 	Asn1ExprTypeConstrChoice
 	Asn1ExprTypeConstrSet
-	Asn1ExprTypeConstrSeqOf
+	Asn1ExprTypeConstrSequenceOf
 	Asn1ExprTypeConstrChoiceOf
 )
 
@@ -99,6 +99,7 @@ const (
 	Asn1ExprTypeT61String
 	Asn1ExprTypeVideoTexString
 	Asn1ExprTypeObjectDescriptor
+	Asn1ExprTypeGeneralString
 
 	Asn1ExprTypeMax
 )
@@ -149,6 +150,29 @@ const (
 
 func NewAsn1Tag() *Asn1Tag {
 	n := &Asn1Tag{}
+
+	return n
+}
+
+type Asn1Marker struct {
+	Flags Asn1MarkerFlag
+	Value *Asn1Value
+}
+
+type Asn1MarkerFlag uint8
+
+const (
+	Asn1MarkerFlagNoMark Asn1MarkerFlag = iota
+	Asn1MarkerFlagIndirect
+	Asn1MarkerFlagOmitable
+
+	Asn1MarkerFlagOptional  = 0x07
+	Asn1MarkerFlagDefault   = 0x00F
+	Asn1MarkerFlagUnRecurse = 0x10
+)
+
+func NewAsn1Marker() *Asn1Marker {
+	n := &Asn1Marker{}
 
 	return n
 }
