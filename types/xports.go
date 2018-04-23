@@ -41,3 +41,10 @@ func NewAsn1Xports() *Asn1Xports {
 
 	return n
 }
+
+func NewAsn1AssignedIdentifier() *Asn1AssignedIdentifier {
+
+	n := &Asn1AssignedIdentifier{}
+
+	return n
+}

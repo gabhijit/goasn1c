@@ -366,8 +366,8 @@ ImportsBundleSet:
 	;
 
 AssignedIdentifier:
-	{ $$.Oid = nil; $$.Value = nil;}
-	| ObjectIdentifier { $$.Oid = $1;  $$.Value = nil};
+	{ $$ = asn1types.NewAsn1AssignedIdentifier(); $$.Oid = nil; $$.Value = nil;}
+	| ObjectIdentifier { $$ = asn1types.NewAsn1AssignedIdentifier(); $$.Oid = $1;  $$.Value = nil};
 
 ImportsBundle:
 	ImportsList Tok_FROM TypeRefName AssignedIdentifier {

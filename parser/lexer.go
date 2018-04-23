@@ -128,6 +128,15 @@ func (l *lexer) Lex(lval *asn1SymType) int {
 	case itemReservedENUMERATED:
 		return Tok_ENUMERATED
 
+	case itemReservedIMPORTS:
+		return Tok_IMPORTS
+
+	case itemReservedFROM:
+		return Tok_FROM
+
+	case itemReservedEXPORTS:
+		return Tok_EXPORTS
+
 	case itemModuleReference, itemTypeReference:
 		lval.str = i.val
 		return Tok_TypeReference

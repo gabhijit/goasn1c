@@ -927,6 +927,7 @@ asn1default:
 		asn1Dollar = asn1S[asn1pt-0 : asn1pt+1]
 		//line parser/asn1p.y:366
 		{
+			asn1VAL.aid = asn1types.NewAsn1AssignedIdentifier()
 			asn1VAL.aid.Oid = nil
 			asn1VAL.aid.Value = nil
 		}
@@ -934,6 +935,7 @@ asn1default:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
 		//line parser/asn1p.y:367
 		{
+			asn1VAL.aid = asn1types.NewAsn1AssignedIdentifier()
 			asn1VAL.aid.Oid = asn1Dollar[1].oid
 			asn1VAL.aid.Value = nil
 		}
