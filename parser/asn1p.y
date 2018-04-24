@@ -847,12 +847,18 @@ DefinedType:
 	;
 
 ComplexTypeReference:
+		    /* FIXME : More needs to be done about references */
 	Tok_TypeReference {
 		$$ = asn1types.NewAsn1Reference()
 	}
 	| Tok_CAPITALREFERENCE {
 		$$ = asn1types.NewAsn1Reference()
-	};
+	}
+	| Tok_TypeReference '.' TypeRefName {
+		fmt.Println("XXX")
+		$$ = asn1types.NewAsn1Reference()
+	}
+	;
 
 NamedNumberList:
 	NamedNumber {
@@ -1044,6 +1050,7 @@ optMarker:
 
 Marker:
 	Tok_OPTIONAL {
+		fmt.Println("YYY")
 		$$ = asn1types.NewAsn1Marker()
 		$$.Flags = asn1types.Asn1MarkerFlagOptional | asn1types.Asn1MarkerFlagIndirect;
 		$$.Value = nil;

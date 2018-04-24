@@ -48,3 +48,12 @@ func (b byName) Less(i, j int) bool {
 
 	return x < y
 }
+
+func getTestNum(name string) (int64, error) {
+
+	n := strings.Split(name, "-")[0]
+
+	return strconv.ParseInt(n, 10, 0)
+}
+
+type testResult map[int64]error

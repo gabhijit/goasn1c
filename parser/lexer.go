@@ -161,6 +161,9 @@ func (l *lexer) Lex(lval *asn1SymType) int {
 	case itemReservedAUTOMATIC:
 		return Tok_AUTOMATIC
 
+	case itemReservedAPPLICATION:
+		return Tok_APPLICATION
+
 	case itemReservedNULL:
 		return Tok_NULL
 
@@ -178,6 +181,12 @@ func (l *lexer) Lex(lval *asn1SymType) int {
 
 	case itemReservedBOOLEAN:
 		return Tok_BOOLEAN
+
+	case itemReservedOPTIONAL:
+		return Tok_OPTIONAL
+
+	case itemReservedDEFAULT:
+		return Tok_DEFAULT
 
 	case itemModuleReference, itemTypeReference:
 		lval.str = i.val
