@@ -209,6 +209,9 @@ func (l *lexer) Lex(lval *asn1SymType) int {
 	case itemReservedFALSE:
 		return Tok_FALSE
 
+	case itemReservedOF:
+		return Tok_OF
+
 	case itemModuleReference, itemTypeReference:
 		lval.str = i.val
 		return Tok_TypeReference

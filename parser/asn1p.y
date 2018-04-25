@@ -241,6 +241,9 @@ var AllModules    *asn1types.Asn1Grammar
 %type <constraint>   SizeConstraint
 %type <constraint>   PermittedAlphabet
 
+%type <str>          optIdentifier
+%type <constraint>   optSizeOrConstraint
+
 %type <expr>         Enumerations
 %type <expr>         UniverationList
 %type <expr>         UniverationElement
@@ -630,6 +633,18 @@ ConcreteTypeDeclaration:
 		$$.Type = asn1types.Asn1ExprTypeConstrSet;
 		$$.Meta = asn1types.Asn1ExprMetaTypeType;
 	}
+	| Tok_SEQUENCE optSizeOrConstraint Tok_OF optIdentifier optTag TypeDeclaration {
+		$$ = asn1types.NewAsn1Expression()
+		$$.Type = asn1types.Asn1ExprTypeConstrSetOf;
+		$$.Meta = asn1types.Asn1ExprMetaTypeType;
+		$6.Identifier = $4;
+	}
+	| Tok_SET optSizeOrConstraint Tok_OF optIdentifier optTag TypeDeclaration {
+		$$ = asn1types.NewAsn1Expression()
+		$$.Type = asn1types.Asn1ExprTypeConstrSetOf;
+		$$.Meta = asn1types.Asn1ExprMetaTypeType;
+		$6.Identifier = $4;
+	};
 
 BuiltinType:
 	BasicTypeId {
@@ -1200,6 +1215,21 @@ PermittedAlphabet:
 	Tok_FROM Constraint {
 		$$ = asn1types.NewAsn1Constraint()
 	};
+
+optIdentifier:
+	{ $$ = ""; }
+	| Identifier {
+		$$ = $1;
+	}
+	;
+/* empty | Constraint | SIZE(...) */
+optSizeOrConstraint:
+	{ $$ = nil; }
+	| Constraint
+	| SizeConstraint
+	;
+
+/* XXXXXXXXXX Marker */
 
 /*
     | SizeConstraint    /* SIZE ... */

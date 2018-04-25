@@ -58,7 +58,7 @@ const (
 	Asn1ExprTypeConstrChoice
 	Asn1ExprTypeConstrSet
 	Asn1ExprTypeConstrSequenceOf
-	Asn1ExprTypeConstrChoiceOf
+	Asn1ExprTypeConstrSetOf
 )
 
 // Basic Types
