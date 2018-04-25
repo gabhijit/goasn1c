@@ -99,7 +99,9 @@ func TestParser(t *testing.T) {
 
 		if err != testResults[num] {
 			fmt.Println(err)
-			t.Error("Error during parsing file :", name)
+			t.Error("FAIL:", name)
+		} else {
+			t.Log("PASS:", name)
 		}
 	}
 }

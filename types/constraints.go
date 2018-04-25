@@ -19,32 +19,32 @@ package asn1types
 type Asn1ConstraintType uint8
 
 const (
-	ConstraintTypeInvalid Asn1ConstraintType = iota
+	Asn1ConstraintTypeInvalid Asn1ConstraintType = iota
 
 	// constraint elements
-	ConstraintTypeSubType // WeekEnd
-	ConstraintTypeValue
-	ConstraintTypeSimpleRange            // 1..2
-	ConstraintTypeLeftExcludedRange      // 0<..MAX (positive integers)
-	ConstraintTypeRightExcludedRange     // MIN..<0 (negative integers)
-	ConstraintTypeLeftRightExcludedRange // MIN<..<Max
-	ConstraintTypeExtensibilityMark
+	Asn1ConstraintTypeSubType // WeekEnd
+	Asn1ConstraintTypeValue
+	Asn1ConstraintTypeSimpleRange            // 1..2
+	Asn1ConstraintTypeLeftExcludedRange      // 0<..MAX (positive integers)
+	Asn1ConstraintTypeRightExcludedRange     // MIN..<0 (negative integers)
+	Asn1ConstraintTypeLeftRightExcludedRange // MIN<..<Max
+	Asn1ConstraintTypeExtensibilityMark
 
 	// constrained types
-	ConstraintTypeSize
-	ConstraintTypeFrom
-	ConstraintTypeWithComponent
-	ConstraintTypeWithComponents
-	ConstraintTypeContstrainedBy
-	ConstraintTypeContainingType
-	ConstraintTypePattern
+	Asn1ConstraintTypeSize
+	Asn1ConstraintTypeFrom
+	Asn1ConstraintTypeWithComponent
+	Asn1ConstraintTypeWithComponents
+	Asn1ConstraintTypeContstrainedBy
+	Asn1ConstraintTypeContainingType
+	Asn1ConstraintTypePattern
 
-	ConstraintTypeSet
-	ConstraintTypeCrc // Not sure what is this?
-	ConstraintTypeUnion
-	ConstraintTypeIntersection
-	ConstraintTypeExcept
-	ConstraintTypeAllExcept
+	Asn1ConstraintTypeSet
+	Asn1ConstraintTypeCrc // Not sure what is this?
+	Asn1ConstraintTypeUnion
+	Asn1ConstraintTypeIntersection
+	Asn1ConstraintTypeExcept
+	Asn1ConstraintTypeAllExcept
 )
 
 type Asn1ConstraintPresentType uint8

@@ -179,6 +179,9 @@ func (l *lexer) Lex(lval *asn1SymType) int {
 	case itemReservedIA5String:
 		return Tok_IA5String
 
+	case itemReservedBMPString:
+		return Tok_BMPString
+
 	case itemReservedBOOLEAN:
 		return Tok_BOOLEAN
 
@@ -187,6 +190,24 @@ func (l *lexer) Lex(lval *asn1SymType) int {
 
 	case itemReservedDEFAULT:
 		return Tok_DEFAULT
+
+	case itemReservedINCLUDES:
+		return Tok_INCLUDES
+
+	case itemReservedSIZE:
+		return Tok_SIZE
+
+	case itemReservedMIN:
+		return Tok_MIN
+
+	case itemReservedMAX:
+		return Tok_MAX
+
+	case itemReservedTRUE:
+		return Tok_TRUE
+
+	case itemReservedFALSE:
+		return Tok_FALSE
 
 	case itemModuleReference, itemTypeReference:
 		lval.str = i.val
@@ -202,6 +223,9 @@ func (l *lexer) Lex(lval *asn1SymType) int {
 	case itemEllipsis:
 		return Tok_Ellipsis
 
+	case itemRangeSeparator:
+		return Tok_TwoDots
+
 	case itemNumber:
 		lval.num, _ = strconv.ParseInt(i.val, 10, 64)
 		return Tok_Number
@@ -213,6 +237,18 @@ func (l *lexer) Lex(lval *asn1SymType) int {
 	case itemSymbol:
 		runes := []rune(i.val)
 		return int(runes[0])
+
+	case itemCstring:
+		lval.str = i.val
+		return Tok_CString
+
+	case itemBstring:
+		lval.str = i.val
+		return Tok_BString
+
+	case itemHstring:
+		lval.str = i.val
+		return Tok_HString
 
 	case itemEOF:
 		return 0

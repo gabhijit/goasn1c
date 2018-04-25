@@ -4,7 +4,7 @@
 | Test Case Type | Pass Percentage |
 |----|----:|
 | Lexer (tokenization) | 99.25 |
-| Parser  | 33.08 |
+| Parser  | 48.00 |
 | Code Generation | 0.0 |
 
 ### Legend
@@ -27,7 +27,7 @@
 | 04-enum-SE.asn1 |  Y | Y | |
 | 05-enum-SE.asn1 |  Y | Y | |
 | 06-enum-SE.asn1 |  Y | Y | |
-| 07-int-OK.asn1 |  Y |  | |
+| 07-int-OK.asn1 |  Y |  Y | |
 | 08-int-SE.asn1 |  Y | Y | |
 | 09-int-SE.asn1 |  Y | Y | |
 | 10-int-OK.asn1 |  Y | Y | |
@@ -37,7 +37,7 @@
 | 14-resolver-OK.asn1 |  Y | Y | |
 | 15-resolver-SE.asn1 |  Y | Y | |
 | 16-constraint-OK.asn1 |  Y |  | |
-| 17-tags-OK.asn1 |  Y |  | |
+| 17-tags-OK.asn1 |  Y |  Y | |
 | 18-class-OK.asn1 |  Y |  | |
 | 19-param-OK.asn1 |  Y |  | |
 | 20-constr-OK.asn1 |  Y |  | |
@@ -71,10 +71,10 @@
 | 48-real-life-OK.asn1 |  Y | Y | |
 | 49-real-life-OK.asn1 |  Y | Y | |
 | 50-constraint-OK.asn1 |  Y |  | |
-| 51-constraint-SE.asn1 |  Y |  | |
-| 52-constraint-SE.asn1 |  Y |  | |
-| 53-constraint-SE.asn1 |  Y |  | |
-| 54-constraint-SE.asn1 |  Y |  | |
+| 51-constraint-SE.asn1 |  Y |  Y | |
+| 52-constraint-SE.asn1 |  Y |  Y | |
+| 53-constraint-SE.asn1 |  Y |  Y | |
+| 54-constraint-SE.asn1 |  Y |  Y | |
 | 55-components-of-OK.asn1 |  Y |  | |
 | 56-components-of-SE.asn1 |  Y |  | |
 | 57-components-of-OK.asn1 |  Y |  | |
@@ -91,12 +91,12 @@
 | 68-enum-default-OK.asn1 |  Y | Y | |
 | 69-reserved-words-OK.asn1 |  Y |  | |
 | 70-xer-test-OK.asn1 |  Y |  | |
-| 71-duplicate-types-SE.asn1 |  Y |  | |
+| 71-duplicate-types-SE.asn1 |  Y | Y | |
 | 72-same-names-OK.asn1 |  Y |  | |
 | 73-circular-OK.asn1 |  Y |  | |
-| 74-int-enum-constraints-OK.asn1 |  Y |  | |
-| 75-duplicate-modules-SE.asn1 |  Y |  | |
-| 76-duplicate-modules-SW.asn1 |  Y |  | |
+| 74-int-enum-constraints-OK.asn1 |  Y |  Y | |
+| 75-duplicate-modules-SE.asn1 |  Y |  Y | |
+| 76-duplicate-modules-SW.asn1 |  Y |  Y | |
 | 77-str-default-OK.asn1 |  Y |  | |
 | 78-str-default-SE.asn1 |  Y |  | |
 | 79-constrained-by-OK.asn1 |  Y |  | |
@@ -110,7 +110,7 @@
 | 87-old-syntax-OK.asn1 |  Y | Y | |
 | 88-integer-enum-OK.asn1 |  Y | Y | |
 | 89-bit-string-enum-OK.asn1 |  Y |  | |
-| 90-cond-int-type-OK.asn1 |  Y |  | |
+| 90-cond-int-type-OK.asn1 |  Y |  Y | |
 | 91-cond-int-blessSize-OK.asn1 |  Y |  | |
 | 92-circular-loops-OK.asn1 |  Y |  | |
 | 93-asn1c-controls-OK.asn1 |  Y |  | |
@@ -138,15 +138,15 @@
 | 115-bit-string-OK.asn1 |  Y |  | |
 | 116-bit-string-SE.asn1 |  Y |  | |
 | 117-real-constraint-OK.asn1 |  Y |  | |
-| 118-per-constraint-OK.asn1 |  Y |  | |
+| 118-per-constraint-OK.asn1 |  Y | Y | |
 | 119-per-strings-OK.asn1 |  Y |  | |
 | 121-empty-imports-OK.asn1 |  Y |  Y | |
 | 122-pattern-OK.asn1 |  Y |  | |
-| 123-valueassignment-OK.asn1 |  Y |  | |
+| 123-valueassignment-OK.asn1 |  Y | Y | |
 | 124-multiconstraint-OK.asn1 |  Y |  | |
 | 125-bitstring-constraint-OK.asn1 |  Y |  | |
-| 126-per-extensions-OK.asn1 |  Y |  | |
-| 127-per-long-OK.asn1 |  Y |  | |
+| 126-per-extensions-OK.asn1 |  Y | Y | |
+| 127-per-long-OK.asn1 |  Y | Y | |
 | 128-enum-SE.asn1 |  Y | Y | |
 | 129-enum-OK.asn1 |  Y | Y | |
 | 129-enum-SE.asn1 |  Y | Y | |

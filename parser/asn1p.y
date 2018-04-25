@@ -46,20 +46,21 @@ var AllModules    *asn1types.Asn1Grammar
 	str          string
 	num          int64
 
-	grammar      *asn1types.Asn1Grammar
-	module       *asn1types.Asn1Module
-	oid	     *asn1types.Asn1Oid
-	oid_arc      asn1types.Asn1OidArc
-	module_flags asn1types.ModuleFlagType
-	xports       *asn1types.Asn1Xports
-	expr         *asn1types.Asn1Expression
-	aid          *asn1types.Asn1AssignedIdentifier
-	expr_type    asn1types.Asn1ExprType
-	tag          *asn1types.Asn1Tag
-	value        *asn1types.Asn1Value
-	ref          *asn1types.Asn1Reference
-	constraint   *asn1types.Asn1Constraint
-	marker       *asn1types.Asn1Marker
+	grammar         *asn1types.Asn1Grammar
+	module          *asn1types.Asn1Module
+	oid	        *asn1types.Asn1Oid
+	oid_arc         asn1types.Asn1OidArc
+	module_flags    asn1types.ModuleFlagType
+	xports          *asn1types.Asn1Xports
+	expr            *asn1types.Asn1Expression
+	aid             *asn1types.Asn1AssignedIdentifier
+	expr_type       asn1types.Asn1ExprType
+	tag             *asn1types.Asn1Tag
+	value           *asn1types.Asn1Value
+	ref             *asn1types.Asn1Reference
+	constraint      *asn1types.Asn1Constraint
+	marker          *asn1types.Asn1Marker
+	constraint_type asn1types.Asn1ConstraintType
 }
 
 %token       Tok_ALL
@@ -89,8 +90,11 @@ var AllModules    *asn1types.Asn1Grammar
 %token       Tok_IMPLICIT
 %token       Tok_IMPLIED
 %token       Tok_IMPORTS
+%token       Tok_INCLUDES
 %token       Tok_INTEGER
 %token       Tok_INTERSECTION
+%token       Tok_MAX
+%token       Tok_MIN
 %token       Tok_NULL
 %token       Tok_OF
 %token       Tok_OBJECT
@@ -102,6 +106,7 @@ var AllModules    *asn1types.Asn1Grammar
 %token       Tok_RELATIVE_OID
 %token       Tok_SEQUENCE
 %token       Tok_SET
+%token       Tok_SIZE
 %token       Tok_STRING
 %token       Tok_TAGS
 %token       Tok_TRUE
@@ -125,6 +130,7 @@ var AllModules    *asn1types.Asn1Grammar
 %token       Tok_ObjectDescriptor
 
 %token       Tok_Ellipsis
+%token       Tok_TwoDots
 %token       Tok_TwoLeftBrackets Tok_TwoRightBrackets
 
 %token <str> Tok_TypeReference
@@ -218,6 +224,22 @@ var AllModules    *asn1types.Asn1Grammar
 %type <marker>       Marker
 
 %type <expr_type>    BasicString
+
+%type <constraint>   optManyConstraints
+%type <constraint>   ManyConstraints
+%type <constraint>   Constraint
+%type <constraint>   ConstraintSpec
+%type <constraint>   SubtypeConstraint
+
+%type <constraint>   ValueRange
+%type <constraint_type> ConstraintRangeSpec
+%type <value>        LowerEndValue
+%type <value>        UpperEndValue
+
+%type <value>        ContainedSubtype
+%type <expr>         DefinedUntaggedType
+%type <constraint>   SizeConstraint
+%type <constraint>   PermittedAlphabet
 
 %type <expr>         Enumerations
 %type <expr>         UniverationList
@@ -583,7 +605,7 @@ TagPlicit:
 	;
 
 UntaggedType:
-	    TypeDeclaration {$$ = $1; }/* FIXME: Constraints not done yet */
+	    TypeDeclaration optManyConstraints {$$ = $1; }/* FIXME: Constraints not done yet */
 	;
 
 TypeDeclaration:
@@ -902,16 +924,16 @@ ValueSetTypeAssignment:
 ElementSetSpecs:
 	Tok_Ellipsis  {
 		$$ = asn1types.NewAsn1Constraint()
-		$$.Type = asn1types.ConstraintTypeExtensibilityMark;
+		$$.Type = asn1types.Asn1ConstraintTypeExtensibilityMark;
 	}
    | ElementSetSpec
    | ElementSetSpec ',' Tok_Ellipsis {
        $$ = asn1types.NewAsn1Constraint()
-       $$.Type = asn1types.ConstraintTypeExtensibilityMark;
+       $$.Type = asn1types.Asn1ConstraintTypeExtensibilityMark;
    }
    | ElementSetSpec ',' Tok_Ellipsis ',' ElementSetSpec {
        $$ = asn1types.NewAsn1Constraint()
-       $$.Type = asn1types.ConstraintTypeExtensibilityMark;
+       $$.Type = asn1types.Asn1ConstraintTypeExtensibilityMark;
    }
 ;
 
@@ -944,15 +966,24 @@ Elements:
     SubtypeElements
     | '(' ElementSetSpec ')' {
 	$$ = asn1types.NewAsn1Constraint();
-	$$.Type = asn1types.ConstraintTypeSet;
+	$$.Type = asn1types.Asn1ConstraintTypeSet;
     }
     ;
 
 SubtypeElements:
 	SingleValue {
 		$$ = asn1types.NewAsn1Constraint();
-		$$.Type = asn1types.ConstraintTypeValue;
+		$$.Type = asn1types.Asn1ConstraintTypeValue;
 	}
+	| ContainedSubtype {
+		$$ = asn1types.NewAsn1Constraint();
+		$$.Type = asn1types.Asn1ConstraintTypeSubType;
+		/* FIXME: */
+	}
+	| ValueRange
+    	| SizeConstraint    /* SIZE ... */
+	| PermittedAlphabet /* FROM ... */
+
 	;
 
 
@@ -1092,14 +1123,85 @@ BasicString:
 	;
 
 
-/*
-	| ContainedSubtype {
-		$$ = asn1p_constraint_new(yylineno, currentModule);
-		checkmem($$);
-		$$->type = ACT_EL_TYPE;
-		$$->containedSubtype = $1;
+/* empty | Constraint... */
+optManyConstraints:
+	{ $$ = nil; }
+	| ManyConstraints;
+
+ManyConstraints:
+    Constraint
+	| ManyConstraints Constraint {
+	// FIXME : Implementation incomplete
 	}
-    | PermittedAlphabet /* FROM ... * /
+	;
+
+Constraint:
+    '(' ConstraintSpec ')' {
+		$$ = $2
+		// FIXME: Needs implementation
+    }
+    ;
+
+ConstraintSpec: SubtypeConstraint ; /* | GeneralConstraint; */
+
+SubtypeConstraint: ElementSetSpecs;
+
+ValueRange:
+    LowerEndValue ConstraintRangeSpec UpperEndValue {
+		$$ = asn1types.NewAsn1Constraint()
+		$$.Type = $2;
+    };
+
+LowerEndValue:
+    SingleValue
+    | Tok_MIN {
+		$$ = asn1types.NewAsn1Value()
+		$$.Type = asn1types.Asn1ValueTypeMin;
+    };
+
+UpperEndValue:
+    SingleValue
+    | Tok_MAX {
+		$$ = asn1types.NewAsn1Value()
+		$$.Type = asn1types.Asn1ValueTypeMax;
+    };
+
+ConstraintRangeSpec:
+	Tok_TwoDots		{ $$ = asn1types.Asn1ConstraintTypeSimpleRange; }
+	| Tok_TwoDots '<'	{ $$ = asn1types.Asn1ConstraintTypeRightExcludedRange; }
+	| '<' Tok_TwoDots	{ $$ = asn1types.Asn1ConstraintTypeLeftExcludedRange; }
+	| '<' Tok_TwoDots '<'	{ $$ = asn1types.Asn1ConstraintTypeLeftRightExcludedRange; }
+	;
+
+ContainedSubtype:
+    Tok_INCLUDES Type {
+		$$ = asn1types.NewAsn1Value()
+    }
+    /* Can't put Type here because of conflicts. Simplified subset */
+    | DefinedUntaggedType {
+		$$ = asn1types.NewAsn1Value()
+    }
+	;
+
+DefinedUntaggedType:
+	DefinedType optManyConstraints {
+		$$ = $1;
+		// FIXME : Implementation
+	}
+	;
+
+SizeConstraint:
+	Tok_SIZE Constraint {
+		$$ = asn1types.NewAsn1Constraint()
+		/* FIXME : implementation not yet complete */
+	};
+
+PermittedAlphabet:
+	Tok_FROM Constraint {
+		$$ = asn1types.NewAsn1Constraint()
+	};
+
+/*
     | SizeConstraint    /* SIZE ... */
     /* | TypeConstraint is via ContainedSubtype * /
 	| InnerTypeConstraints  /* WITH COMPONENT[S] ... * /
@@ -1110,16 +1212,6 @@ BasicString:
 
 
 /* TODO: Constraints not implemented yet
-PermittedAlphabet:
-	TOK_FROM Constraint {
-		CONSTRAINT_INSERT($$, ACT_CT_FROM, $2, 0);
-	};
-
-SizeConstraint:
-	TOK_SIZE Constraint {
-		CONSTRAINT_INSERT($$, ACT_CT_SIZE, $2, 0);
-	};
-
 PatternConstraint:
 	TOK_PATTERN TOK_cstring {
 		$$ = asn1p_constraint_new(yylineno, currentModule);
@@ -1137,29 +1229,6 @@ PatternConstraint:
 	}
 	;
 
-ValueRange:
-    LowerEndValue ConstraintRangeSpec UpperEndValue {
-		$$ = asn1p_constraint_new(yylineno, currentModule);
-		checkmem($$);
-		$$->type = $2;
-		$$->range_start = $1;
-		$$->range_stop = $3;
-    };
-
-LowerEndValue:
-    SingleValue
-    | TOK_MIN {
-		$$ = asn1p_value_fromint(-123);
-		$$->type = ATV_MIN;
-    };
-
-UpperEndValue:
-    SingleValue
-    | TOK_MAX {
-		$$ = asn1p_value_fromint(321);
-		$$->type = ATV_MAX;
-    };
-
 */
 
 SingleValue: Value;
@@ -1176,20 +1245,6 @@ BitStringValue:
 		checkmem($$);
 		free($1);
 	}
-	;
-
-ContainedSubtype:
-    TOK_INCLUDES Type {
-		$$ = asn1p_value_fromtype($2);
-		checkmem($$);
-		asn1p_expr_free($2);
-    }
-    /* Can't put Type here because of conflicts. Simplified subset * /
-    | DefinedUntaggedType {
-		$$ = asn1p_value_fromtype($1);
-		checkmem($$);
-		asn1p_expr_free($1);
-    }
 	;
 
 */
@@ -1218,7 +1273,7 @@ PartialSpecification:
         $$->type = ACT_CA_CSV;
 		asn1p_constraint_t *ct = asn1p_constraint_new(yylineno, currentModule);
 		checkmem($$);
-		ct->type = asn1types.ConstraintTypeExtensibilityMark;
+		ct->type = asn1types.Asn1ConstraintTypeExtensibilityMark;
         asn1p_constraint_insert($$, ct);
         for(unsigned i = 0; i < $4->el_count; i++) {
             asn1p_constraint_insert($$, $4->elements[i]);
@@ -1297,12 +1352,6 @@ ContentsConstraint:
 	}
 	;
 
-ConstraintRangeSpec:
-	TOK_TwoDots		{ $$ = ACT_EL_RANGE; }
-	| TOK_TwoDots '<'	{ $$ = ACT_EL_RLRANGE; }
-	| '<' TOK_TwoDots	{ $$ = ACT_EL_LLRANGE; }
-	| '<' TOK_TwoDots '<'	{ $$ = ACT_EL_ULRANGE; }
-	;
 TableConstraint:
 	SimpleTableConstraint {
 		$$ = $1;
