@@ -4,7 +4,7 @@
 | Test Case Type | Pass Percentage |
 |----|----:|
 | Lexer (tokenization) | 99.25 |
-| Parser  | 48.00 |
+| Parser  | 70.18 |
 | Code Generation | 0.0 |
 
 ### Legend
@@ -40,31 +40,31 @@
 | 17-tags-OK.asn1 | Y | Y | |
 | 18-class-OK.asn1 | Y |  | |
 | 19-param-OK.asn1 | Y |  | |
-| 20-constr-OK.asn1 | Y |  | |
+| 20-constr-OK.asn1 | Y | Y | |
 | 21-tags-OK.asn1 | Y | Y | |
-| 22-tags-OK.asn1 | Y |  | |
+| 22-tags-OK.asn1 | Y | Y | |
 | 23-bits-OK.asn1 | Y |  | |
 | 24-sequence-OK.asn1 | Y | Y | |
-| 25-misc-OK.asn1 | Y |  | |
+| 25-misc-OK.asn1 | Y | Y | |
 | 26-sequence-SE.asn1 | Y | Y | |
 | 27-set-SE.asn1 | Y | Y | |
 | 28-tags-SE.asn1 | Y | Y | |
 | 29-tags-OK.asn1 | Y | Y | |
 | 30-set-OK.asn1 | Y | Y | |
-| 31-set-of-OK.asn1 | Y |  | |
-| 32-sequence-of-OK.asn1 | Y |  | |
-| 33-misc-OK.asn1 | Y |  | |
+| 31-set-of-OK.asn1 | Y | Y | |
+| 32-sequence-of-OK.asn1 | Y | Y | |
+| 33-misc-OK.asn1 | Y | Y | |
 | 34-class-OK.asn1 | Y |  | |
 | 35-set-choice-OK.asn1 | Y | Y | |
 | 36-indirect-choice-SE.asn1 | Y | Y | |
 | 37-indirect-choice-OK.asn1 | Y | Y | |
 | 38-comments-OK.asn1 | Y | Y | |
-| 39-sequence-of-OK.asn1 | Y |  | |
-| 40-int-optional-SE.asn1 | Y |  | |
-| 41-int-optional-OK.asn1 | Y |  | |
-| 42-real-life-OK.asn1 | Y |  | |
+| 39-sequence-of-OK.asn1 | Y | Y | |
+| 40-int-optional-SE.asn1 | Y | Y | |
+| 41-int-optional-OK.asn1 | Y | Y | |
+| 42-real-life-OK.asn1 | Y | Y | |
 | 43-recursion-OK.asn1 | Y | Y | |
-| 44-choice-in-sequence-OK.asn1 | Y |  | |
+| 44-choice-in-sequence-OK.asn1 | Y | Y | |
 | 45-undefined-type-SE.asn1 | Y | Y | |
 | 46-redefine-OK.asn1 | Y | Y | |
 | 47-set-ext-OK.asn1 | Y | Y | |
@@ -75,9 +75,9 @@
 | 52-constraint-SE.asn1 | Y | Y | |
 | 53-constraint-SE.asn1 | Y | Y | |
 | 54-constraint-SE.asn1 | Y | Y | |
-| 55-components-of-OK.asn1 | Y |  | |
-| 56-components-of-SE.asn1 | Y |  | |
-| 57-components-of-OK.asn1 | Y |  | |
+| 55-components-of-OK.asn1 | Y | Y | |
+| 56-components-of-SE.asn1 | Y | Y | |
+| 57-components-of-OK.asn1 | Y | Y | |
 | 58-param-OK.asn1 | Y |  | |
 | 59-choice-extended-OK.asn1 | Y | Y | |
 | 60-any-OK.asn1 | Y | Y | |
@@ -85,22 +85,22 @@
 | 62-any-OK.asn1 | Y | Y | |
 | 63-any-2-SE.asn1 | Y | Y | |
 | 64-oid-constr-OK.asn1 | Y |  | |
-| 65-multi-tag-OK.asn1 | Y |  | |
+| 65-multi-tag-OK.asn1 | Y | Y | |
 | 66-ref-simple-OK.asn1 | Y | Y | |
 | 67-embedded-choice-OK.asn1 | Y | Y | |
 | 68-enum-default-OK.asn1 | Y | Y | |
-| 69-reserved-words-OK.asn1 | Y |  | |
-| 70-xer-test-OK.asn1 | Y |  | |
+| 69-reserved-words-OK.asn1 | Y | Y | |
+| 70-xer-test-OK.asn1 | Y | Y | |
 | 71-duplicate-types-SE.asn1 | Y | Y | |
 | 72-same-names-OK.asn1 | Y |  | |
 | 73-circular-OK.asn1 | Y | Y | |
 | 74-int-enum-constraints-OK.asn1 | Y | Y | |
 | 75-duplicate-modules-SE.asn1 | Y | Y | |
 | 76-duplicate-modules-SW.asn1 | Y | Y | |
-| 77-str-default-OK.asn1 | Y |  | |
-| 78-str-default-SE.asn1 | Y |  | |
+| 77-str-default-OK.asn1 | Y | Y | |
+| 78-str-default-SE.asn1 | Y | Y | |
 | 79-constrained-by-OK.asn1 | Y |  | |
-| 80-chardefs-OK.asn1 | Y |  | |
+| 80-chardefs-OK.asn1 | Y | Y | |
 | 81-type-default-OK.asn1 | Y |  | |
 | 82-with-comps-OK.asn1 | Y |  | |
 | 83-with-comps-OK.asn1 | Y |  | |
@@ -114,7 +114,7 @@
 | 91-cond-int-blessSize-OK.asn1 | Y | Y | |
 | 92-circular-loops-OK.asn1 | Y | Y | |
 | 93-asn1c-controls-OK.asn1 | Y | Y | |
-| 94-set-optionals-OK.asn1 | Y |  | |
+| 94-set-optionals-OK.asn1 | Y | Y | |
 | 95-choice-per-order-OK.asn1 | Y | Y | |
 | 96-type-identifier-OK.asn1 | Y |  | |
 | 97-type-identifier-SW.asn1 | Y |  | |
@@ -139,7 +139,7 @@
 | 116-bit-string-SE.asn1 | Y |  | |
 | 117-real-constraint-OK.asn1 | Y |  | |
 | 118-per-constraint-OK.asn1 | Y | Y | |
-| 119-per-strings-OK.asn1 | Y |  | |
+| 119-per-strings-OK.asn1 | Y | Y | |
 | 121-empty-imports-OK.asn1 | Y | Y | |
 | 122-pattern-OK.asn1 | Y |  | |
 | 123-valueassignment-OK.asn1 | Y | Y | |

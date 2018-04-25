@@ -63,72 +63,90 @@ var AllModules    *asn1types.Asn1Grammar
 	constraint_type asn1types.Asn1ConstraintType
 }
 
-%token       Tok_ALL
-%token       Tok_APPLICATION
+/* Reserved Keywords Begin - DO NOT INSERT By Hand */
+%token	Tok_ABSENT
+%token	Tok_ABSTRACT_SYNTAX
+%token	Tok_ALL
+%token	Tok_APPLICATION
+%token	Tok_AUTOMATIC
+%token	Tok_BEGIN
+%token	Tok_BIT
+%token	Tok_BMPString
+%token	Tok_BOOLEAN
+%token	Tok_BY
+%token	Tok_CHARACTER
+%token	Tok_CHOICE
+%token	Tok_CLASS
+%token	Tok_COMPONENT
+%token	Tok_COMPONENTS
+%token	Tok_CONSTRAINED
+%token	Tok_CONTAINING
+%token	Tok_DEFAULT
+%token	Tok_DEFINITIONS
+%token	Tok_EMBEDDED
+%token	Tok_ENCODED
+%token	Tok_END
+%token	Tok_ENUMERATED
+%token	Tok_EXCEPT
+%token	Tok_EXPLICIT
+%token	Tok_EXPORTS
+%token	Tok_EXTENSIBILITY
+%token	Tok_EXTERNAL
+%token	Tok_FALSE
+%token	Tok_FROM
+%token	Tok_GeneralString
+%token	Tok_GeneralizedTime
+%token	Tok_GraphicString
+%token	Tok_IA5String
+%token	Tok_IDENTIFIER
+%token	Tok_IMPLICIT
+%token	Tok_IMPLIED
+%token	Tok_IMPORTS
+%token	Tok_INCLUDES
+%token	Tok_INSTANCE
+%token	Tok_INTEGER
+%token	Tok_INTERSECTION
+%token	Tok_ISO646String
+%token	Tok_MAX
+%token	Tok_MIN
+%token	Tok_MINUS_INFINITY
+%token	Tok_NULL
+%token	Tok_NumericString
+%token	Tok_OBJECT
+%token	Tok_OCTET
+%token	Tok_OF
+%token	Tok_OPTIONAL
+%token	Tok_ObjectDescriptor
+%token	Tok_PATTERN
+%token	Tok_PDV
+%token	Tok_PLUS_INFINITY
+%token	Tok_PRESENT
+%token	Tok_PRIVATE
+%token	Tok_PrintableString
+%token	Tok_REAL
+%token	Tok_RELATIVE_OID
+%token	Tok_SEQUENCE
+%token	Tok_SET
+%token	Tok_SIZE
+%token	Tok_STRING
+%token	Tok_SYNTAX
+%token	Tok_T61String
+%token	Tok_TAGS
+%token	Tok_TRUE
+%token	Tok_TYPE_IDENTIFIER
+%token	Tok_TeletexString
+%token	Tok_UNION
+%token	Tok_UNIQUE
+%token	Tok_UNIVERSAL
+%token	Tok_UTCTime
+%token	Tok_UTF8String
+%token	Tok_UniversalString
+%token	Tok_VideotexString
+%token	Tok_VisibleString
+%token	Tok_WITH
+/* Reserved Keywords End - DO NOT INSERT By Hand */
+
 %token       Tok_ASSIGNMENT
-%token       Tok_AUTOMATIC
-%token       Tok_BEGIN
-%token       Tok_BIT
-%token       Tok_BOOLEAN
-%token       Tok_CHARACTER
-%token       Tok_CHOICE
-%token       Tok_COMPONENTS
-%token       Tok_DEFAULT
-%token       Tok_DEFINITIONS
-%token       Tok_EMBEDDED
-%token       Tok_END
-%token       Tok_ENUMERATED
-%token       Tok_EXCEPT
-%token       Tok_EXPLICIT
-%token       Tok_EXPORTS
-%token       Tok_EXTENSIBILITY
-%token       Tok_EXTERNAL
-%token       Tok_FALSE
-%token       Tok_FROM
-%token       Tok_GeneralizedTime
-%token       Tok_IDENTIFIER
-%token       Tok_IMPLICIT
-%token       Tok_IMPLIED
-%token       Tok_IMPORTS
-%token       Tok_INCLUDES
-%token       Tok_INTEGER
-%token       Tok_INTERSECTION
-%token       Tok_MAX
-%token       Tok_MIN
-%token       Tok_NULL
-%token       Tok_OF
-%token       Tok_OBJECT
-%token       Tok_OCTET
-%token       Tok_OPTIONAL
-%token       Tok_PDV
-%token       Tok_PRIVATE
-%token       Tok_REAL
-%token       Tok_RELATIVE_OID
-%token       Tok_SEQUENCE
-%token       Tok_SET
-%token       Tok_SIZE
-%token       Tok_STRING
-%token       Tok_TAGS
-%token       Tok_TRUE
-%token       Tok_UNION
-%token       Tok_UNIVERSAL
-%token       Tok_UTCTime
-
-%token       Tok_BMPString
-%token       Tok_GeneralString
-%token       Tok_GraphicString
-%token       Tok_IA5String
-%token       Tok_ISO646String
-%token       Tok_NumericString
-%token       Tok_PrintableString
-%token       Tok_T61String
-%token       Tok_TeletexString
-%token       Tok_UniversalString
-%token       Tok_UTF8String
-%token       Tok_VideotexString
-%token       Tok_VisibleString
-%token       Tok_ObjectDescriptor
-
 %token       Tok_Ellipsis
 %token       Tok_TwoDots
 %token       Tok_TwoLeftBrackets Tok_TwoRightBrackets
@@ -1262,22 +1280,6 @@ PatternConstraint:
 */
 
 SingleValue: Value;
-
-/* TODO: Add support one by one
-BitStringValue:
-	TOK_bstring {
-		$$ = _convert_bitstring2binary($1, 'B');
-		checkmem($$);
-		free($1);
-	}
-	| TOK_hstring {
-		$$ = _convert_bitstring2binary($1, 'H');
-		checkmem($$);
-		free($1);
-	}
-	;
-
-*/
 
 /*
  * X.680 08/2015

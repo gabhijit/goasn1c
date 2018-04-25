@@ -97,163 +97,53 @@ func (l *lexer) Lex(lval *asn1SymType) int {
 		fmt.Println(i)
 	}
 
-	switch i.typ {
-	case itemReservedBEGIN:
-		return Tok_BEGIN
+	switch t := i.typ; {
+	case t >= itemReservedABSENT && t <= itemReservedWITH:
+		off := i.typ - itemReservedABSENT
+		return Tok_ABSENT + int(off)
 
-	case itemReservedCHOICE:
-		return Tok_CHOICE
-
-	case itemReservedEND:
-		return Tok_END
-
-	case itemReservedDEFINITIONS:
-		return Tok_DEFINITIONS
-
-	case itemReservedEXPLICIT:
-		return Tok_EXPLICIT
-
-	case itemReservedIMPLICIT:
-		return Tok_IMPLICIT
-
-	case itemReservedTAGS:
-		return Tok_TAGS
-
-	case itemReservedEXTENSIBILITY:
-		return Tok_EXTENSIBILITY
-
-	case itemReservedIMPLIED:
-		return Tok_IMPLIED
-
-	case itemReservedINTEGER:
-		return Tok_INTEGER
-
-	case itemReservedENUMERATED:
-		return Tok_ENUMERATED
-
-	case itemReservedIMPORTS:
-		return Tok_IMPORTS
-
-	case itemReservedFROM:
-		return Tok_FROM
-
-	case itemReservedEXPORTS:
-		return Tok_EXPORTS
-
-	case itemReservedOCTET:
-		return Tok_OCTET
-
-	case itemReservedSTRING:
-		return Tok_STRING
-
-	case itemReservedBIT:
-		return Tok_BIT
-
-	case itemReservedOBJECT:
-		return Tok_OBJECT
-
-	case itemReservedIDENTIFIER:
-		return Tok_IDENTIFIER
-
-	case itemReservedRELATIVE_OID:
-		return Tok_RELATIVE_OID
-
-	case itemReservedAUTOMATIC:
-		return Tok_AUTOMATIC
-
-	case itemReservedAPPLICATION:
-		return Tok_APPLICATION
-
-	case itemReservedNULL:
-		return Tok_NULL
-
-	case itemReservedSET:
-		return Tok_SET
-
-	case itemReservedSEQUENCE:
-		return Tok_SEQUENCE
-
-	case itemReservedNumericString:
-		return Tok_NumericString
-
-	case itemReservedIA5String:
-		return Tok_IA5String
-
-	case itemReservedBMPString:
-		return Tok_BMPString
-
-	case itemReservedBOOLEAN:
-		return Tok_BOOLEAN
-
-	case itemReservedOPTIONAL:
-		return Tok_OPTIONAL
-
-	case itemReservedDEFAULT:
-		return Tok_DEFAULT
-
-	case itemReservedINCLUDES:
-		return Tok_INCLUDES
-
-	case itemReservedSIZE:
-		return Tok_SIZE
-
-	case itemReservedMIN:
-		return Tok_MIN
-
-	case itemReservedMAX:
-		return Tok_MAX
-
-	case itemReservedTRUE:
-		return Tok_TRUE
-
-	case itemReservedFALSE:
-		return Tok_FALSE
-
-	case itemReservedOF:
-		return Tok_OF
-
-	case itemModuleReference, itemTypeReference:
+	case t == itemModuleReference || t == itemTypeReference:
 		lval.str = i.val
 		return Tok_TypeReference
 
-	case itemCapitalReference:
+	case t == itemCapitalReference:
 		lval.str = i.val
 		return Tok_CAPITALREFERENCE
 
-	case itemAssignment:
+	case t == itemAssignment:
 		return Tok_ASSIGNMENT
 
-	case itemEllipsis:
+	case t == itemEllipsis:
 		return Tok_Ellipsis
 
-	case itemRangeSeparator:
+	case t == itemRangeSeparator:
 		return Tok_TwoDots
 
-	case itemNumber:
+	case t == itemNumber:
 		lval.num, _ = strconv.ParseInt(i.val, 10, 64)
 		return Tok_Number
 
-	case itemIdentifier, itemValueReference:
+	case t == itemIdentifier || t == itemValueReference:
 		lval.str = i.val
 		return Tok_Identifier
 
-	case itemSymbol:
+	case t == itemSymbol:
 		runes := []rune(i.val)
 		return int(runes[0])
 
-	case itemCstring:
+	case t == itemCstring:
 		lval.str = i.val
 		return Tok_CString
 
-	case itemBstring:
+	case t == itemBstring:
 		lval.str = i.val
 		return Tok_BString
 
-	case itemHstring:
+	case t == itemHstring:
 		lval.str = i.val
 		return Tok_HString
 
-	case itemEOF:
+	case t == itemEOF:
 		return 0
 	}
 
@@ -1032,6 +922,7 @@ const (
 	itemReservedAPPLICATION
 	itemReservedAUTOMATIC
 	itemReservedBEGIN
+	itemReservedBIT
 	itemReservedBMPString
 	itemReservedBOOLEAN
 	itemReservedBY
@@ -1105,7 +996,6 @@ const (
 	itemReservedVideotexString
 	itemReservedVisibleString
 	itemReservedWITH
-	itemReservedBIT
 
 	itemCapitalReference
 	// X.681 Section 7
