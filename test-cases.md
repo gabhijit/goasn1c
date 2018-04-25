@@ -4,7 +4,7 @@
 | Test Case Type | Pass Percentage |
 |----|----:|
 | Lexer (tokenization) | 99.25 |
-| Parser  | 70.18 |
+| Parser  | 75.37 |
 | Code Generation | 0.0 |
 
 ### Legend
@@ -133,10 +133,10 @@
 | 110-param-3-OK.asn1 | Y |  | |
 | 111-param-4-SE.asn1 | Y |  | |
 | 112-param-class-OK.asn1 | Y |  | |
-| 113-bit-string-SE.asn1 | Y |  | |
-| 114-bit-string-SE.asn1 | Y |  | |
-| 115-bit-string-OK.asn1 | Y |  | |
-| 116-bit-string-SE.asn1 | Y |  | |
+| 113-bit-string-SE.asn1 | Y | Y | |
+| 114-bit-string-SE.asn1 | Y | Y | |
+| 115-bit-string-OK.asn1 | Y | Y | |
+| 116-bit-string-SE.asn1 | Y | Y | |
 | 117-real-constraint-OK.asn1 | Y |  | |
 | 118-per-constraint-OK.asn1 | Y | Y | |
 | 119-per-strings-OK.asn1 | Y | Y | |
@@ -144,7 +144,7 @@
 | 122-pattern-OK.asn1 | Y |  | |
 | 123-valueassignment-OK.asn1 | Y | Y | |
 | 124-multiconstraint-OK.asn1 | Y |  | |
-| 125-bitstring-constraint-OK.asn1 | Y |  | |
+| 125-bitstring-constraint-OK.asn1 | Y | Y | |
 | 126-per-extensions-OK.asn1 | Y | Y | |
 | 127-per-long-OK.asn1 | Y | Y | |
 | 128-enum-SE.asn1 | Y | Y | |

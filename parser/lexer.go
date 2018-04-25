@@ -645,9 +645,15 @@ Loop:
 	for {
 		switch r := l.next(); {
 		case r == '"':
-			l.emit(itemCstring)
-			l.start = l.pos
-			return nil
+			s := l.peek()
+			if s == '"' {
+				l.next()
+				continue
+			} else {
+				l.emit(itemCstring)
+				l.start = l.pos
+				return nil
+			}
 		case r == eof:
 			break Loop
 		}

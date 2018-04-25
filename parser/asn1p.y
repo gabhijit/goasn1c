@@ -262,6 +262,9 @@ var AllModules    *asn1types.Asn1Grammar
 %type <str>          optIdentifier
 %type <constraint>   optSizeOrConstraint
 
+%type <expr>         NamedBitList
+%type <expr>         NamedBit
+
 %type <expr>         Enumerations
 %type <expr>         UniverationList
 %type <expr>         UniverationElement
@@ -570,6 +573,7 @@ Assignment:
 		$$.Members = append($$.Members, $1)
 	}
 	| ValueAssignment {
+		fmt.Println("DDD")
 		$$ = asn1types.NewAsn1Module();
 		$$.Members = append($$.Members, $1)
 	}
@@ -679,6 +683,12 @@ BuiltinType:
 		$$ = $3;
 		$$.Type = asn1types.Asn1ExprTypeEnumerated;
 		$$.Meta = asn1types.Asn1ExprMetaTypeValue;
+	}
+	| Tok_BIT Tok_STRING '{' NamedBitList '}' {
+		fmt.Println("AAA")
+		$$ = $4;
+		$$.Type = asn1types.Asn1ExprTypeBitString;
+		$$.Meta = asn1types.Asn1ExprMetaTypeType;
 	}
 	;
 
@@ -910,7 +920,6 @@ ComplexTypeReference:
 		$$ = asn1types.NewAsn1Reference()
 	}
 	| Tok_TypeReference '.' TypeRefName {
-		fmt.Println("XXX")
 		$$ = asn1types.NewAsn1Reference()
 	}
 	;
@@ -1114,7 +1123,6 @@ optMarker:
 
 Marker:
 	Tok_OPTIONAL {
-		fmt.Println("YYY")
 		$$ = asn1types.NewAsn1Marker()
 		$$.Flags = asn1types.Asn1MarkerFlagOptional | asn1types.Asn1MarkerFlagIndirect;
 		$$.Value = nil;
@@ -1246,6 +1254,29 @@ optSizeOrConstraint:
 	| Constraint
 	| SizeConstraint
 	;
+
+NamedBitList:
+	NamedBit {
+		$$ = asn1types.NewAsn1Expression()
+	}
+	| NamedBitList ',' NamedBit {
+		$$ = asn1types.NewAsn1Expression()
+	}
+	;
+
+NamedBit:
+	Identifier '(' Tok_Number ')' {
+		$$ = asn1types.NewAsn1Expression()
+		$$.Type = asn1types.Asn1ExprTypeUniversal;
+		$$.Meta = asn1types.Asn1ExprMetaTypeType;
+		$$.Identifier = $1;
+	}
+	| Identifier '(' DefinedValue ')' {
+		$$ = asn1types.NewAsn1Expression()
+		$$.Type = asn1types.Asn1ExprTypeUniversal;
+		$$.Meta = asn1types.Asn1ExprMetaTypeType;
+		$$.Identifier = $1;
+	};
 
 /* XXXXXXXXXX Marker */
 
