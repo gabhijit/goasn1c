@@ -264,6 +264,8 @@ var AllModules    *asn1types.Asn1Grammar
 
 %type <expr>         NamedBitList
 %type <expr>         NamedBit
+%type <expr>         IdentifierList
+%type <expr>         IdentifierElement
 
 %type <expr>         Enumerations
 %type <expr>         UniverationList
@@ -826,6 +828,15 @@ BitStringValue:
 	| Tok_HString {
 		$$ = asn1types.NewAsn1Value()
 	}
+	| '{' IdentifierList '}' {
+		$$ = asn1types.NewAsn1Value()
+
+
+	}
+	| '{' '}' {
+		$$ = asn1types.NewAsn1Value()
+
+	}
 	;
 
 Enumerations:
@@ -1277,6 +1288,22 @@ NamedBit:
 		$$.Meta = asn1types.Asn1ExprMetaTypeType;
 		$$.Identifier = $1;
 	};
+
+IdentifierList:
+    IdentifierElement {
+		$$ = asn1types.NewAsn1Expression()
+    }
+    | IdentifierList ',' IdentifierElement {
+		$$ = $1
+    };
+
+IdentifierElement:
+    Identifier {
+		$$ = asn1types.NewAsn1Expression()
+		$$.Type = asn1types.Asn1ExprTypeUniversal;
+		$$.Meta = asn1types.Asn1ExprMetaTypeValue;
+		$$.Identifier = $1;
+    }
 
 /* XXXXXXXXXX Marker */
 
