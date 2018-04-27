@@ -110,6 +110,14 @@ func (l *lexer) Lex(lval *asn1SymType) int {
 		lval.str = i.val
 		return Tok_CAPITALREFERENCE
 
+	case t == itemValueFieldReference:
+		lval.str = i.val
+		return Tok_ValueFieldReference
+
+	case t == itemTypeFieldReference:
+		lval.str = i.val
+		return Tok_TypeFieldReference
+
 	case t == itemAssignment:
 		return Tok_ASSIGNMENT
 

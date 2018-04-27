@@ -34,7 +34,7 @@ type Asn1WithSyntaxChunk struct {
 	next    *Asn1WithSyntaxChunk
 }
 
-type ASn1WithSyntax struct {
+type Asn1WithSyntax struct {
 	chunks []Asn1WithSyntaxChunk
 }
 

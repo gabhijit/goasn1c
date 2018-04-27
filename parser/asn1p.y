@@ -61,6 +61,7 @@ var AllModules    *asn1types.Asn1Grammar
 	constraint      *asn1types.Asn1Constraint
 	marker          *asn1types.Asn1Marker
 	constraint_type asn1types.Asn1ConstraintType
+	with_syntax     *asn1types.Asn1WithSyntax
 }
 
 /* Reserved Keywords Begin - DO NOT INSERT By Hand */
@@ -158,6 +159,8 @@ var AllModules    *asn1types.Asn1Grammar
 %token <str> Tok_CString
 %token <str> Tok_BString
 %token <str> Tok_HString
+%token <str> Tok_TypeFieldReference
+%token <str> Tok_ValueFieldReference
 
 %type <grammar>      ModuleList
 %type <str>          TypeRefName
@@ -266,6 +269,14 @@ var AllModules    *asn1types.Asn1Grammar
 %type <expr>         NamedBit
 %type <expr>         IdentifierList
 %type <expr>         IdentifierElement
+
+%type <expr>         ObjectClass
+%type <expr>         FieldSpec
+%type <expr>         ClassField
+%type <ref>          DefinedObjectClass
+%type <with_syntax>  optWithSyntax
+%type <num>          optUNIQUE
+%type <ref>          FieldName
 
 %type <expr>         Enumerations
 %type <expr>         UniverationList
@@ -590,7 +601,12 @@ DataTypeReference:
 		$$ = asn1types.NewAsn1Expression()
 		$$.Identifier = $1
 		// FIXME : Need to add code for type of expression
-	};
+	}
+	| TypeRefName Tok_ASSIGNMENT ObjectClass {
+		$$ = $3;
+		$$.Identifier = $1;
+	}
+	;
 
 Type:TaggedType;
 
@@ -1304,6 +1320,109 @@ IdentifierElement:
 		$$.Meta = asn1types.Asn1ExprMetaTypeValue;
 		$$.Identifier = $1;
     }
+
+ObjectClass:
+	Tok_CLASS '{' FieldSpec '}' optWithSyntax {
+		$$ = $3;
+	}
+	;
+
+FieldSpec:
+	ClassField {
+		$$ = asn1types.NewAsn1Expression()
+		$$.Type = asn1types.Asn1ExprTypeClassDef;
+		$$.Meta = asn1types.Asn1ExprMetaTypeObjectClass;
+	}
+	| FieldSpec ',' ClassField {
+		$$ = $1;
+	}
+	;
+
+
+	/* X.681 */
+ClassField:
+
+	/* TypeFieldSpec ::= typefieldreference TypeOptionalitySpec? */
+	Tok_TypeFieldReference optMarker {
+		$$ = asn1types.NewAsn1Expression()
+		$$.Type = asn1types.Asn1ExprTypeClassDef;
+		$$.Meta = asn1types.Asn1ExprMetaTypeObjectField;
+		$$.Identifier = $1;
+	}
+
+	/* FixedTypeValueFieldSpec ::= valuefieldreference Type UNIQUE ? ValueOptionalitySpec ? */
+	| Tok_ValueFieldReference Type optUNIQUE optMarker {
+		$$ = asn1types.NewAsn1Expression()
+		$$.Type = asn1types.Asn1ExprTypeClassDef;
+		$$.Meta = asn1types.Asn1ExprMetaTypeObjectField;
+		$$.Identifier = $1;
+	}
+
+	/* VariableTypeValueFieldSpec ::= valuefieldreference FieldName ValueOptionalitySpec ? */
+	| Tok_ValueFieldReference FieldName optMarker {
+		$$ = asn1types.NewAsn1Expression()
+		$$.Type = asn1types.Asn1ExprTypeClassDef;
+		$$.Meta = asn1types.Asn1ExprMetaTypeObjectField;
+		$$.Identifier = $1;
+	}
+
+	/*  ObjectFieldSpec ::= objectfieldreference DefinedObjectClass ObjectOptionalitySpec ? */
+	| Tok_ValueFieldReference DefinedObjectClass optMarker {
+		$$ = asn1types.NewAsn1Expression()
+		$$.Type = asn1types.Asn1ExprTypeClassDef;
+		$$.Meta = asn1types.Asn1ExprMetaTypeObjectField;
+		$$.Identifier = $1;
+	}
+
+	/* VariableTypeValueSetFieldSpec ::= valuesetfieldreference FieldName ValueOptionalitySpec ? */
+	| Tok_TypeFieldReference FieldName optMarker {
+		$$ = asn1types.NewAsn1Expression()
+		$$.Type = asn1types.Asn1ExprTypeClassDef;
+		$$.Meta = asn1types.Asn1ExprMetaTypeObjectField;
+		$$.Identifier = $1;
+	}
+
+	/* FixedTypeValueSetFieldSpec ::= valuesetfieldreference Type ValueSetOptionalitySpec ? */
+	| Tok_TypeFieldReference Type optMarker {
+		$$ = asn1types.NewAsn1Expression()
+		$$.Type = asn1types.Asn1ExprTypeClassDef;
+		$$.Meta = asn1types.Asn1ExprMetaTypeObjectField;
+		$$.Identifier = $1;
+	}
+
+	/*  ObjectSetFieldSpec ::= objectsetfieldreference DefinedObjectClass ObjectOptionalitySpec ? */
+	| Tok_TypeFieldReference DefinedObjectClass optMarker {
+		$$ = asn1types.NewAsn1Expression()
+		$$.Type = asn1types.Asn1ExprTypeClassDef;
+		$$.Meta = asn1types.Asn1ExprMetaTypeObjectField;
+		$$.Identifier = $1;
+	}
+	;
+
+optUNIQUE:
+	{ $$ = 0; }
+	| Tok_UNIQUE { $$ = 1; }
+	;
+
+optWithSyntax: { $$ = nil };
+
+FieldName:
+	/* "&Type1" */
+	Tok_TypeFieldReference {
+		$$ = asn1types.NewAsn1Reference()
+	}
+	| FieldName '.' Tok_TypeFieldReference {
+		$$ = asn1types.NewAsn1Reference()
+	}
+	| FieldName '.' Tok_ValueFieldReference {
+		$$ = asn1types.NewAsn1Reference()
+	}
+	;
+
+DefinedObjectClass:
+	Tok_CAPITALREFERENCE {
+		$$ = asn1types.NewAsn1Reference()
+	}
 
 /* XXXXXXXXXX Marker */
 
