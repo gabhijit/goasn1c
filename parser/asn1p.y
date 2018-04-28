@@ -224,6 +224,7 @@ var AllModules    *asn1types.Asn1Grammar
 
 %type <expr>         ValueSetTypeAssignment
 %type <constraint>   ValueSet
+
 %type <constraint>   ElementSetSpecs
 %type <constraint>   ElementSetSpec
 %type <constraint>   Unions
@@ -277,6 +278,12 @@ var AllModules    *asn1types.Asn1Grammar
 %type <with_syntax>  optWithSyntax
 %type <num>          optUNIQUE
 %type <ref>          FieldName
+
+%type <expr>         ObjectAssignment
+%type <expr>         Object
+%type <expr>         Setting
+%type <expr>         FieldSetting
+%type <expr>         FieldSettingList
 
 %type <expr>         Enumerations
 %type <expr>         UniverationList
@@ -586,12 +593,15 @@ Assignment:
 		$$.Members = append($$.Members, $1)
 	}
 	| ValueAssignment {
-		fmt.Println("DDD")
 		$$ = asn1types.NewAsn1Module();
 		$$.Members = append($$.Members, $1)
 	}
 	| ValueSetTypeAssignment {
 		$$ = asn1types.NewAsn1Module();
+		$$.Members = append($$.Members, $1)
+	}
+	| ObjectAssignment {
+		$$ = asn1types.NewAsn1Module()
 		$$.Members = append($$.Members, $1)
 	}
 	;
@@ -980,7 +990,7 @@ NamedNumber:
 UnionMark:		'|' | Tok_UNION;
 IntersectionMark:	'^' | Tok_INTERSECTION;
 
-ValueSet: '{' ElementSetSpecs '}' { $$ = $2; };
+ValueSet: '{' ElementSetSpecs '}' { $$ = $2};
 
 ValueSetTypeAssignment:
 	TypeRefName Type Tok_ASSIGNMENT ValueSet {
@@ -1423,7 +1433,54 @@ DefinedObjectClass:
 	Tok_CAPITALREFERENCE {
 		$$ = asn1types.NewAsn1Reference()
 	}
+	;
 
+ObjectAssignment:
+	Tok_Identifier Tok_CAPITALREFERENCE Tok_ASSIGNMENT Object {
+		$$ = asn1types.NewAsn1Expression()
+		$$.Type = asn1types.Asn1ExprTypeObjectIdentifier;
+		$$.Meta = asn1types.Asn1ExprMetaTypeObject;
+	}
+
+Object:
+	'{' FieldSettingList '}' {
+		$$ = $2;
+	}
+	/* FIXME : not implemented | DefinedSyntax */
+	;
+FieldSettingList:
+		FieldSetting {
+			$$ = asn1types.NewAsn1Expression()
+
+		}
+		| FieldSettingList ',' FieldSetting {
+			$$ = asn1types.NewAsn1Expression()
+		}
+		;
+
+FieldSetting:
+		/* FIXME: May be use PrimitiveFieldName */
+		PrimitiveFieldName Setting {
+			$$ = asn1types.NewAsn1Expression()
+		}
+		;
+
+/* FIXME: May be define a totally different type? */
+Setting:
+	Value {
+		$$ = asn1types.NewAsn1Expression()
+	}
+	| Type
+	| ValueSet {
+		$$ = asn1types.NewAsn1Expression()
+	}
+	| Object
+	;
+
+PrimitiveFieldName:
+		Tok_TypeFieldReference
+		| Tok_ValueFieldReference
+		;
 /* XXXXXXXXXX Marker */
 
 /*
