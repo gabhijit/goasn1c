@@ -119,7 +119,7 @@ func (l *lexer) Lex(lval *asn1SymType) int {
 		return Tok_TypeFieldReference
 
 	case t == itemAssignment:
-		return Tok_ASSIGNMENT
+		return Tok_Assignment
 
 	case t == itemEllipsis:
 		return Tok_Ellipsis

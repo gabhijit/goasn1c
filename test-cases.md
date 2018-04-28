@@ -1,10 +1,12 @@
 ## Test Cases from the asn1c
 
+Re-Writing the grammar - so below matrix is invalid. Just follow the summary for now
+
 ### Summary
 | Test Case Type | Pass Percentage |
 |----|----:|
 | Lexer (tokenization) | 99.25 |
-| Parser  | 75.37 |
+| Parser  | 3.7 |
 | Code Generation | 0.0 |
 
 ### Legend
@@ -16,7 +18,7 @@
 | - | Not implemented|
 | F | Fails Right now |
 
-### Results
+### Results (Ignore For Now)
 
 | Test Case | Tokenizer Support | Parser Support | Code Generation | Notes |
 |:---|:---:|:---:|:---:|:---:|

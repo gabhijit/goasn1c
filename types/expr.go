@@ -143,9 +143,9 @@ const (
 type Asn1TagMode int
 
 const (
-	Asn1TagModeDefault Asn1TagMode = iota
+	Asn1TagModeExplicit Asn1TagMode = iota
 	Asn1TagModeImplicit
-	Asn1TagModeExplicit
+	Asn1TagModeAutomatic
 )
 
 func NewAsn1Tag() *Asn1Tag {

@@ -1,3 +1,7 @@
+// FIXME: Ignoring to build this (old grammar)
+
+// +build ignore
+
 //line parser/asn1p.y:24
 package parser
 

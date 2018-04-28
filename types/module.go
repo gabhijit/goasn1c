@@ -24,22 +24,22 @@ type Asn1Module struct {
 	Members []*Asn1Expression
 }
 
-type ModuleFlagType uint16
+type Asn1ModuleFlagType uint16
 
 const (
-	ModuleFlagUnkInstr ModuleFlagType = 1 << iota
-	ModuleFlagTagInstr
-	ModuleFlagXerInstr
+	Asn1ModuleFlagUnkInstr Asn1ModuleFlagType = 1 << iota
+	Asn1ModuleFlagTagInstr
+	Asn1ModuleFlagXerInstr
 	_
-	ModuleFlagImplicitTags
-	ModuleFlagExplicitTags
-	ModuleFlagAutomaticTags
+	Asn1ModuleFlagImplicitTags
+	Asn1ModuleFlagExplicitTags
+	Asn1ModuleFlagAutomaticTags
 	_
-	ModuleFlagExtensibilityImplied
+	Asn1ModuleFlagExtensibilityImplied
 
-	ModuleFlagNoFlags          ModuleFlagType = 0x00
-	ModuleFlagInstructionsMask ModuleFlagType = 0x0F
-	ModuleFlagsTagMask         ModuleFlagType = 0xF0
+	Asn1ModuleFlagNoFlags          Asn1ModuleFlagType = 0x00
+	Asn1ModuleFlagInstructionsMask Asn1ModuleFlagType = 0x0F
+	Asn1ModuleFlagsTagMask         Asn1ModuleFlagType = 0xF0
 )
 
 func NewAsn1Module() *Asn1Module {
