@@ -182,6 +182,10 @@ var AllModules    *asn1types.Asn1Grammar
 %type <module_flags>    TagDefault
 %type <module_flags>    ExtensionDefault
 
+/*
+%type <oid_arc> NumberForm
+%type <oid_arc> NameAndNumberForm
+*/
 %%
 
 ParsedGrammar:
@@ -263,7 +267,6 @@ DefinitiveNumberForm:
 		number {
 			$$.Name = ""
 			$$.Num = $1
-
 		}
 		;
 
@@ -303,4 +306,123 @@ ExtensionDefault:
 		}
 		;
 
-ModuleBody:;
+ModuleBody: Exports Imports /* AssignmentList */
+		;
+
+Exports:
+		| Tok_EXPORTS SymbolsExported ';'
+		| Tok_EXPORTS Tok_ALL ';'
+		;
+
+SymbolsExported:
+		| SymbolList
+		;
+
+SymbolList:
+		Symbol
+		| SymbolList ',' Symbol
+		;
+
+Symbol:
+		Reference
+		/* | ParameterizedReference  */
+		;
+
+Reference:
+		typereference
+		| valuereference
+		/*
+		| objectclassreference
+		| objectreference
+		| objectsetreference
+		*/
+		;
+
+typereference:
+		Tok_TypeReference
+		;
+
+valuereference:
+		identifier
+		;
+
+Imports:
+		| Tok_IMPORTS SymbolsImported ';'
+		;
+
+SymbolsImported:
+		SymbolsFromModuleList
+		;
+
+SymbolsFromModuleList:
+		SymbolsFromModule
+		| SymbolsFromModuleList ',' SymbolsFromModule
+		;
+
+SymbolsFromModule:
+		SymbolList Tok_FROM GlobalModuleReference
+		;
+
+GlobalModuleReference:
+		modulereference AssignedIdentifier
+		;
+
+AssignedIdentifier:
+		DefinitiveIdentifier
+
+/*
+		ObjectIdentifierValue
+		| DefinedValue
+		|
+*/
+		;
+
+
+/* FIXME : We'll need it again when we deal with OBJECT IDENTIFIER ValueAssignment
+
+DefinedValue:
+		ExternalValueReference
+		| valuereference
+		/* | ParameterizedValue * /
+		;
+
+ExternalValueReference:
+		modulereference '.' valuereference
+		;
+
+ObjectIdentifierValue:
+		'{' ObjIdComponentsList '}'
+		| '{' DefinedValue ObjIdComponentsList '}'
+		;
+
+ObjIdComponentsList:
+		ObjIdComponents
+		| ObjIdComponents ObjIdComponentsList
+
+ObjIdComponents:
+		NameForm
+		| NumberForm
+		| NameAndNumberForm
+		| DefinedValue
+		;
+
+NumberForm:
+		number {
+			$$.Name = ""
+			$$.Num = $1
+		}
+		| DefinedValue {
+			// FIXME: assign correct values
+			$$.Num = -1
+			$$.Name = ""
+		}
+		;
+
+NameAndNumberForm:
+		identifier '(' NumberForm ')' {
+			$$.Name = $1
+			$$.Num = $3.Num
+		}
+		;
+*/
+/* AssignmentList:; */

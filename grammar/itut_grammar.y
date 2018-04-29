@@ -26,6 +26,8 @@ TagDefault ::= EXPLICIT TAGS | IMPLICIT TAGS | AUTOMATIC TAGS | empty
 
 ExtensionDefault ::= EXTENSIBILITY IMPLIED | empty
 
+/* completed so far */
+
 ModuleBody ::= Exports Imports AssignmentList | empty
 
 Exports ::= EXPORTS SymbolsExported ";" | EXPORTS ALL ";" | empty
