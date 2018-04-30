@@ -1,3 +1,5 @@
+%{
+
 /*
 
 // Derived from ans1c/libasn1parser/asn1p_y.y @ https://github.com/vlm/asn1c
@@ -20,7 +22,6 @@
 
 */
 
-%{
 
 package parser
 
