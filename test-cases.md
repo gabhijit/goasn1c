@@ -6,7 +6,7 @@ Re-Writing the grammar - so below matrix is invalid. Just follow the summary for
 | Test Case Type | Pass Percentage |
 |----|----:|
 | Lexer (tokenization) | 99.25 |
-| Parser  | 3.7 |
+| Parser  | 6.7 |
 | Code Generation | 0.0 |
 
 ### Legend

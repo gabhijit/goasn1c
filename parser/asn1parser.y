@@ -307,7 +307,7 @@ ExtensionDefault:
 		}
 		;
 
-ModuleBody: Exports Imports /* AssignmentList */
+ModuleBody: Exports Imports AssignmentList
 		;
 
 Exports:
@@ -371,7 +371,7 @@ GlobalModuleReference:
 AssignedIdentifier:
 		DefinitiveIdentifier
 
-/*
+/* This is a slight variation from the official grammar, because, there are just too many conflicts
 		ObjectIdentifierValue
 		| DefinedValue
 		|
@@ -426,4 +426,124 @@ NameAndNumberForm:
 		}
 		;
 */
-/* AssignmentList:; */
+AssignmentList:
+		Assignment
+		| AssignmentList Assignment
+		|
+		;
+
+
+Assignment:
+		TypeAssignment
+/*
+		| ValueAssignment
+		| XMLValueAssignment
+		| ValueSetTypeAssignment
+		| ObjectClassAssignment
+		| ObjectAssignment
+		| ObjectSetAssignment
+		| ParameterizedAssignment
+
+*/
+		;
+TypeAssignment:
+		Tok_TypeReference Tok_Assignment Type {
+		}
+		;
+
+Type:
+		BuiltinType
+/*
+		| ReferencedType
+		| ConstrainedType
+*/
+
+BuiltinType:
+		BitStringType
+/*
+		| BooleanType
+		| CharacterStringType
+		| ChoiceType
+		| EmbeddedPDVType
+*/
+		| EnumeratedType
+/*
+		| ExternalType
+		| InstanceOfType
+*/
+		| IntegerType
+/*
+		| NullType
+		| ObjectClassFieldType
+		| ObjectIdentifierType
+		| OctetStringType
+		| RealType
+		| RelativeOIDType
+		| SequenceType
+		| SequenceOfType
+		| SetType
+		| SetOfType
+		| TaggedType
+*/
+		;
+
+BitStringType:
+		Tok_BIT Tok_STRING
+		| Tok_BIT Tok_STRING '{' NamedBitList '}'
+
+		;
+
+NamedBitList:
+		NamedBit
+		| NamedBitList ',' NamedBit
+		;
+
+NamedBit:
+		Tok_Identifier '(' number ')'
+/*
+		| Tok_Identifier '(' DefinedValue ')'
+*/
+		;
+
+IntegerType:
+		Tok_INTEGER
+		| Tok_INTEGER '{' NamedNumberList '}'
+		;
+
+NamedNumberList:
+		NamedNumber
+		| NamedNumberList ',' NamedNumber
+		;
+
+NamedNumber:
+		Tok_Identifier '(' number ')'
+/*
+		| Tok_Identifier '(' DefinedValue ')'
+		;
+
+*/
+EnumeratedType: Tok_ENUMERATED '{' Enumerations '}';
+
+
+Enumerations:
+		RootEnumeration
+		| RootEnumeration ',' Tok_Ellipsis ExceptionSpec
+		| RootEnumeration ',' Tok_Ellipsis ExceptionSpec ',' AdditionalEnumeration
+		;
+RootEnumeration: Enumeration ;
+
+AdditionalEnumeration: Enumeration;
+
+Enumeration:
+		EnumerationItem
+		| EnumerationItem ',' Enumeration
+		;
+
+EnumerationItem: identifier| NamedNumber:
+
+ExceptionSpec:
+	     /*
+		'!' ExceptionIdentification
+		*/
+		|
+		;
