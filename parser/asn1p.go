@@ -1,7 +1,3 @@
-// FIXME: Ignoring to build this (old grammar)
-
-// +build ignore
-
 //line parser/asn1p.y:24
 package parser
 
@@ -34,7 +30,7 @@ type asn1SymType struct {
 	module          *asn1types.Asn1Module
 	oid             *asn1types.Asn1Oid
 	oid_arc         asn1types.Asn1OidArc
-	module_flags    asn1types.ModuleFlagType
+	module_flags    asn1types.Asn1ModuleFlagType
 	xports          *asn1types.Asn1Xports
 	expr            *asn1types.Asn1Expression
 	aid             *asn1types.Asn1AssignedIdentifier
@@ -128,7 +124,7 @@ const Tok_UniversalString = 57422
 const Tok_VideotexString = 57423
 const Tok_VisibleString = 57424
 const Tok_WITH = 57425
-const Tok_ASSIGNMENT = 57426
+const Tok_Assignment = 57426
 const Tok_Ellipsis = 57427
 const Tok_TwoDots = 57428
 const Tok_TwoLeftBrackets = 57429
@@ -227,7 +223,7 @@ var asn1Toknames = [...]string{
 	"Tok_VideotexString",
 	"Tok_VisibleString",
 	"Tok_WITH",
-	"Tok_ASSIGNMENT",
+	"Tok_Assignment",
 	"Tok_Ellipsis",
 	"Tok_TwoDots",
 	"Tok_TwoLeftBrackets",
@@ -607,7 +603,7 @@ var asn1ErrorMessages = [...]struct {
 
 var (
 	asn1Debug        = 0
-	asn1ErrorVerbose = true
+	asn1ErrorVerbose = false
 )
 
 type asn1Lexer interface {
@@ -1057,7 +1053,7 @@ asn1default:
 		asn1Dollar = asn1S[asn1pt-0 : asn1pt+1]
 		//line parser/asn1p.y:388
 		{
-			asn1VAL.module_flags = asn1types.ModuleFlagNoFlags
+			asn1VAL.module_flags = asn1types.Asn1ModuleFlagNoFlags
 		}
 	case 19:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
@@ -1081,25 +1077,25 @@ asn1default:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
 		//line parser/asn1p.y:404
 		{
-			asn1VAL.module_flags = asn1types.ModuleFlagExplicitTags
+			asn1VAL.module_flags = asn1types.Asn1ModuleFlagExplicitTags
 		}
 	case 23:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
 		//line parser/asn1p.y:407
 		{
-			asn1VAL.module_flags = asn1types.ModuleFlagImplicitTags
+			asn1VAL.module_flags = asn1types.Asn1ModuleFlagImplicitTags
 		}
 	case 24:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
 		//line parser/asn1p.y:410
 		{
-			asn1VAL.module_flags = asn1types.ModuleFlagAutomaticTags
+			asn1VAL.module_flags = asn1types.Asn1ModuleFlagAutomaticTags
 		}
 	case 25:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]
 		//line parser/asn1p.y:413
 		{
-			asn1VAL.module_flags = asn1types.ModuleFlagExtensibilityImplied
+			asn1VAL.module_flags = asn1types.Asn1ModuleFlagExtensibilityImplied
 		}
 	case 26:
 		asn1Dollar = asn1S[asn1pt-0 : asn1pt+1]
@@ -1430,7 +1426,7 @@ asn1default:
 		//line parser/asn1p.y:649
 		{
 			asn1VAL.tag = asn1types.NewAsn1Tag()
-			asn1VAL.tag.Mode = asn1types.Asn1TagModeDefault
+			asn1VAL.tag.Mode = asn1types.Asn1TagModeExplicit
 		}
 	case 74:
 		asn1Dollar = asn1S[asn1pt-1 : asn1pt+1]
@@ -1444,7 +1440,7 @@ asn1default:
 		//line parser/asn1p.y:651
 		{
 			asn1VAL.tag = asn1types.NewAsn1Tag()
-			asn1VAL.tag.Mode = asn1types.Asn1TagModeImplicit
+			asn1VAL.tag.Mode = asn1types.Asn1TagModeExplicit
 		}
 	case 76:
 		asn1Dollar = asn1S[asn1pt-2 : asn1pt+1]

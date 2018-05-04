@@ -50,7 +50,7 @@ var AllModules    *asn1types.Asn1Grammar
 	module          *asn1types.Asn1Module
 	oid	        *asn1types.Asn1Oid
 	oid_arc         asn1types.Asn1OidArc
-	module_flags    asn1types.ModuleFlagType
+	module_flags    asn1types.Asn1ModuleFlagType
 	xports          *asn1types.Asn1Xports
 	expr            *asn1types.Asn1Expression
 	aid             *asn1types.Asn1AssignedIdentifier
@@ -147,7 +147,7 @@ var AllModules    *asn1types.Asn1Grammar
 %token	Tok_WITH
 /* Reserved Keywords End - DO NOT INSERT By Hand */
 
-%token       Tok_ASSIGNMENT
+%token       Tok_Assignment
 %token       Tok_Ellipsis
 %token       Tok_TwoDots
 %token       Tok_TwoLeftBrackets Tok_TwoRightBrackets
@@ -322,7 +322,7 @@ ModuleDefinition:
 		TypeRefName { currentModule = asn1types.NewAsn1Module();}
 		optObjectIdentifier Tok_DEFINITIONS
 		optModuleDefinitionFlags
-		Tok_ASSIGNMENT
+		Tok_Assignment
 		Tok_BEGIN optModuleBody Tok_END {
 
 			$$ = currentModule
@@ -388,7 +388,7 @@ TypeRefName:
 	};
 
 optModuleDefinitionFlags:
-	{ $$ = asn1types.ModuleFlagNoFlags; }
+	{ $$ = asn1types.Asn1ModuleFlagNoFlags; }
 	| ModuleDefinitionFlags {
 		$$ = $1;
 	}
@@ -405,16 +405,16 @@ ModuleDefinitionFlags:
 
 ModuleDefinitionFlag:
 	Tok_EXPLICIT Tok_TAGS {
-		$$ = asn1types.ModuleFlagExplicitTags;
+		$$ = asn1types.Asn1ModuleFlagExplicitTags;
 	}
 	| Tok_IMPLICIT Tok_TAGS {
-		$$ = asn1types.ModuleFlagImplicitTags;
+		$$ = asn1types.Asn1ModuleFlagImplicitTags;
 	}
 	| Tok_AUTOMATIC Tok_TAGS {
-		$$ = asn1types.ModuleFlagAutomaticTags;
+		$$ = asn1types.Asn1ModuleFlagAutomaticTags;
 	}
 	| Tok_EXTENSIBILITY Tok_IMPLIED {
-		$$ = asn1types.ModuleFlagExtensibilityImplied;
+		$$ = asn1types.Asn1ModuleFlagExtensibilityImplied;
 	} ;
 
 optModuleBody:
@@ -607,12 +607,12 @@ Assignment:
 	;
 
 DataTypeReference:
-	TypeRefName Tok_ASSIGNMENT Type {
+	TypeRefName Tok_Assignment Type {
 		$$ = asn1types.NewAsn1Expression()
 		$$.Identifier = $1
 		// FIXME : Need to add code for type of expression
 	}
-	| TypeRefName Tok_ASSIGNMENT ObjectClass {
+	| TypeRefName Tok_Assignment ObjectClass {
 		$$ = $3;
 		$$.Identifier = $1;
 	}
@@ -652,9 +652,9 @@ TagClass:
 	;
 
 TagPlicit:
-	{ $$ = asn1types.NewAsn1Tag(); $$.Mode = asn1types.Asn1TagModeDefault; }
+	{ $$ = asn1types.NewAsn1Tag(); $$.Mode = asn1types.Asn1TagModeExplicit; }
 	| Tok_IMPLICIT { $$ = asn1types.NewAsn1Tag(); $$.Mode = asn1types.Asn1TagModeImplicit; }
-	| Tok_EXPLICIT { $$ = asn1types.NewAsn1Tag(); $$.Mode = asn1types.Asn1TagModeImplicit; }
+	| Tok_EXPLICIT { $$ = asn1types.NewAsn1Tag(); $$.Mode = asn1types.Asn1TagModeExplicit; }
 	;
 
 UntaggedType:
@@ -748,7 +748,7 @@ BasicTypeId_UniverationCompatible:
  * === EOF ===
  */
 ValueAssignment:
-	Identifier Type Tok_ASSIGNMENT Value {
+	Identifier Type Tok_Assignment Value {
 		$$ = $2;
 		$$.Identifier = $1;
 		$$.Meta = asn1types.Asn1ExprMetaTypeValue;
@@ -993,7 +993,7 @@ IntersectionMark:	'^' | Tok_INTERSECTION;
 ValueSet: '{' ElementSetSpecs '}' { $$ = $2};
 
 ValueSetTypeAssignment:
-	TypeRefName Type Tok_ASSIGNMENT ValueSet {
+	TypeRefName Type Tok_Assignment ValueSet {
 		$$ = $2;
 		$$.Identifier = $1;
 		$$.Meta = asn1types.Asn1ExprMetaTypeValueSet;
@@ -1436,7 +1436,7 @@ DefinedObjectClass:
 	;
 
 ObjectAssignment:
-	Tok_Identifier Tok_CAPITALREFERENCE Tok_ASSIGNMENT Object {
+	Tok_Identifier Tok_CAPITALREFERENCE Tok_Assignment Object {
 		$$ = asn1types.NewAsn1Expression()
 		$$.Type = asn1types.Asn1ExprTypeObjectIdentifier;
 		$$.Meta = asn1types.Asn1ExprMetaTypeObject;
