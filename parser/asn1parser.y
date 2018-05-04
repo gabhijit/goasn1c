@@ -527,23 +527,25 @@ EnumeratedType: Tok_ENUMERATED '{' Enumerations '}';
 
 Enumerations:
 		RootEnumeration
-		| RootEnumeration ',' Tok_Ellipsis ExceptionSpec
-		| RootEnumeration ',' Tok_Ellipsis ExceptionSpec ',' AdditionalEnumeration
+		| RootEnumeration /* ExceptionSpec */
+		| RootEnumeration /* ExceptionSpec */ ',' AdditionalEnumeration
 		;
 RootEnumeration: Enumeration ;
 
 AdditionalEnumeration: Enumeration;
 
 Enumeration:
-		EnumerationItem
-		| EnumerationItem ',' Enumeration
+		EnumerationItem {
+		}
+		| EnumerationItem ',' Enumeration {
+		}
 		;
 
-EnumerationItem: identifier| NamedNumber:
+EnumerationItem: identifier | NamedNumber | Tok_Ellipsis;
 
-ExceptionSpec:
 	     /*
+ExceptionSpec:
 		'!' ExceptionIdentification
-		*/
 		|
 		;
+		*/
